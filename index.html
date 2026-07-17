@@ -630,14 +630,14 @@
   // ==== Firebase 設定（ここを あなたの プロジェクトの ものに 書き換えてください） ====
   // Firebaseコンソール → プロジェクトの設定 → 全般 → マイアプリ の SDK設定 からコピーできます。
   // このapiKeyはブラウザに公開しても問題ない種類のキーです（アクセス制御はFirestoreのセキュリティルール側で行います）。
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyD9QLN8R_Io5yiNBpb74w3KCM4kkQijsPU",
+  authDomain: "dressup-avatars.firebaseapp.com",
+  projectId: "dressup-avatars",
+  storageBucket: "dressup-avatars.firebasestorage.app",
+  messagingSenderId: "875993188844",
+  appId: "1:875993188844:web:01da8d07ca4c69eec518c9"
+};
   const COLLECTION_NAME = 'dressup_avatars'; // 他プロジェクトのFirestoreと共有する場合の衝突を避けるための専用コレクション名
 
   import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js').then(async ({ initializeApp }) => {
