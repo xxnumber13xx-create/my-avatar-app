@@ -11,7 +11,7 @@
 //   「画像を入力として受け取り、画像を生成できるモデル名」を確認し、
 //   必要であれば下の MODEL 定数を書き換えてください。
 
-const MODEL = 'gemini-2.5-flash-image-preview';
+const MODEL = 'gemini-3.1-flash-lite-image';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
