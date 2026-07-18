@@ -65,6 +65,98 @@
   .doodle-row span:nth-child(3) { animation-delay: .6s; }
   @keyframes bob { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-6px);} }
 
+  .usage-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 6px 14px;
+    background: #fff;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--pink-dark);
+    box-shadow: 0 4px 0 rgba(225,78,127,0.15), 0 6px 12px rgba(46,42,71,0.06);
+  }
+  .usage-badge.empty { color: var(--ink-soft); }
+
+  /* 変換確認モーダル */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(46,42,71,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: #fff;
+    border-radius: 24px;
+    padding: 26px 22px 22px;
+    max-width: 340px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    animation: pop .25s ease;
+  }
+  .modal h3 {
+    font-family: 'Baloo 2', sans-serif;
+    color: var(--purple);
+    margin: 0 0 10px;
+    font-size: 22px;
+  }
+  .modal p {
+    margin: 0 0 8px;
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .modal .modal-preview {
+    width: 90px; height: 90px;
+    object-fit: contain;
+    background: var(--paper);
+    border-radius: 12px;
+    border: 2px solid #F0E6D2;
+    margin: 6px auto 12px;
+    display: block;
+  }
+  .modal .modal-remaining {
+    font-size: 13px;
+    color: var(--pink-dark);
+    font-weight: 800;
+    margin-bottom: 14px;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 6px;
+  }
+  .modal-actions .btn {
+    padding: 11px 20px;
+    font-size: 15px;
+    border-radius: 999px;
+  }
+  .btn-cancel {
+    background: #F1EEFF;
+    color: var(--purple);
+    box-shadow: 0 3px 0 #DAD3FF;
+  }
+  .btn-confirm {
+    background: linear-gradient(135deg, var(--pink), var(--pink-dark));
+    color: #fff;
+    box-shadow: 0 3px 0 #B8305C;
+  }
+  .btn-confirm:disabled {
+    background: #ccc;
+    box-shadow: 0 3px 0 #aaa;
+  }
+
   .card {
     background: #fff;
     border-radius: 28px;
@@ -491,6 +583,7 @@
     <h1>おえかき あばたーめーかー</h1>
     <p>すきな え を かいて、あばたー を つくろう！</p>
     <div class="doodle-row"><span>🖍️</span><span>✨</span><span>🎨</span></div>
+    <div class="usage-badge empty" id="usageBadge">✨ きょうの リアルへんかん：－</div>
   </header>
 
   <div class="card">
@@ -620,11 +713,25 @@
   <p class="note">
     ここは フェーズ0〜3（おえかき→あばたー化＋Firestore保存＋Gemini連携＋きせかえ）の たしかめ ばん です。<br>
     このあと ミニゲーム を つないでいきます。<br>
-    「✨ リアルに へんかん」には Vercel の サーバーレス関数（api/generate-avatar.js）が 必要です。あわせて設置してください。
+    「✨ リアルに へんかん」には Vercel の サーバーレス関数（api/generate-avatar.js）が 必要です。あわせて設置してください。<br>
+    「リアルへんかん」は 1にち 5かい までに せいげん されています（にほんじかんの 0じ に リセット）。
   </p>
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3>✨ リアルに へんかん するよ</h3>
+    <img class="modal-preview" id="confirmPreview" alt="へんかん する え">
+    <p>この えを リアルな がぞう に へんかん するよ。<br>ほんとうに いい？</p>
+    <p class="modal-remaining" id="confirmRemaining"></p>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" id="confirmCancel">やめる</button>
+      <button class="btn btn-confirm" id="confirmOk">✨ へんかん する</button>
+    </div>
+  </div>
+</div>
 
 <script type="module">
   // ==== Firebase 設定（ここを あなたの プロジェクトの ものに 書き換えてください） ====
@@ -639,10 +746,13 @@ const firebaseConfig = {
   appId: "1:875993188844:web:01da8d07ca4c69eec518c9"
 };
   const COLLECTION_NAME = 'dressup_avatars'; // 他プロジェクトのFirestoreと共有する場合の衝突を避けるための専用コレクション名
+  const USAGE_COLLECTION = 'dressup_usage';  // 1日あたりのGemini変換カウント用（複数端末で共有するためFirestoreに置く）
+  const DAILY_LIMIT = 5;                     // 1日に変換できる回数の上限
 
   import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js').then(async ({ initializeApp }) => {
     const {
-      getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp
+      getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDoc, setDoc,
+      onSnapshot, query, orderBy, serverTimestamp, runTransaction, increment
     } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
 
     const isConfigured = !Object.values(firebaseConfig).some(v => String(v).includes('YOUR_'));
@@ -656,7 +766,11 @@ const firebaseConfig = {
       }
     }
     window.__dressupFirestore = db
-      ? { db, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp, COLLECTION_NAME }
+      ? {
+          db, collection, addDoc, updateDoc, deleteDoc, doc, getDoc, setDoc,
+          onSnapshot, query, orderBy, serverTimestamp, runTransaction, increment,
+          COLLECTION_NAME, USAGE_COLLECTION, DAILY_LIMIT
+        }
       : null;
     window.dispatchEvent(new CustomEvent('firestore-ready'));
   });
@@ -1009,6 +1123,148 @@ const firebaseConfig = {
   let closetItems = [];
   let fsApi = null;
   let unsubscribeSnapshot = null;
+  let unsubscribeUsage = null;
+
+  // ---------- daily usage tracking (Gemini リアル変換の回数制限) ----------
+  const usageBadge = document.getElementById('usageBadge');
+  const confirmModal = document.getElementById('confirmModal');
+  const confirmPreview = document.getElementById('confirmPreview');
+  const confirmRemaining = document.getElementById('confirmRemaining');
+  const confirmCancel = document.getElementById('confirmCancel');
+  const confirmOk = document.getElementById('confirmOk');
+
+  let dailyUsedCount = 0;   // 今日すでに使った回数
+
+  // 日本時間で「今日の日付」を YYYY-MM-DD 形式で返す（Firestoreドキュメントのキーに使う）
+  function todayKey() {
+    const now = new Date();
+    const jstOffsetMs = 9 * 60 * 60 * 1000;
+    const jst = new Date(now.getTime() + jstOffsetMs);
+    return jst.toISOString().slice(0, 10); // "2026-07-18"
+  }
+
+  function remainingCount() {
+    const limit = fsApi ? fsApi.DAILY_LIMIT : 5;
+    return Math.max(0, limit - dailyUsedCount);
+  }
+
+  function renderUsageBadge() {
+    if (!fsApi) {
+      usageBadge.classList.add('empty');
+      usageBadge.textContent = '✨ きょうの リアルへんかん：－';
+      return;
+    }
+    const rest = remainingCount();
+    usageBadge.classList.remove('empty');
+    if (rest > 0) {
+      usageBadge.textContent = `✨ きょうの リアルへんかん：あと ${rest} かい`;
+    } else {
+      usageBadge.textContent = '✨ きょうは もう つかいきったよ！ あしたまた あそぼう';
+    }
+    // 変換ボタンの表示更新
+    updateAllGenButtons();
+  }
+
+  function updateAllGenButtons() {
+    const rest = remainingCount();
+    document.querySelectorAll('.btn-gen').forEach(btn => {
+      if (btn.dataset.busy === '1') return;
+      btn.disabled = rest <= 0;
+      btn.textContent = rest > 0 ? '✨ リアルに へんかん' : '😴 きょうは もう つかえないよ';
+    });
+    document.querySelectorAll('.icon-btn.regen').forEach(btn => {
+      if (btn.dataset.busy === '1') return;
+      btn.disabled = rest <= 0;
+      btn.title = rest > 0 ? 'もういちど へんかん' : 'きょうは もう つかえないよ';
+    });
+  }
+
+  function subscribeUsage() {
+    if (!fsApi) return;
+    if (unsubscribeUsage) unsubscribeUsage();
+    const key = todayKey();
+    const ref = fsApi.doc(fsApi.db, fsApi.USAGE_COLLECTION, key);
+    unsubscribeUsage = fsApi.onSnapshot(ref, (snap) => {
+      const data = snap.exists() ? snap.data() : null;
+      dailyUsedCount = data?.count || 0;
+      renderUsageBadge();
+    }, (err) => {
+      console.error('Usage listen error', err);
+    });
+  }
+
+  // カウントを +1 する。上限を超えていたら失敗を返す（複数端末で同時押ししてもFirestore側で正しくカウント）
+  async function tryIncrementUsage() {
+    if (!fsApi) return { ok: false, reason: 'no-firestore' };
+    const key = todayKey();
+    const ref = fsApi.doc(fsApi.db, fsApi.USAGE_COLLECTION, key);
+    try {
+      const result = await fsApi.runTransaction(fsApi.db, async (tx) => {
+        const snap = await tx.get(ref);
+        const current = snap.exists() ? (snap.data().count || 0) : 0;
+        if (current >= fsApi.DAILY_LIMIT) {
+          return { ok: false, reason: 'over-limit', current };
+        }
+        if (snap.exists()) {
+          tx.update(ref, { count: current + 1, updatedAt: fsApi.serverTimestamp() });
+        } else {
+          tx.set(ref, { count: 1, createdAt: fsApi.serverTimestamp(), updatedAt: fsApi.serverTimestamp() });
+        }
+        return { ok: true, current: current + 1 };
+      });
+      return result;
+    } catch (err) {
+      console.error('tryIncrementUsage error', err);
+      return { ok: false, reason: 'error' };
+    }
+  }
+
+  // カウントを -1 する（変換が失敗したときにロールバック）
+  async function rollbackUsage() {
+    if (!fsApi) return;
+    const key = todayKey();
+    const ref = fsApi.doc(fsApi.db, fsApi.USAGE_COLLECTION, key);
+    try {
+      await fsApi.runTransaction(fsApi.db, async (tx) => {
+        const snap = await tx.get(ref);
+        if (!snap.exists()) return;
+        const current = snap.data().count || 0;
+        if (current <= 0) return;
+        tx.update(ref, { count: current - 1, updatedAt: fsApi.serverTimestamp() });
+      });
+    } catch (err) {
+      console.error('rollbackUsage error', err);
+    }
+  }
+
+  // ---------- confirm modal ----------
+  let confirmContext = null; // { id, dataUrl, triggerBtn }
+
+  function openConfirmModal(id, dataUrl, triggerBtn) {
+    confirmContext = { id, dataUrl, triggerBtn };
+    confirmPreview.src = dataUrl;
+    const rest = remainingCount();
+    const afterRest = Math.max(0, rest - 1);
+    confirmRemaining.textContent = `へんかん すると、きょうの のこりは あと ${afterRest} かい に なるよ`;
+    confirmOk.disabled = rest <= 0;
+    confirmModal.classList.add('show');
+  }
+
+  function closeConfirmModal() {
+    confirmModal.classList.remove('show');
+    confirmContext = null;
+  }
+
+  confirmCancel.addEventListener('click', closeConfirmModal);
+  confirmModal.addEventListener('click', (e) => {
+    if (e.target === confirmModal) closeConfirmModal();
+  });
+  confirmOk.addEventListener('click', async () => {
+    if (!confirmContext) return;
+    const ctx = confirmContext;
+    closeConfirmModal();
+    await doGenerateRealistic(ctx.id, ctx.dataUrl, ctx.triggerBtn);
+  });
 
   function renderShelf() {
     shelf.querySelectorAll('.avatar-item').forEach(el => el.remove());
@@ -1073,6 +1329,7 @@ const firebaseConfig = {
 
       shelf.appendChild(item);
     });
+    updateAllGenButtons();
   }
 
   async function saveAvatarToFirestore(dataUrl, type = 'avatar', message = 'あばたー が たな に とうじょう！ 🎉') {
@@ -1103,16 +1360,42 @@ const firebaseConfig = {
     }
   }
 
-  async function generateRealistic(id, dataUrl, triggerBtn) {
+  // ボタンから呼ばれる入口。確認モーダルを出すだけ。
+  function generateRealistic(id, dataUrl, triggerBtn) {
     if (!fsApi) {
       showToast('Firebase の せってい が まだ だよ！');
       return;
     }
+    if (remainingCount() <= 0) {
+      showToast('きょうは もう つかいきったよ！ あしたね');
+      return;
+    }
+    openConfirmModal(id, dataUrl, triggerBtn);
+  }
+
+  // 実際の変換処理。カウントアップ → API呼び出し → 失敗時ロールバック
+  async function doGenerateRealistic(id, dataUrl, triggerBtn) {
+    if (!fsApi) return;
+
+    // まずFirestore側でカウントを+1（複数端末で同時押ししても正しく判定される）
+    const inc = await tryIncrementUsage();
+    if (!inc.ok) {
+      if (inc.reason === 'over-limit') {
+        showToast('きょうは もう つかいきったよ！ あしたね');
+      } else {
+        showToast('カウントの こうしんに しっぱいしたよ…');
+      }
+      renderUsageBadge();
+      return;
+    }
+
     if (triggerBtn) {
       triggerBtn.disabled = true;
+      triggerBtn.dataset.busy = '1';
       triggerBtn.dataset.originalText = triggerBtn.textContent;
       triggerBtn.textContent = '⏳ へんかんちゅう…';
     }
+
     try {
       const res = await fetch('/api/generate-avatar', {
         method: 'POST',
@@ -1129,9 +1412,12 @@ const firebaseConfig = {
       showToast('リアルに へんかん できたよ！ ✨');
     } catch (err) {
       console.error('generateRealistic error', err);
-      showToast('へんかんに しっぱいしたよ…');
+      // 失敗したのでカウントを戻す（ユーザーの回数を無駄にしない）
+      await rollbackUsage();
+      showToast('へんかんに しっぱいしたよ… カウントは もどしたよ');
       if (triggerBtn) {
-        triggerBtn.disabled = false;
+        triggerBtn.disabled = remainingCount() <= 0;
+        triggerBtn.dataset.busy = '';
         triggerBtn.textContent = triggerBtn.dataset.originalText || '✨ リアルに へんかん';
       }
     }
@@ -1139,8 +1425,10 @@ const firebaseConfig = {
 
   function connectFirestore() {
     const api = window.__dressupFirestore;
-    if (!api) { renderShelf(); renderCloset(); return; }
+    if (!api) { renderShelf(); renderCloset(); renderUsageBadge(); return; }
     fsApi = api;
+    subscribeUsage();
+    renderUsageBadge();
     const q = api.query(api.collection(api.db, api.COLLECTION_NAME), api.orderBy('createdAt', 'asc'));
     if (unsubscribeSnapshot) unsubscribeSnapshot();
     unsubscribeSnapshot = api.onSnapshot(q, (snapshot) => {
