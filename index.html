@@ -715,6 +715,50 @@
     min-width: 120px;
     text-align: center;
   }
+
+  .song-picker {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 8px;
+    background: #FBF7EE;
+    border-radius: 14px;
+  }
+  .song-picker button {
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 8px 14px;
+    border: 3px solid transparent;
+    border-radius: 12px;
+    background: #fff;
+    color: var(--ink);
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    transition: transform .12s ease;
+    text-align: center;
+    min-width: 120px;
+  }
+  .song-picker button:hover { transform: translateY(-2px); }
+  .song-picker button.selected {
+    border-color: var(--purple);
+    background: linear-gradient(135deg, #F1EEFF, #fff);
+  }
+  .song-picker button .diff {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin-top: 3px;
+  }
+  .song-picker button .best-inline {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--pink-dark);
+    margin-top: 2px;
+  }
 </style>
 </head>
 <body>
@@ -869,7 +913,6 @@
       <div class="game-tabs">
         <button class="game-tab active" data-game="runner">🏃 ラン</button>
         <button class="game-tab" data-game="rhythm">🎵 リズム</button>
-        <button class="game-tab" data-game="spot">🔍 まちがいさがし</button>
       </div>
 
       <div class="game-section active" id="game-runner">
@@ -905,11 +948,16 @@
 
       <div class="game-section" id="game-rhythm">
         <h2 class="game-title">🎵 リズム ダンス</h2>
-        <p class="game-hint">あばたーを えらんで、まる が せん に きたら タップ！</p>
+        <p class="game-hint">3つの レーン に まる が おちてくる → せん に きたら その レーン を タップ！ ながい まる は「おしっぱなし」で はなす！</p>
 
         <div class="picker-row">
           <div class="picker-label">おどる あばたー を えらぶ（コーデも OK！）</div>
           <div class="picker" id="rhythmAvatarPicker"></div>
+        </div>
+
+        <div class="picker-row">
+          <div class="picker-label">きょく を えらぶ</div>
+          <div class="song-picker" id="songPicker"></div>
         </div>
 
         <div class="canvas-stage">
@@ -928,40 +976,9 @@
         <div class="game-controls">
           <div class="score-display">
             スコア: <span id="rhythmScoreValue">0</span>
-            <span class="best">ベスト: <span id="rhythmBestValue">0</span></span>
+            <span class="best">コンボ: <span id="rhythmComboValue">0</span></span>
           </div>
           <div class="judgment" id="rhythmJudgment">✨</div>
-        </div>
-      </div>
-
-      <div class="game-section" id="game-spot">
-        <h2 class="game-title">🔍 まちがい さがし</h2>
-        <p class="game-hint">うえ と した の え を くらべて、ちがう ところ を タップ！ぜんぶで 4こ！</p>
-
-        <div class="picker-row">
-          <div class="picker-label">えらぶ あばたー（コーデも OK！）</div>
-          <div class="picker" id="spotAvatarPicker"></div>
-        </div>
-
-        <div class="canvas-stage">
-          <div class="game-holder">
-            <canvas id="spotCanvas" width="480" height="480"></canvas>
-            <div class="game-overlay" id="spotOverlay">
-              <h3 id="spotOverlayTitle">🔍 まちがい さがし</h3>
-              <div class="final-score" id="spotFinalScore"></div>
-              <div class="best-score" id="spotBestLabel"></div>
-              <div class="leaderboard" id="spotLeaderboard"></div>
-              <button class="btn-primary" id="spotOverlayBtn">▶️ はじめる</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="game-controls">
-          <div class="score-display">
-            みつけた: <span id="spotFoundValue">0</span> / 4
-            <span class="best">じかん: <span id="spotTimeValue">0</span> 秒</span>
-          </div>
-          <button class="btn-soft btn" id="spotGiveUpBtn">🏳️ ギブアップ</button>
         </div>
       </div>
     </div>
@@ -1826,7 +1843,6 @@
       } else {
         stopRunnerLoop();
         stopRhythmLoop();
-        stopSpotLoop();
       }
     });
   });
@@ -1841,13 +1857,10 @@
       const target = tab.dataset.game;
       gameTabs.forEach(t => t.classList.toggle('active', t === tab));
       gameSections.forEach(s => s.classList.toggle('active', s.id === `game-${target}`));
-      // 遊んでない方は止める
       stopRunnerLoop();
       stopRhythmLoop();
-      stopSpotLoop();
       if (target === 'runner') drawRunnerIdle();
       else if (target === 'rhythm') drawRhythmIdle();
-      else if (target === 'spot') drawSpotIdle();
     });
   });
 
@@ -1897,12 +1910,6 @@
       rhythm.avatarId = av.id;
       renderGamePickers();
       if (rhythm.state === 'idle') drawRhythmIdle();
-    });
-    buildAvatarPicker(document.getElementById('spotAvatarPicker'), spot.avatarId, (av, img) => {
-      spot.img = img;
-      spot.avatarId = av.id;
-      renderGamePickers();
-      if (spot.state === 'idle') drawSpotIdle();
     });
   }
 
@@ -2277,12 +2284,12 @@
   drawRunnerIdle();
 
   // ================================================================
-  // 🎵 リズムゲーム
+  // 🎵 リズム ダンス（3レーン + ロングノート + 複数曲）
   // ================================================================
   const rhythmCanvas = document.getElementById('rhythmCanvas');
   const rCtx = rhythmCanvas.getContext('2d');
   const rhythmScoreValue = document.getElementById('rhythmScoreValue');
-  const rhythmBestValue = document.getElementById('rhythmBestValue');
+  const rhythmComboValue = document.getElementById('rhythmComboValue');
   const rhythmOverlay = document.getElementById('rhythmOverlay');
   const rhythmOverlayTitle = document.getElementById('rhythmOverlayTitle');
   const rhythmOverlayBtn = document.getElementById('rhythmOverlayBtn');
@@ -2290,166 +2297,368 @@
   const rhythmBestLabel = document.getElementById('rhythmBestLabel');
   const rhythmJudgment = document.getElementById('rhythmJudgment');
   const rhythmLeaderboardEl = document.getElementById('rhythmLeaderboard');
+  const songPicker = document.getElementById('songPicker');
 
-  const RW = rhythmCanvas.width;
-  const RH = rhythmCanvas.height;
-  const TARGET_Y = 400;
-  const FALL_TIME = 2.0; // 秒。上から線まで落ちてくる時間
+  const RW = rhythmCanvas.width;   // 480
+  const RH = rhythmCanvas.height;  // 480
+  const LANE_X = [80, 240, 400];
+  const LANE_COLORS = ['#FF6B9D', '#FFC93C', '#4CD4B0'];
+  const LANE_LABELS = ['●', '●', '●'];
   const NOTE_R = 26;
+  const TARGET_Y = 340;
+  const NOTE_START_Y = 6;
+  const FALL_TIME = 1.8;  // 秒。上端から線までの時間
+  const PPS = (TARGET_Y - NOTE_START_Y) / FALL_TIME; // pixels per second
 
-  // きらきら星 の メロディ（time は 曲頭からの hit タイミング [秒]）
-  // 音階: C4=262, D4=294, E4=330, F4=349, G4=392, A4=440
-  const RHYTHM_SONG = [
-    { t: 1.0, f: 262, c: '#FF6B9D' },
-    { t: 1.6, f: 262, c: '#FF6B9D' },
-    { t: 2.2, f: 392, c: '#FFC93C' },
-    { t: 2.8, f: 392, c: '#FFC93C' },
-    { t: 3.4, f: 440, c: '#4CD4B0' },
-    { t: 4.0, f: 440, c: '#4CD4B0' },
-    { t: 4.6, f: 392, c: '#FFC93C' },
-    { t: 5.8, f: 349, c: '#7C6FF2' },
-    { t: 6.4, f: 349, c: '#7C6FF2' },
-    { t: 7.0, f: 330, c: '#4FA9E8' },
-    { t: 7.6, f: 330, c: '#4FA9E8' },
-    { t: 8.2, f: 294, c: '#FF9F43' },
-    { t: 8.8, f: 294, c: '#FF9F43' },
-    { t: 9.4, f: 262, c: '#FF6B9D' },
-    // 2小節目
-    { t: 10.6, f: 392, c: '#FFC93C' },
-    { t: 11.2, f: 392, c: '#FFC93C' },
-    { t: 11.8, f: 349, c: '#7C6FF2' },
-    { t: 12.4, f: 349, c: '#7C6FF2' },
-    { t: 13.0, f: 330, c: '#4FA9E8' },
-    { t: 13.6, f: 330, c: '#4FA9E8' },
-    { t: 14.2, f: 294, c: '#FF9F43' },
-    { t: 15.4, f: 392, c: '#FFC93C' },
-    { t: 16.0, f: 392, c: '#FFC93C' },
-    { t: 16.6, f: 349, c: '#7C6FF2' },
-    { t: 17.2, f: 349, c: '#7C6FF2' },
-    { t: 17.8, f: 330, c: '#4FA9E8' },
-    { t: 18.4, f: 330, c: '#4FA9E8' },
-    { t: 19.0, f: 294, c: '#FF9F43' },
-    // 3小節目（1と同じ）
-    { t: 20.2, f: 262, c: '#FF6B9D' },
-    { t: 20.8, f: 262, c: '#FF6B9D' },
-    { t: 21.4, f: 392, c: '#FFC93C' },
-    { t: 22.0, f: 392, c: '#FFC93C' },
-    { t: 22.6, f: 440, c: '#4CD4B0' },
-    { t: 23.2, f: 440, c: '#4CD4B0' },
-    { t: 23.8, f: 392, c: '#FFC93C' },
-    { t: 25.0, f: 349, c: '#7C6FF2' },
-    { t: 25.6, f: 349, c: '#7C6FF2' },
-    { t: 26.2, f: 330, c: '#4FA9E8' },
-    { t: 26.8, f: 330, c: '#4FA9E8' },
-    { t: 27.4, f: 294, c: '#FF9F43' },
-    { t: 28.0, f: 294, c: '#FF9F43' },
-    { t: 28.6, f: 262, c: '#FF6B9D' }
+  // 判定しきい値（秒）
+  const T_PERFECT = 0.15;
+  const T_GOOD = 0.30;
+  const T_LATE = 0.30; // 過ぎたら Miss
+
+  // ---- 曲データ ----
+  // b = 拍タイミング, lane = 0/1/2, f = 音の周波数, dur(任意) = ロング拍長
+  const SONGS = [
+    {
+      name: '🌟 きらきらぼし',
+      difficulty: 'かんたん',
+      beatSec: 0.55,
+      notes: [
+        { b: 2, lane: 0, f: 262 }, { b: 3, lane: 0, f: 262 },
+        { b: 4, lane: 1, f: 392 }, { b: 5, lane: 1, f: 392 },
+        { b: 6, lane: 2, f: 440 }, { b: 7, lane: 2, f: 440 },
+        { b: 8, lane: 1, f: 392, dur: 2 },
+        { b: 11, lane: 1, f: 349 }, { b: 12, lane: 1, f: 349 },
+        { b: 13, lane: 1, f: 330 }, { b: 14, lane: 1, f: 330 },
+        { b: 15, lane: 0, f: 294 }, { b: 16, lane: 0, f: 294 },
+        { b: 17, lane: 0, f: 262, dur: 2 },
+        { b: 20, lane: 1, f: 392 }, { b: 21, lane: 1, f: 392 },
+        { b: 22, lane: 1, f: 349 }, { b: 23, lane: 1, f: 349 },
+        { b: 24, lane: 1, f: 330 }, { b: 25, lane: 1, f: 330 },
+        { b: 26, lane: 0, f: 294, dur: 2 },
+        { b: 29, lane: 1, f: 392 }, { b: 30, lane: 1, f: 392 },
+        { b: 31, lane: 1, f: 349 }, { b: 32, lane: 1, f: 349 },
+        { b: 33, lane: 1, f: 330 }, { b: 34, lane: 1, f: 330 },
+        { b: 35, lane: 0, f: 294, dur: 2 },
+        { b: 38, lane: 0, f: 262 }, { b: 39, lane: 0, f: 262 },
+        { b: 40, lane: 1, f: 392 }, { b: 41, lane: 1, f: 392 },
+        { b: 42, lane: 2, f: 440 }, { b: 43, lane: 2, f: 440 },
+        { b: 44, lane: 1, f: 392, dur: 2 },
+        { b: 47, lane: 1, f: 349 }, { b: 48, lane: 1, f: 349 },
+        { b: 49, lane: 1, f: 330 }, { b: 50, lane: 1, f: 330 },
+        { b: 51, lane: 0, f: 294 }, { b: 52, lane: 0, f: 294 },
+        { b: 53, lane: 0, f: 262, dur: 4 }
+      ]
+    },
+    {
+      name: '🌷 チューリップ',
+      difficulty: 'ふつう',
+      beatSec: 0.50,
+      notes: [
+        { b: 2, lane: 0, f: 262 }, { b: 3, lane: 0, f: 294 },
+        { b: 4, lane: 1, f: 330, dur: 2 },
+        { b: 7, lane: 0, f: 262 }, { b: 8, lane: 0, f: 294 },
+        { b: 9, lane: 1, f: 330, dur: 2 },
+        { b: 12, lane: 2, f: 392 }, { b: 13, lane: 1, f: 330 },
+        { b: 14, lane: 0, f: 294 }, { b: 15, lane: 0, f: 262 },
+        { b: 16, lane: 0, f: 294 }, { b: 17, lane: 1, f: 330 },
+        { b: 18, lane: 0, f: 294, dur: 2 },
+        { b: 21, lane: 0, f: 262 }, { b: 22, lane: 0, f: 294 },
+        { b: 23, lane: 1, f: 330, dur: 2 },
+        { b: 26, lane: 0, f: 262 }, { b: 27, lane: 0, f: 294 },
+        { b: 28, lane: 1, f: 330, dur: 2 },
+        { b: 31, lane: 2, f: 392 }, { b: 32, lane: 1, f: 330 },
+        { b: 33, lane: 0, f: 294 }, { b: 34, lane: 0, f: 262 },
+        { b: 35, lane: 0, f: 294 }, { b: 36, lane: 1, f: 330 },
+        { b: 37, lane: 0, f: 262, dur: 2 },
+        { b: 40, lane: 2, f: 392 }, { b: 41, lane: 2, f: 392 },
+        { b: 42, lane: 2, f: 392 }, { b: 43, lane: 2, f: 392 },
+        { b: 44, lane: 1, f: 330 }, { b: 45, lane: 1, f: 330 },
+        { b: 46, lane: 1, f: 330 }, { b: 47, lane: 0, f: 262 },
+        { b: 48, lane: 0, f: 262 }, { b: 49, lane: 0, f: 294 },
+        { b: 50, lane: 1, f: 330 }, { b: 51, lane: 0, f: 294 },
+        { b: 52, lane: 0, f: 262, dur: 4 }
+      ]
+    },
+    {
+      name: '🐸 かえるのうた',
+      difficulty: 'むずかしい',
+      beatSec: 0.45,
+      notes: [
+        { b: 2, lane: 0, f: 262 }, { b: 3, lane: 0, f: 294 },
+        { b: 4, lane: 1, f: 330 }, { b: 5, lane: 1, f: 349 },
+        { b: 6, lane: 1, f: 330 }, { b: 7, lane: 0, f: 294 },
+        { b: 8, lane: 0, f: 262, dur: 2 },
+        { b: 11, lane: 1, f: 330 }, { b: 12, lane: 1, f: 349 },
+        { b: 13, lane: 2, f: 392 }, { b: 14, lane: 2, f: 440 },
+        { b: 15, lane: 2, f: 392 }, { b: 16, lane: 1, f: 349 },
+        { b: 17, lane: 1, f: 330, dur: 2 },
+        { b: 20, lane: 0, f: 262 }, { b: 21, lane: 0, f: 262 },
+        { b: 22, lane: 0, f: 262 }, { b: 23, lane: 0, f: 262 },
+        // 「ケロケロケロケロ」高速
+        { b: 24, lane: 0, f: 262 }, { b: 24.5, lane: 0, f: 294 },
+        { b: 25, lane: 1, f: 330 }, { b: 25.5, lane: 1, f: 349 },
+        { b: 26, lane: 1, f: 330 }, { b: 26.5, lane: 0, f: 294 },
+        { b: 27, lane: 0, f: 262, dur: 3 },
+        // Repeat first phrase
+        { b: 31, lane: 0, f: 262 }, { b: 32, lane: 0, f: 294 },
+        { b: 33, lane: 1, f: 330 }, { b: 34, lane: 1, f: 349 },
+        { b: 35, lane: 1, f: 330 }, { b: 36, lane: 0, f: 294 },
+        { b: 37, lane: 0, f: 262, dur: 2 },
+        { b: 40, lane: 1, f: 330 }, { b: 41, lane: 1, f: 349 },
+        { b: 42, lane: 2, f: 392 }, { b: 43, lane: 2, f: 440 },
+        { b: 44, lane: 2, f: 392 }, { b: 45, lane: 1, f: 349 },
+        { b: 46, lane: 1, f: 330, dur: 2 },
+        { b: 49, lane: 0, f: 262 }, { b: 50, lane: 0, f: 262 },
+        { b: 51, lane: 0, f: 262 }, { b: 52, lane: 0, f: 262, dur: 5 }
+      ]
+    }
   ];
-  const SONG_END = 30.0;
+
+  function songTotalTime(song) {
+    let maxT = 0;
+    for (const n of song.notes) {
+      const end = (n.b + (n.dur || 0)) * song.beatSec;
+      if (end > maxT) maxT = end;
+    }
+    return maxT + 2.0;
+  }
 
   let rhythm = {
     state: 'idle',
     img: null,
     avatarId: null,
+    songIndex: 0,
+    songLen: songTotalTime(SONGS[0]),
     startTime: 0,
-    notes: [],       // {hit, freq, color, hit_taken}
+    notes: [],
+    laneHeld: [null, null, null], // { noteIdx, pointerId, startTime }
+    lanePressed: [false, false, false], // 見た目のハイライト用
     score: 0,
+    combo: 0,
+    maxCombo: 0,
     perfectCount: 0,
     goodCount: 0,
     missCount: 0,
-    bestScore: Number(localStorage.getItem('rhythmBest') || 0),
     lastJudgment: '',
     lastJudgmentAt: 0,
+    lastJudgmentLane: -1,
+    hitFlashes: [], // {lane, at, type}
     raf: null
   };
-  rhythmBestValue.textContent = rhythm.bestScore;
 
-  function drawRhythmBg() {
+  function bestKey(idx) { return `rhythmBest_${idx}`; }
+  function getBest(idx) { return Number(localStorage.getItem(bestKey(idx)) || 0); }
+  function setBest(idx, v) { localStorage.setItem(bestKey(idx), String(v)); }
+
+  // ---- 曲ピッカーの表示 ----
+  function renderSongPicker() {
+    songPicker.innerHTML = '';
+    SONGS.forEach((s, i) => {
+      const btn = document.createElement('button');
+      btn.className = i === rhythm.songIndex ? 'selected' : '';
+      const best = getBest(i);
+      btn.innerHTML = `
+        ${s.name}
+        <span class="diff">${s.difficulty}</span>
+        ${best > 0 ? `<span class="best-inline">🏆 ${best}</span>` : ''}
+      `;
+      btn.addEventListener('click', () => {
+        rhythm.songIndex = i;
+        rhythm.songLen = songTotalTime(s);
+        renderSongPicker();
+        if (rhythm.state === 'idle') {
+          rhythmBestLabel.textContent = `ベスト: ${getBest(i)} てん`;
+          drawRhythmIdle();
+        }
+      });
+      songPicker.appendChild(btn);
+    });
+  }
+  renderSongPicker();
+
+  // ---- 描画 ----
+  function drawRhythmBg(currentTime = 0) {
     rCtx.clearRect(0, 0, RW, RH);
-    // 星々
-    rCtx.fillStyle = 'rgba(255,255,255,0.6)';
-    const nowFrame = performance.now() * 0.001;
-    for (let i = 0; i < 20; i++) {
-      const x = (i * 71 + Math.sin(nowFrame + i) * 5) % RW;
+    // 背景グラデ
+    const grad = rCtx.createLinearGradient(0, 0, 0, RH);
+    grad.addColorStop(0, '#FFE0F0');
+    grad.addColorStop(1, '#FFF3D6');
+    rCtx.fillStyle = grad;
+    rCtx.fillRect(0, 0, RW, RH);
+    // 星
+    rCtx.fillStyle = 'rgba(255,255,255,0.7)';
+    const nowSec = performance.now() * 0.001;
+    for (let i = 0; i < 24; i++) {
+      const x = (i * 71 + Math.sin(nowSec + i) * 5) % RW;
       const y = (i * 37) % (TARGET_Y - 40);
-      const s = 1 + Math.sin(nowFrame * 2 + i) * 0.5;
+      const s = 1 + Math.sin(nowSec * 2 + i) * 0.5;
       rCtx.beginPath();
       rCtx.arc(x, y, 1.5 * s, 0, Math.PI * 2);
       rCtx.fill();
     }
+    // レーン背景（薄い縦帯）
+    for (let l = 0; l < 3; l++) {
+      const x = LANE_X[l];
+      rCtx.fillStyle = LANE_COLORS[l] + '18';
+      rCtx.fillRect(x - 55, NOTE_START_Y, 110, TARGET_Y - NOTE_START_Y);
+    }
+    // レーン仕切り
+    rCtx.strokeStyle = 'rgba(124,111,242,0.15)';
+    rCtx.lineWidth = 1;
+    [160, 320].forEach(x => {
+      rCtx.beginPath();
+      rCtx.moveTo(x, 0); rCtx.lineTo(x, TARGET_Y);
+      rCtx.stroke();
+    });
     // ターゲットライン
-    rCtx.strokeStyle = 'rgba(124,111,242,0.7)';
+    rCtx.strokeStyle = 'rgba(124,111,242,0.75)';
     rCtx.lineWidth = 4;
     rCtx.setLineDash([12, 8]);
     rCtx.beginPath();
-    rCtx.moveTo(20, TARGET_Y); rCtx.lineTo(RW - 20, TARGET_Y); rCtx.stroke();
+    rCtx.moveTo(10, TARGET_Y); rCtx.lineTo(RW - 10, TARGET_Y);
+    rCtx.stroke();
     rCtx.setLineDash([]);
-    // ターゲット枠
-    rCtx.strokeStyle = 'rgba(124,111,242,0.35)';
-    rCtx.lineWidth = 2;
-    rCtx.strokeRect(RW / 2 - NOTE_R - 6, TARGET_Y - NOTE_R - 6, (NOTE_R + 6) * 2, (NOTE_R + 6) * 2);
+    // レーンボタンの丸（ターゲット付近）
+    for (let l = 0; l < 3; l++) {
+      const x = LANE_X[l];
+      const pressed = rhythm.lanePressed[l];
+      rCtx.beginPath();
+      rCtx.arc(x, TARGET_Y, NOTE_R + (pressed ? 6 : 2), 0, Math.PI * 2);
+      rCtx.strokeStyle = LANE_COLORS[l];
+      rCtx.lineWidth = pressed ? 6 : 3;
+      rCtx.stroke();
+      if (pressed) {
+        rCtx.fillStyle = LANE_COLORS[l] + '40';
+        rCtx.fill();
+      }
+    }
   }
 
   function drawRhythmAvatar() {
     if (!rhythm.img) return;
-    const size = 130;
+    const size = 100;
     const iw = rhythm.img.width, ih = rhythm.img.height;
     const fit = Math.min(size / iw, size / ih);
     const w = iw * fit, h = ih * fit;
-    // ダンスの上下動 + 傾き
     const t = performance.now() * 0.001;
-    const bounce = Math.sin(t * 4) * 6;
-    const tilt = Math.sin(t * 4) * 0.06;
-    const cx = RW / 2, cy = 220 + bounce;
+    // 曲テンポに合わせて弾む
+    const beatSec = SONGS[rhythm.songIndex].beatSec;
+    const beatPhase = (t / beatSec) * Math.PI;
+    const bounce = Math.abs(Math.sin(beatPhase)) * 8;
+    const tilt = Math.sin(t * 4) * 0.08;
+    const cx = RW / 2, cy = RH - 60 - bounce;
     rCtx.save();
     rCtx.translate(cx, cy);
     rCtx.rotate(tilt);
     rCtx.drawImage(rhythm.img, -w / 2, -h / 2, w, h);
     rCtx.restore();
+    // 影
+    rCtx.fillStyle = 'rgba(46,42,71,0.15)';
+    rCtx.beginPath();
+    rCtx.ellipse(cx, RH - 12, w * 0.4, 5, 0, 0, Math.PI * 2);
+    rCtx.fill();
   }
 
-  function drawRhythmNotes(elapsedSec) {
-    rhythm.notes.forEach(n => {
-      if (n.taken) return;
-      const timeToHit = n.hit - elapsedSec;
-      if (timeToHit > FALL_TIME) return;      // まだ出現しない
-      if (timeToHit < -0.4) return;           // もう画面下
-      // y は timeToHit=FALL_TIME → y=0, timeToHit=0 → y=TARGET_Y
-      const y = TARGET_Y * (1 - timeToHit / FALL_TIME);
-      const x = RW / 2;
-      rCtx.fillStyle = n.color;
+  function drawNote(note, i, currentTime) {
+    const headY = TARGET_Y - (note.hit - currentTime) * PPS;
+    const tailTopY = TARGET_Y - (note.hit + note.dur - currentTime) * PPS;
+    // 完全に画面外なら描かない
+    if (headY < NOTE_START_Y - 60 && tailTopY < NOTE_START_Y - 60) return;
+    if (headY > TARGET_Y + 60 && tailTopY > TARGET_Y + 60) return;
+    const x = LANE_X[note.lane];
+    const color = LANE_COLORS[note.lane];
+
+    // ロングのテール
+    if (note.dur > 0) {
+      const isHeld = rhythm.laneHeld[note.lane] && rhythm.laneHeld[note.lane].noteIdx === i;
+      const top = Math.max(tailTopY, NOTE_START_Y - 20);
+      const bottom = Math.min(headY, TARGET_Y);
+      if (bottom > top) {
+        rCtx.fillStyle = isHeld ? color : color + 'B0';
+        rCtx.beginPath();
+        // 角丸長方形
+        const rx = x - 16, ry = top, rw = 32, rh = bottom - top, r = 12;
+        rCtx.moveTo(rx + r, ry);
+        rCtx.lineTo(rx + rw - r, ry);
+        rCtx.quadraticCurveTo(rx + rw, ry, rx + rw, ry + r);
+        rCtx.lineTo(rx + rw, ry + rh - r);
+        rCtx.quadraticCurveTo(rx + rw, ry + rh, rx + rw - r, ry + rh);
+        rCtx.lineTo(rx + r, ry + rh);
+        rCtx.quadraticCurveTo(rx, ry + rh, rx, ry + rh - r);
+        rCtx.lineTo(rx, ry + r);
+        rCtx.quadraticCurveTo(rx, ry, rx + r, ry);
+        rCtx.fill();
+        if (isHeld) {
+          rCtx.strokeStyle = '#fff';
+          rCtx.lineWidth = 3;
+          rCtx.stroke();
+        }
+      }
+    }
+
+    // ヘッド
+    if (!note.taken && headY >= NOTE_START_Y - 30 && headY <= TARGET_Y + 40) {
+      rCtx.fillStyle = color;
       rCtx.beginPath();
-      rCtx.arc(x, y, NOTE_R, 0, Math.PI * 2);
+      rCtx.arc(x, headY, NOTE_R, 0, Math.PI * 2);
       rCtx.fill();
-      rCtx.fillStyle = 'rgba(255,255,255,0.9)';
+      rCtx.strokeStyle = 'rgba(255,255,255,0.6)';
+      rCtx.lineWidth = 3;
+      rCtx.stroke();
+      rCtx.fillStyle = 'rgba(255,255,255,0.95)';
       rCtx.font = '700 22px sans-serif';
       rCtx.textAlign = 'center';
       rCtx.textBaseline = 'middle';
-      rCtx.fillText('♪', x, y);
+      rCtx.fillText('♪', x, headY);
+    }
+  }
+
+  function drawHitFlashes() {
+    const now = performance.now() * 0.001;
+    rhythm.hitFlashes = rhythm.hitFlashes.filter(f => now - f.at < 0.5);
+    rhythm.hitFlashes.forEach(f => {
+      const age = now - f.at;
+      const alpha = 1 - age / 0.5;
+      const r = NOTE_R + age * 60;
+      rCtx.strokeStyle = f.type === 'Perfect' ? `rgba(76,212,176,${alpha})`
+        : f.type === 'Good' ? `rgba(255,201,60,${alpha})` : `rgba(255,107,157,${alpha})`;
+      rCtx.lineWidth = 5;
+      rCtx.beginPath();
+      rCtx.arc(LANE_X[f.lane], TARGET_Y, r, 0, Math.PI * 2);
+      rCtx.stroke();
     });
   }
 
-  function drawRhythmHUD(elapsedSec) {
+  function drawRhythmHUD(currentTime) {
     // スコア
-    rCtx.fillStyle = 'rgba(46,42,71,0.8)';
+    rCtx.fillStyle = 'rgba(46,42,71,0.85)';
     rCtx.font = '800 22px "Baloo 2", sans-serif';
     rCtx.textAlign = 'right';
     rCtx.textBaseline = 'top';
     rCtx.fillText(`${rhythm.score}`, RW - 14, 14);
-    // 判定表示（0.7秒間）
-    if (performance.now() * 0.001 - rhythm.lastJudgmentAt < 0.7 && rhythm.lastJudgment) {
+    // コンボ
+    if (rhythm.combo >= 3) {
+      rCtx.fillStyle = 'rgba(255,107,157,0.9)';
+      rCtx.font = '800 20px "Baloo 2", sans-serif';
+      rCtx.textAlign = 'left';
+      rCtx.fillText(`${rhythm.combo} コンボ！`, 14, 14);
+    }
+    // 判定表示（0.6秒間、レーン上に）
+    if (performance.now() * 0.001 - rhythm.lastJudgmentAt < 0.6 && rhythm.lastJudgment) {
+      const laneX = rhythm.lastJudgmentLane >= 0 ? LANE_X[rhythm.lastJudgmentLane] : RW / 2;
       rCtx.fillStyle = rhythm.lastJudgment === 'Perfect' ? '#4CD4B0'
-        : rhythm.lastJudgment === 'Good' ? '#FFC93C' : '#FF6B9D';
-      rCtx.font = '800 32px "Baloo 2", sans-serif';
+        : rhythm.lastJudgment === 'Good' ? '#E5A82C' : '#E14E7F';
+      rCtx.font = '800 22px "Baloo 2", sans-serif';
       rCtx.textAlign = 'center';
-      rCtx.fillText(rhythm.lastJudgment, RW / 2, 340);
+      rCtx.textBaseline = 'middle';
+      rCtx.fillText(rhythm.lastJudgment, laneX, TARGET_Y - 60);
     }
     // 進捗バー
-    const prog = Math.min(1, elapsedSec / SONG_END);
+    const prog = Math.min(1, currentTime / rhythm.songLen);
     rCtx.fillStyle = 'rgba(124,111,242,0.15)';
-    rCtx.fillRect(20, RH - 18, RW - 40, 8);
+    rCtx.fillRect(20, RH - 12, RW - 40, 6);
     rCtx.fillStyle = '#7C6FF2';
-    rCtx.fillRect(20, RH - 18, (RW - 40) * prog, 8);
+    rCtx.fillRect(20, RH - 12, (RW - 40) * prog, 6);
   }
 
   function drawRhythmIdle() {
@@ -2458,72 +2667,229 @@
     rCtx.fillStyle = 'rgba(46,42,71,0.75)';
     rCtx.font = '700 18px Nunito, sans-serif';
     rCtx.textAlign = 'center';
+    rCtx.textBaseline = 'middle';
     if (!rhythm.img) {
-      rCtx.fillText('うえ から あばたー を えらんでね', RW / 2, 340);
+      rCtx.fillText('うえ から あばたー を えらんでね', RW / 2, 220);
     } else {
-      rCtx.fillText('じゅんび OK！ スタート を おしてね', RW / 2, 340);
+      const s = SONGS[rhythm.songIndex];
+      rCtx.fillText(`きょく: ${s.name} (${s.difficulty})`, RW / 2, 200);
+      rCtx.fillText('じゅんび OK！ スタート を おしてね', RW / 2, 224);
     }
   }
 
-  function rhythmTap() {
-    if (rhythm.state !== 'playing') return;
-    const elapsed = (performance.now() - rhythm.startTime) / 1000;
-    // 一番タイミングの近い未取得ノートを探す
-    let target = null, targetDelta = Infinity;
-    for (const n of rhythm.notes) {
-      if (n.taken) continue;
+  // ---- 入力 ----
+  function pointerLane(e) {
+    const rect = rhythmCanvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (RW / rect.width);
+    if (x < 160) return 0;
+    if (x < 320) return 1;
+    return 2;
+  }
+
+  function updateJudgmentUI(text) {
+    rhythmJudgment.textContent = text;
+  }
+
+  function judgeHit(lane, elapsed) {
+    // このレーンの最も近い未取得ノートを探す
+    let idx = -1, best = Infinity;
+    for (let i = 0; i < rhythm.notes.length; i++) {
+      const n = rhythm.notes[i];
+      if (n.taken || n.lane !== lane) continue;
       const d = Math.abs(n.hit - elapsed);
-      if (d < targetDelta) { targetDelta = d; target = n; }
+      if (d < best) { best = d; idx = i; }
     }
-    if (!target || targetDelta > 0.4) {
-      // 空タップ = Miss小さめ
+    return { idx, delta: best };
+  }
+
+  function registerHit(lane, elapsed, pointerId) {
+    const { idx, delta } = judgeHit(lane, elapsed);
+    rhythm.lastJudgmentLane = lane;
+    if (idx === -1 || delta > T_GOOD + 0.1) {
+      // 空タップ
+      rhythm.combo = 0;
+      rhythmComboValue.textContent = 0;
       rhythm.lastJudgment = 'Miss';
       rhythm.lastJudgmentAt = performance.now() * 0.001;
+      updateJudgmentUI('💦 Miss');
       soundMiss();
       return;
     }
-    target.taken = true;
+    const note = rhythm.notes[idx];
     let judge, points;
-    if (targetDelta <= 0.15) {
-      judge = 'Perfect'; points = 100; rhythm.perfectCount++;
-      soundPerfect();
-    } else if (targetDelta <= 0.30) {
-      judge = 'Good'; points = 50; rhythm.goodCount++;
-      soundGood();
+    if (delta <= T_PERFECT) { judge = 'Perfect'; points = 100; rhythm.perfectCount++; soundPerfect(); }
+    else if (delta <= T_GOOD) { judge = 'Good'; points = 50; rhythm.goodCount++; soundGood(); }
+    else { judge = 'Miss'; points = 0; rhythm.missCount++; soundMiss(); }
+
+    if (judge !== 'Miss') {
+      rhythm.combo++;
+      if (rhythm.combo > rhythm.maxCombo) rhythm.maxCombo = rhythm.combo;
+      // コンボボーナス
+      if (rhythm.combo >= 10) points = Math.floor(points * 1.5);
+      else if (rhythm.combo >= 5) points = Math.floor(points * 1.2);
     } else {
-      judge = 'Miss'; points = 0; rhythm.missCount++;
-      soundMiss();
+      rhythm.combo = 0;
     }
     rhythm.score += points;
     rhythmScoreValue.textContent = rhythm.score;
+    rhythmComboValue.textContent = rhythm.combo;
     rhythm.lastJudgment = judge;
     rhythm.lastJudgmentAt = performance.now() * 0.001;
-    rhythmJudgment.textContent = judge === 'Perfect' ? '⭐ Perfect!' : judge === 'Good' ? '👍 Good' : '💦 Miss';
+    rhythm.hitFlashes.push({ lane, at: performance.now() * 0.001, type: judge });
+    updateJudgmentUI(judge === 'Perfect' ? '⭐ Perfect!' : judge === 'Good' ? '👍 Good' : '💦 Miss');
+
+    if (note.dur > 0 && judge !== 'Miss') {
+      // ロング開始
+      rhythm.laneHeld[lane] = { noteIdx: idx, pointerId, startTime: elapsed };
+    } else {
+      note.taken = true;
+    }
+  }
+
+  function registerRelease(lane, elapsed) {
+    const held = rhythm.laneHeld[lane];
+    if (!held) return;
+    const note = rhythm.notes[held.noteIdx];
+    const expectedEnd = note.hit + note.dur;
+    const delta = elapsed - expectedEnd; // 正=遅い、負=早い
+    let bonus, judge;
+    if (Math.abs(delta) <= 0.20) {
+      bonus = 100; judge = 'Perfect'; rhythm.perfectCount++;
+      soundPerfect();
+    } else if (Math.abs(delta) <= 0.50) {
+      bonus = 50; judge = 'Good'; rhythm.goodCount++;
+      soundGood();
+    } else if (delta < -0.5) {
+      // 早く離しすぎ: 部分点
+      const heldDur = elapsed - note.hit;
+      const frac = Math.max(0, Math.min(1, heldDur / note.dur));
+      bonus = Math.floor(80 * frac);
+      judge = frac > 0.5 ? 'Good' : 'Miss';
+      if (judge === 'Miss') { rhythm.missCount++; soundMiss(); }
+      else { rhythm.goodCount++; soundGood(); }
+    } else {
+      // 遅すぎるが、タイム内に触ってはいた → Good
+      bonus = 30; judge = 'Good'; rhythm.goodCount++;
+      soundGood();
+    }
+    if (judge !== 'Miss') {
+      rhythm.combo++;
+      if (rhythm.combo > rhythm.maxCombo) rhythm.maxCombo = rhythm.combo;
+    } else {
+      rhythm.combo = 0;
+    }
+    rhythm.score += bonus;
+    rhythmScoreValue.textContent = rhythm.score;
+    rhythmComboValue.textContent = rhythm.combo;
+    rhythm.lastJudgment = judge;
+    rhythm.lastJudgmentAt = performance.now() * 0.001;
+    rhythm.lastJudgmentLane = lane;
+    rhythm.hitFlashes.push({ lane, at: performance.now() * 0.001, type: judge });
+    updateJudgmentUI(judge === 'Perfect' ? '⭐ Perfect!' : judge === 'Good' ? '👍 Good' : '💦 Miss');
+    note.taken = true;
+    rhythm.laneHeld[lane] = null;
   }
 
   rhythmCanvas.addEventListener('pointerdown', (e) => {
     e.preventDefault();
-    if (rhythm.state === 'playing') rhythmTap();
+    if (rhythm.state !== 'playing') return;
+    const lane = pointerLane(e);
+    rhythm.lanePressed[lane] = true;
+    const elapsed = (performance.now() - rhythm.startTime) / 1000;
+    registerHit(lane, elapsed, e.pointerId);
+    try { rhythmCanvas.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+
+  rhythmCanvas.addEventListener('pointerup', (e) => {
+    e.preventDefault();
+    if (rhythm.state !== 'playing') return;
+    // どのレーンに紐づいてたかを pointerId で探す
+    for (let l = 0; l < 3; l++) {
+      const held = rhythm.laneHeld[l];
+      if (held && held.pointerId === e.pointerId) {
+        const elapsed = (performance.now() - rhythm.startTime) / 1000;
+        registerRelease(l, elapsed);
+      }
+    }
+    // このポインタが押していた lane を lanePressed から下ろす
+    const lane = pointerLane(e);
+    rhythm.lanePressed[lane] = false;
+  });
+  rhythmCanvas.addEventListener('pointercancel', (e) => {
+    for (let l = 0; l < 3; l++) {
+      if (rhythm.laneHeld[l] && rhythm.laneHeld[l].pointerId === e.pointerId) {
+        rhythm.laneHeld[l] = null;
+      }
+    }
+    rhythm.lanePressed = [false, false, false];
+  });
+
+  // キーボード操作（A/S/D 左中右）
+  document.addEventListener('keydown', (e) => {
+    const gameScreen = document.getElementById('screen-game');
+    const rhythmActive = document.getElementById('game-rhythm').classList.contains('active');
+    if (!gameScreen.classList.contains('active') || !rhythmActive) return;
+    if (rhythm.state !== 'playing') return;
+    let lane = -1;
+    if (e.code === 'KeyA' || e.code === 'ArrowLeft') lane = 0;
+    else if (e.code === 'KeyS' || e.code === 'ArrowDown' || e.code === 'Space') lane = 1;
+    else if (e.code === 'KeyD' || e.code === 'ArrowRight') lane = 2;
+    if (lane === -1 || e.repeat) return;
+    e.preventDefault();
+    rhythm.lanePressed[lane] = true;
+    const elapsed = (performance.now() - rhythm.startTime) / 1000;
+    registerHit(lane, elapsed, -lane - 1);
+  });
+  document.addEventListener('keyup', (e) => {
+    let lane = -1;
+    if (e.code === 'KeyA' || e.code === 'ArrowLeft') lane = 0;
+    else if (e.code === 'KeyS' || e.code === 'ArrowDown' || e.code === 'Space') lane = 1;
+    else if (e.code === 'KeyD' || e.code === 'ArrowRight') lane = 2;
+    if (lane === -1) return;
+    rhythm.lanePressed[lane] = false;
+    const held = rhythm.laneHeld[lane];
+    if (held && held.pointerId === -lane - 1 && rhythm.state === 'playing') {
+      const elapsed = (performance.now() - rhythm.startTime) / 1000;
+      registerRelease(lane, elapsed);
+    }
   });
 
   function rhythmTick() {
     const elapsed = (performance.now() - rhythm.startTime) / 1000;
-    // 見逃し判定
-    for (const n of rhythm.notes) {
-      if (!n.taken && elapsed - n.hit > 0.30) {
+    // 見逃したノートの自動 Miss
+    for (let i = 0; i < rhythm.notes.length; i++) {
+      const n = rhythm.notes[i];
+      if (n.taken) continue;
+      const isBeingHeld = rhythm.laneHeld[n.lane] && rhythm.laneHeld[n.lane].noteIdx === i;
+      if (!isBeingHeld && elapsed - n.hit > T_LATE) {
         n.taken = true;
         rhythm.missCount++;
-        rhythm.lastJudgment = 'Miss';
-        rhythm.lastJudgmentAt = performance.now() * 0.001;
-        rhythmJudgment.textContent = '💦 Miss';
+        rhythm.combo = 0;
+        rhythmComboValue.textContent = 0;
       }
     }
-    drawRhythmBg();
+    // ロング押しすぎ自動リリース
+    for (let l = 0; l < 3; l++) {
+      const held = rhythm.laneHeld[l];
+      if (held) {
+        const note = rhythm.notes[held.noteIdx];
+        if (elapsed > note.hit + note.dur + 0.7) {
+          note.taken = true;
+          rhythm.laneHeld[l] = null;
+          rhythm.hitFlashes.push({ lane: l, at: performance.now() * 0.001, type: 'Good' });
+          rhythm.score += 30;
+          rhythmScoreValue.textContent = rhythm.score;
+        }
+      }
+    }
+
+    drawRhythmBg(elapsed);
     drawRhythmAvatar();
-    drawRhythmNotes(elapsed);
+    rhythm.notes.forEach((n, i) => drawNote(n, i, elapsed));
+    drawHitFlashes();
     drawRhythmHUD(elapsed);
 
-    if (elapsed >= SONG_END) { endRhythm(); return; }
+    if (elapsed >= rhythm.songLen) { endRhythm(); return; }
     rhythm.raf = requestAnimationFrame(rhythmTick);
   }
 
@@ -2534,21 +2900,38 @@
 
   function startRhythm() {
     if (!rhythm.img) { showToast('さきに あばたー を えらんでね！'); return; }
+    const song = SONGS[rhythm.songIndex];
     rhythm.state = 'playing';
-    rhythm.notes = RHYTHM_SONG.map(n => ({ hit: n.t, freq: n.f, color: n.c, taken: false }));
+    rhythm.notes = song.notes.map(n => ({
+      lane: n.lane,
+      freq: n.f,
+      hit: n.b * song.beatSec,
+      dur: (n.dur || 0) * song.beatSec,
+      taken: false
+    }));
+    rhythm.songLen = songTotalTime(song);
     rhythm.score = 0;
+    rhythm.combo = 0;
+    rhythm.maxCombo = 0;
     rhythm.perfectCount = 0;
     rhythm.goodCount = 0;
     rhythm.missCount = 0;
+    rhythm.laneHeld = [null, null, null];
+    rhythm.lanePressed = [false, false, false];
+    rhythm.hitFlashes = [];
     rhythm.lastJudgment = '';
     rhythmScoreValue.textContent = 0;
-    rhythmJudgment.textContent = '✨';
+    rhythmComboValue.textContent = 0;
+    updateJudgmentUI('✨');
     rhythmOverlay.classList.remove('show');
-    // AudioContext を先に起動しないと iOS で予約再生が動かないことがある
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    // 全ノートを予約して自動演奏（軽い伴奏）
-    RHYTHM_SONG.forEach(n => beepAt(n.f, n.t, 0.25, 'triangle', 0.08));
+    // 伴奏を予約
+    song.notes.forEach(n => {
+      const startAt = n.b * song.beatSec;
+      const dur = Math.max(0.2, (n.dur || 0) * song.beatSec);
+      beepAt(n.f, startAt, dur, 'triangle', 0.07);
+    });
     soundStart();
     rhythm.startTime = performance.now();
     stopRhythmLoop();
@@ -2558,402 +2941,38 @@
   async function endRhythm() {
     stopRhythmLoop();
     rhythm.state = 'over';
+    const song = SONGS[rhythm.songIndex];
+    const prevBest = getBest(rhythm.songIndex);
     let isNewBest = false;
-    if (rhythm.score > rhythm.bestScore) {
-      rhythm.bestScore = rhythm.score;
-      localStorage.setItem('rhythmBest', String(rhythm.bestScore));
-      rhythmBestValue.textContent = rhythm.bestScore;
+    if (rhythm.score > prevBest) {
+      setBest(rhythm.songIndex, rhythm.score);
       isNewBest = true;
     }
-    rhythmOverlayTitle.textContent = isNewBest ? '🎉 ハイスコア！' : '🎵 おわり！';
+    // フルコンボ判定
+    const isFullCombo = rhythm.missCount === 0;
+    rhythmOverlayTitle.textContent = isNewBest ? '🎉 ハイスコア！'
+      : isFullCombo ? '🌟 フルコンボ！' : '🎵 おわり！';
     rhythmFinalScore.textContent = `${rhythm.score} てん`;
-    rhythmBestLabel.textContent = `Perfect ${rhythm.perfectCount} / Good ${rhythm.goodCount} / Miss ${rhythm.missCount}`;
+    rhythmBestLabel.textContent =
+      `${song.name}｜Perfect ${rhythm.perfectCount} / Good ${rhythm.goodCount} / Miss ${rhythm.missCount} / MaxCombo ${rhythm.maxCombo}`;
     rhythmOverlayBtn.textContent = '🔁 もういちど';
     rhythmLeaderboardEl.innerHTML = '';
     rhythmOverlay.classList.add('show');
-    await saveScore('rhythm', rhythm.avatarId, rhythm.score);
-    const top = await fetchTopScores('rhythm', 3);
+    await saveScore(`rhythm_${rhythm.songIndex}`, rhythm.avatarId, rhythm.score);
+    const top = await fetchTopScores(`rhythm_${rhythm.songIndex}`, 3);
     renderLeaderboard(rhythmLeaderboardEl, top, ' てん');
+    renderSongPicker(); // ベスト表示を更新
   }
 
   rhythmOverlayBtn.addEventListener('click', () => startRhythm());
 
   rhythmOverlayTitle.textContent = '🎵 リズム ダンス';
   rhythmFinalScore.textContent = '';
-  rhythmBestLabel.textContent = `ベスト: ${rhythm.bestScore} てん`;
+  rhythmBestLabel.textContent = `ベスト: ${getBest(0)} てん`;
   rhythmOverlayBtn.textContent = '▶️ はじめる';
   rhythmOverlay.classList.add('show');
   drawRhythmIdle();
 
-  // ================================================================
-  // 🔍 まちがい さがし
-  // ================================================================
-  const spotCanvas = document.getElementById('spotCanvas');
-  const sCtx = spotCanvas.getContext('2d');
-  const spotFoundValue = document.getElementById('spotFoundValue');
-  const spotTimeValue = document.getElementById('spotTimeValue');
-  const spotOverlay = document.getElementById('spotOverlay');
-  const spotOverlayTitle = document.getElementById('spotOverlayTitle');
-  const spotOverlayBtn = document.getElementById('spotOverlayBtn');
-  const spotFinalScore = document.getElementById('spotFinalScore');
-  const spotBestLabel = document.getElementById('spotBestLabel');
-  const spotLeaderboardEl = document.getElementById('spotLeaderboard');
-  const spotGiveUpBtn = document.getElementById('spotGiveUpBtn');
-
-  const SW = spotCanvas.width;   // 480
-  const SH = spotCanvas.height;  // 480
-  // 上の画像エリア: 20-220、下の画像エリア: 260-460
-  const IMG_TOP_Y = 20;
-  const IMG_TOP_H = 200;
-  const IMG_BOT_Y = 260;
-  const IMG_BOT_H = 200;
-  const DIVIDER_Y = 240;
-  const NUM_DIFFS = 4;
-  const HIT_RADIUS = 34; // タップ許容範囲（大きめ）
-
-  const SPOT_STICKERS = ['⭐', '💖', '✨', '🌸', '🎵', '🍩', '🌈', '🍭', '🎀', '🐝'];
-  const SPOT_COLORS = ['#FF6B9D', '#FFC93C', '#4CD4B0', '#7C6FF2', '#4FA9E8', '#FF9F43'];
-
-  let spot = {
-    state: 'idle',
-    img: null,
-    avatarId: null,
-    diffs: [],          // {ix, iy, r, type, ...props, found}
-    foundCount: 0,
-    startTime: 0,
-    elapsed: 0,
-    bestScore: Number(localStorage.getItem('spotBest') || 0),
-    raf: null
-  };
-
-  // 差分を生成（画像座標系 480x480 内で、互いに離れた位置に）
-  function generateDiffs() {
-    const diffs = [];
-    const minDist = 130;
-    let attempts = 0;
-    while (diffs.length < NUM_DIFFS && attempts < 300) {
-      attempts++;
-      const ix = 50 + Math.random() * 380;
-      const iy = 50 + Math.random() * 380;
-      // 他の差分と近すぎないように
-      const tooClose = diffs.some(d => Math.hypot(d.ix - ix, d.iy - iy) < minDist);
-      if (tooClose) continue;
-
-      const kind = Math.random();
-      if (kind < 0.5) {
-        // スタンプ（絵文字）
-        diffs.push({
-          ix, iy,
-          r: 34,
-          type: 'sticker',
-          emoji: SPOT_STICKERS[Math.floor(Math.random() * SPOT_STICKERS.length)],
-          size: 40 + Math.random() * 12,
-          found: false
-        });
-      } else if (kind < 0.8) {
-        // 丸
-        diffs.push({
-          ix, iy,
-          r: 32,
-          type: 'circle',
-          color: SPOT_COLORS[Math.floor(Math.random() * SPOT_COLORS.length)],
-          radius: 22 + Math.random() * 8,
-          found: false
-        });
-      } else {
-        // 星
-        diffs.push({
-          ix, iy,
-          r: 36,
-          type: 'star',
-          color: SPOT_COLORS[Math.floor(Math.random() * SPOT_COLORS.length)],
-          size: 26 + Math.random() * 8,
-          found: false
-        });
-      }
-    }
-    return diffs;
-  }
-
-  // 画像を指定エリアに aspect fit で描く。戻り値は描画されたバウンディング
-  function drawImageFit(img, ax, ay, aw, ah) {
-    const fit = Math.min(aw / img.width, ah / img.height);
-    const w = img.width * fit, h = img.height * fit;
-    const dx = ax + (aw - w) / 2;
-    const dy = ay + (ah - h) / 2;
-    sCtx.drawImage(img, dx, dy, w, h);
-    return { dx, dy, w, h };
-  }
-
-  // 画像座標(ix, iy) を 描画エリア(rect: {dx,dy,w,h}) の 実座標に変換
-  function imgToCanvas(ix, iy, rect) {
-    return {
-      x: rect.dx + (ix / 480) * rect.w,
-      y: rect.dy + (iy / 480) * rect.h
-    };
-  }
-
-  function drawSpotBg() {
-    sCtx.clearRect(0, 0, SW, SH);
-    // 背景
-    const grad = sCtx.createLinearGradient(0, 0, 0, SH);
-    grad.addColorStop(0, '#E5F3FF');
-    grad.addColorStop(1, '#FFF3D6');
-    sCtx.fillStyle = grad;
-    sCtx.fillRect(0, 0, SW, SH);
-    // 画像パネルの背景
-    sCtx.fillStyle = '#FFFDF7';
-    sCtx.fillRect(10, IMG_TOP_Y - 10, SW - 20, IMG_TOP_H + 20);
-    sCtx.fillRect(10, IMG_BOT_Y - 10, SW - 20, IMG_BOT_H + 20);
-    sCtx.strokeStyle = '#F0E6D2';
-    sCtx.lineWidth = 2;
-    sCtx.strokeRect(10, IMG_TOP_Y - 10, SW - 20, IMG_TOP_H + 20);
-    sCtx.strokeRect(10, IMG_BOT_Y - 10, SW - 20, IMG_BOT_H + 20);
-    // ラベル
-    sCtx.fillStyle = 'rgba(46,42,71,0.7)';
-    sCtx.font = '800 12px "Baloo 2", sans-serif';
-    sCtx.textAlign = 'left';
-    sCtx.textBaseline = 'top';
-    sCtx.fillText('げんかん (もとの え)', 14, IMG_TOP_Y - 8);
-    sCtx.fillText('ちがう ところ が 4こ！', 14, IMG_BOT_Y - 8);
-    // 中央の divider 装飾
-    sCtx.strokeStyle = 'rgba(124,111,242,0.5)';
-    sCtx.lineWidth = 2;
-    sCtx.setLineDash([6, 6]);
-    sCtx.beginPath();
-    sCtx.moveTo(0, DIVIDER_Y);
-    sCtx.lineTo(SW, DIVIDER_Y);
-    sCtx.stroke();
-    sCtx.setLineDash([]);
-    sCtx.fillStyle = 'rgba(124,111,242,0.9)';
-    sCtx.font = '700 16px Nunito, sans-serif';
-    sCtx.textAlign = 'center';
-    sCtx.textBaseline = 'middle';
-    sCtx.fillText('▼ くらべてみて ▼', SW / 2, DIVIDER_Y);
-  }
-
-  // 差分をキャンバス上に描画（下半分のみ）
-  function drawDiffs(bottomRect) {
-    spot.diffs.forEach(d => {
-      const { x, y } = imgToCanvas(d.ix, d.iy, bottomRect);
-      // 差分サイズも下の画像スケールに合わせる
-      const scale = bottomRect.w / 480;
-      if (d.type === 'sticker') {
-        sCtx.font = `${d.size * scale}px sans-serif`;
-        sCtx.textAlign = 'center';
-        sCtx.textBaseline = 'middle';
-        sCtx.fillText(d.emoji, x, y);
-      } else if (d.type === 'circle') {
-        sCtx.fillStyle = d.color;
-        sCtx.beginPath();
-        sCtx.arc(x, y, d.radius * scale, 0, Math.PI * 2);
-        sCtx.fill();
-      } else if (d.type === 'star') {
-        drawStar(x, y, d.size * scale, d.color);
-      }
-    });
-  }
-
-  function drawStar(cx, cy, size, color) {
-    sCtx.fillStyle = color;
-    sCtx.beginPath();
-    for (let i = 0; i < 10; i++) {
-      const r = i % 2 === 0 ? size : size * 0.45;
-      const a = -Math.PI / 2 + (i * Math.PI) / 5;
-      const px = cx + Math.cos(a) * r;
-      const py = cy + Math.sin(a) * r;
-      if (i === 0) sCtx.moveTo(px, py); else sCtx.lineTo(px, py);
-    }
-    sCtx.closePath();
-    sCtx.fill();
-  }
-
-  // みつけた差分に○印を両方の絵に付ける
-  function drawFoundMarkers(topRect, bottomRect) {
-    const scale = bottomRect.w / 480;
-    spot.diffs.forEach(d => {
-      if (!d.found) return;
-      const tp = imgToCanvas(d.ix, d.iy, topRect);
-      const bp = imgToCanvas(d.ix, d.iy, bottomRect);
-      sCtx.strokeStyle = '#FF6B9D';
-      sCtx.lineWidth = 4;
-      const rTop = 30 * (topRect.w / 480);
-      const rBot = 30 * scale;
-      sCtx.beginPath(); sCtx.arc(tp.x, tp.y, rTop, 0, Math.PI * 2); sCtx.stroke();
-      sCtx.beginPath(); sCtx.arc(bp.x, bp.y, rBot, 0, Math.PI * 2); sCtx.stroke();
-    });
-  }
-
-  // 「まちがい」フィードバック
-  let spotWrongMark = null; // {x, y, at}
-  function drawWrongMark() {
-    if (!spotWrongMark) return;
-    const age = (performance.now() - spotWrongMark.at) / 1000;
-    if (age > 0.6) { spotWrongMark = null; return; }
-    const alpha = 1 - age / 0.6;
-    sCtx.strokeStyle = `rgba(180,180,180,${alpha})`;
-    sCtx.lineWidth = 3;
-    sCtx.beginPath();
-    sCtx.arc(spotWrongMark.x, spotWrongMark.y, 20 + age * 30, 0, Math.PI * 2);
-    sCtx.stroke();
-  }
-
-  let spotFoundBurst = null; // {x, y, at}
-  function drawFoundBurst() {
-    if (!spotFoundBurst) return;
-    const age = (performance.now() - spotFoundBurst.at) / 1000;
-    if (age > 0.5) { spotFoundBurst = null; return; }
-    const alpha = 1 - age / 0.5;
-    sCtx.strokeStyle = `rgba(255,201,60,${alpha})`;
-    sCtx.lineWidth = 5;
-    sCtx.beginPath();
-    sCtx.arc(spotFoundBurst.x, spotFoundBurst.y, 20 + age * 60, 0, Math.PI * 2);
-    sCtx.stroke();
-  }
-
-  let spotTopRect = null, spotBotRect = null;
-
-  function drawSpotFrame() {
-    drawSpotBg();
-    if (!spot.img) return;
-    spotTopRect = drawImageFit(spot.img, 10, IMG_TOP_Y, SW - 20, IMG_TOP_H);
-    spotBotRect = drawImageFit(spot.img, 10, IMG_BOT_Y, SW - 20, IMG_BOT_H);
-    drawDiffs(spotBotRect);
-    drawFoundMarkers(spotTopRect, spotBotRect);
-    drawWrongMark();
-    drawFoundBurst();
-    // HUD
-    sCtx.fillStyle = 'rgba(46,42,71,0.8)';
-    sCtx.font = '800 18px "Baloo 2", sans-serif';
-    sCtx.textAlign = 'right';
-    sCtx.textBaseline = 'top';
-    sCtx.fillText(`${spot.foundCount} / ${NUM_DIFFS}`, SW - 14, 4);
-  }
-
-  function drawSpotIdle() {
-    drawSpotBg();
-    sCtx.fillStyle = 'rgba(46,42,71,0.75)';
-    sCtx.font = '700 18px Nunito, sans-serif';
-    sCtx.textAlign = 'center';
-    sCtx.textBaseline = 'middle';
-    if (!spot.img) {
-      sCtx.fillText('うえ から あばたー を えらんでね', SW / 2, SH / 2);
-    } else {
-      // プレビュー的に、上下に同じ絵を表示
-      spotTopRect = drawImageFit(spot.img, 10, IMG_TOP_Y, SW - 20, IMG_TOP_H);
-      spotBotRect = drawImageFit(spot.img, 10, IMG_BOT_Y, SW - 20, IMG_BOT_H);
-      sCtx.fillStyle = 'rgba(46,42,71,0.75)';
-      sCtx.font = '700 16px Nunito, sans-serif';
-      sCtx.fillText('じゅんび OK！ スタート を おしてね', SW / 2, DIVIDER_Y - 4);
-    }
-  }
-
-  function spotTick() {
-    if (spot.state !== 'playing') return;
-    spot.elapsed = (performance.now() - spot.startTime) / 1000;
-    spotTimeValue.textContent = Math.floor(spot.elapsed);
-    drawSpotFrame();
-    spot.raf = requestAnimationFrame(spotTick);
-  }
-
-  function stopSpotLoop() {
-    if (spot.raf) cancelAnimationFrame(spot.raf);
-    spot.raf = null;
-  }
-
-  spotCanvas.addEventListener('pointerdown', (e) => {
-    e.preventDefault();
-    if (spot.state !== 'playing') return;
-    if (!spotBotRect) return;
-    const rect = spotCanvas.getBoundingClientRect();
-    const scaleX = spotCanvas.width / rect.width;
-    const scaleY = spotCanvas.height / rect.height;
-    const tx = (e.clientX - rect.left) * scaleX;
-    const ty = (e.clientY - rect.top) * scaleY;
-    // 下半分でしか受け付けない（上半分タップは無反応 = 迷わない）
-    if (ty < DIVIDER_Y) return;
-    // タップ位置を「画像座標」に逆変換
-    const ix = ((tx - spotBotRect.dx) / spotBotRect.w) * 480;
-    const iy = ((ty - spotBotRect.dy) / spotBotRect.h) * 480;
-    // 最も近い未発見の差分を探す
-    let hit = null, hitDist = Infinity;
-    for (const d of spot.diffs) {
-      if (d.found) continue;
-      const dist = Math.hypot(d.ix - ix, d.iy - iy);
-      if (dist < hitDist) { hit = d; hitDist = dist; }
-    }
-    if (hit && hitDist < HIT_RADIUS) {
-      hit.found = true;
-      spot.foundCount++;
-      spotFoundValue.textContent = spot.foundCount;
-      soundPerfect();
-      const p = imgToCanvas(hit.ix, hit.iy, spotBotRect);
-      spotFoundBurst = { x: p.x, y: p.y, at: performance.now() };
-      if (spot.foundCount >= NUM_DIFFS) endSpot(true);
-    } else {
-      // ハズレのフィードバック
-      spotWrongMark = { x: tx, y: ty, at: performance.now() };
-      soundMiss();
-    }
-  });
-
-  function startSpot() {
-    if (!spot.img) { showToast('さきに あばたー を えらんでね！'); return; }
-    spot.state = 'playing';
-    spot.diffs = generateDiffs();
-    spot.foundCount = 0;
-    spot.elapsed = 0;
-    spot.startTime = performance.now();
-    spotFoundValue.textContent = 0;
-    spotTimeValue.textContent = 0;
-    spotOverlay.classList.remove('show');
-    soundStart();
-    stopSpotLoop();
-    spot.raf = requestAnimationFrame(spotTick);
-  }
-
-  async function endSpot(cleared) {
-    stopSpotLoop();
-    spot.state = 'over';
-    const elapsedSec = Math.max(1, Math.floor(spot.elapsed));
-    // スコア: みつけた数 × 100 + タイムボーナス（60秒以内で早いほど高く）
-    const base = spot.foundCount * 100;
-    const bonus = cleared ? Math.max(0, (120 - elapsedSec) * 5) : 0;
-    const score = base + bonus;
-    let isNewBest = false;
-    if (score > spot.bestScore) {
-      spot.bestScore = score;
-      localStorage.setItem('spotBest', String(spot.bestScore));
-      isNewBest = true;
-    }
-    if (cleared) {
-      spotOverlayTitle.textContent = isNewBest ? '🎉 ハイスコア！' : '🎊 ぜんぶ みつけた！';
-      soundPerfect();
-    } else {
-      spotOverlayTitle.textContent = '🏳️ ギブアップ';
-      soundGameOver();
-    }
-    spotFinalScore.textContent = `${score} てん`;
-    spotBestLabel.textContent = `みつけた: ${spot.foundCount}/${NUM_DIFFS}  じかん: ${elapsedSec}秒  ベスト: ${spot.bestScore}`;
-    spotOverlayBtn.textContent = '🔁 もういちど';
-    spotLeaderboardEl.innerHTML = '';
-    spotOverlay.classList.add('show');
-    await saveScore('spot', spot.avatarId, score);
-    const top = await fetchTopScores('spot', 3);
-    renderLeaderboard(spotLeaderboardEl, top, ' てん');
-  }
-
-  spotOverlayBtn.addEventListener('click', () => startSpot());
-  spotGiveUpBtn.addEventListener('click', () => {
-    if (spot.state === 'playing') endSpot(false);
-  });
-
-  spotOverlayTitle.textContent = '🔍 まちがい さがし';
-  spotFinalScore.textContent = '';
-  spotBestLabel.textContent = `ベスト: ${spot.bestScore} てん`;
-  spotOverlayBtn.textContent = '▶️ はじめる';
-  spotOverlay.classList.add('show');
-  drawSpotIdle();
 })();
 </script>
 </body>
