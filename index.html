@@ -1626,6 +1626,7 @@
   let stageDragging = false;
   let dragOffset = { x: 0, y: 0 };
   const imageCache = {};
+  const transparentCache = {};
 
   function loadImage(src) {
     return new Promise((resolve) => {
@@ -1634,6 +1635,36 @@
       img.onload = () => { imageCache[src] = img; resolve(img); };
       img.src = src;
     });
+  }
+
+  // 紙色（#FFFDF7 付近）を透明化した canvas を返す
+  // アバターや look の白背景をゲーム画面で透けさせる用
+  function makeTransparentCanvas(img) {
+    const c = document.createElement('canvas');
+    c.width = img.width; c.height = img.height;
+    const cx = c.getContext('2d');
+    cx.drawImage(img, 0, 0);
+    try {
+      const data = cx.getImageData(0, 0, c.width, c.height);
+      const d = data.data;
+      const TOL = 26;
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i + 1], b = d[i + 2];
+        if (Math.abs(r - 255) <= TOL && Math.abs(g - 253) <= TOL && Math.abs(b - 247) <= TOL) {
+          d[i + 3] = 0;
+        }
+      }
+      cx.putImageData(data, 0, 0);
+    } catch (_) { /* cross-origin 等はそのまま */ }
+    return c;
+  }
+
+  async function loadTransparent(src) {
+    if (transparentCache[src]) return transparentCache[src];
+    const img = await loadImage(src);
+    const c = makeTransparentCanvas(img);
+    transparentCache[src] = c;
+    return c;
   }
 
   function renderPickers() {
@@ -1884,7 +1915,7 @@
       img.title = av.type === 'look' ? 'このコーデで あそぶ' : 'このあばたーで あそぶ';
       img.classList.toggle('selected', currentId === av.id);
       img.addEventListener('click', async () => {
-        const loaded = await loadImage(av.src);
+        const loaded = await loadTransparent(av.src);
         onPick(av, loaded);
       });
       wrap.appendChild(img);
@@ -1983,7 +2014,101 @@
   }
 
   // ================================================================
-  // 🏃 ランナーゲーム（やさしめチューニング）
+  // ご褒美（アイテム解放）システム
+  // ================================================================
+  // スコアやコンボの条件を満たすと、新しい ふく/アイテム が
+  // クローゼットに追加される。localStorage で解放済みを記録。
+  const REWARDS = [
+    {
+      id: 'candy',
+      name: '🍬 キャンディ',
+      when: (s) => s.game === 'runner' && s.score >= 100,
+      draw: (cx) => drawEmojiItem(cx, '🍬', '#FFD5E5')
+    },
+    {
+      id: 'crown',
+      name: '👑 きらきら クラウン',
+      when: (s) => s.game === 'runner' && s.score >= 250,
+      draw: (cx) => drawEmojiItem(cx, '👑', '#FFF0C7')
+    },
+    {
+      id: 'star',
+      name: '🌟 スター メダル',
+      when: (s) => s.game === 'runner' && s.score >= 500,
+      draw: (cx) => drawEmojiItem(cx, '🌟', '#FFF5A0')
+    },
+    {
+      id: 'ribbon',
+      name: '🎀 ピンク リボン',
+      when: (s) => s.game.startsWith('rhythm') && s.score >= 2000,
+      draw: (cx) => drawEmojiItem(cx, '🎀', '#FFD1E1')
+    },
+    {
+      id: 'wings',
+      name: '✨ ようせいの はね',
+      when: (s) => s.game.startsWith('rhythm') && s.maxCombo >= 20,
+      draw: (cx) => drawEmojiItem(cx, '🧚', '#E0F0FF')
+    },
+    {
+      id: 'headphones',
+      name: '🎧 ヘッドホン',
+      when: (s) => s.game.startsWith('rhythm') && s.score >= 4000,
+      draw: (cx) => drawEmojiItem(cx, '🎧', '#DDD8FF')
+    },
+    {
+      id: 'trophy',
+      name: '🏆 トロフィー',
+      when: (s) => s.fullCombo === true,
+      draw: (cx) => drawEmojiItem(cx, '🏆', '#FFEAB2')
+    }
+  ];
+
+  function drawEmojiItem(cx, emoji, glowColor) {
+    // 200x200 の透明カンバスに絵文字を大きく描く。周りは半透明のリング。
+    cx.clearRect(0, 0, 200, 200);
+    // グロー
+    const grad = cx.createRadialGradient(100, 100, 20, 100, 100, 100);
+    grad.addColorStop(0, glowColor + 'C0');
+    grad.addColorStop(1, glowColor + '00');
+    cx.fillStyle = grad;
+    cx.fillRect(0, 0, 200, 200);
+    // 絵文字
+    cx.font = '130px sans-serif';
+    cx.textAlign = 'center';
+    cx.textBaseline = 'middle';
+    cx.fillText(emoji, 100, 108);
+  }
+
+  function generateRewardItemDataURL(reward) {
+    const c = document.createElement('canvas');
+    c.width = 200; c.height = 200;
+    reward.draw(c.getContext('2d'));
+    return c.toDataURL('image/png');
+  }
+
+  async function checkRewards(gameStats) {
+    if (!fsApi) return;
+    for (const r of REWARDS) {
+      if (localStorage.getItem(`unlocked_${r.id}`)) continue;
+      if (!r.when(gameStats)) continue;
+      try {
+        const dataUrl = generateRewardItemDataURL(r);
+        await fsApi.addDoc(fsApi.collection(fsApi.db, fsApi.COLLECTION_NAME), {
+          imageData: dataUrl,
+          type: 'item',
+          rewardId: r.id,
+          createdAt: fsApi.serverTimestamp()
+        });
+        localStorage.setItem(`unlocked_${r.id}`, '1');
+        showToast(`✨ ${r.name} を てにいれた！`);
+      } catch (err) {
+        console.error('reward unlock error', err);
+      }
+    }
+  }
+
+  // ================================================================
+  // 🏃 ランナー（地形あり: 平地/坂/崖/おとしあな + 豆腐スライド物理）
   // ================================================================
   const gameCanvas = document.getElementById('gameCanvas');
   const gCtx = gameCanvas.getContext('2d');
@@ -1999,45 +2124,153 @@
 
   const GW = gameCanvas.width;
   const GH = gameCanvas.height;
-  const GROUND_Y = 380;
-  // やさしめ:重力を下げてジャンプ滞空を長く、初期スピードもゆっくり
+  const BASE_GROUND_Y = 380;   // 平地のyレベル
   const GRAVITY = 0.65;
   const JUMP_V = -14.5;
   const PLAYER_SIZE = 80;
+  const PLAYER_X = 110;        // プレイヤーの画面上の固定x
+  const MIN_GROUND_Y = 260;    // 一番高い場所（上に登れる限界）
+  const MAX_GROUND_Y = 440;    // 一番低い場所（谷の底）
 
   let runner = {
     state: 'idle',
     player: {
-      x: 90, y: GROUND_Y - PLAYER_SIZE, vy: 0, onGround: true,
-      img: null, avatarId: null
+      y: BASE_GROUND_Y - PLAYER_SIZE,
+      vy: 0,
+      onGround: true,
+      img: null,
+      avatarId: null
     },
-    obstacles: [],
+    obstacles: [],   // { worldX, w, h, emoji }
+    coins: [],       // { worldX, y, collected }
     clouds: [],
+    terrain: [],     // 地形セグメント: {xStart, xEnd, yL, yR} or {xStart, xEnd, gap:true}
+    worldOffset: 0,
     scrollSpeed: 3.5,
     spawnTimer: 0,
-    spawnInterval: 130,
+    spawnInterval: 140,
+    coinTimer: 0,
+    coinInterval: 90,
     score: 0,
+    coinCount: 0,
     bestScore: Number(localStorage.getItem('runnerBest') || 0),
     frame: 0,
     raf: null
   };
   bestValue.textContent = runner.bestScore;
 
+  // ---- 地形 ----
+  function bounded(y) { return Math.max(MIN_GROUND_Y, Math.min(MAX_GROUND_Y, y)); }
+
+  function initRunnerTerrain() {
+    runner.terrain = [
+      { xStart: 0, xEnd: 800, yL: BASE_GROUND_Y, yR: BASE_GROUND_Y }
+    ];
+    extendTerrain();
+  }
+
+  function addTerrainSegment() {
+    const last = runner.terrain[runner.terrain.length - 1];
+    const startX = last.xEnd;
+    const currentY = last.gap ? BASE_GROUND_Y : last.yR;
+    const r = Math.random();
+    const difficulty = Math.min(1, runner.score / 400); // 進むほど難しく
+
+    if (r < 0.30) {
+      // 平地（休憩）
+      const w = 140 + Math.random() * 160;
+      runner.terrain.push({ xStart: startX, xEnd: startX + w, yL: currentY, yR: currentY });
+    } else if (r < 0.50) {
+      // 上り坂
+      const w = 130 + Math.random() * 80;
+      const dy = 30 + Math.random() * 40;
+      runner.terrain.push({ xStart: startX, xEnd: startX + w, yL: currentY, yR: bounded(currentY - dy) });
+    } else if (r < 0.72) {
+      // 下り坂（豆腐スライド！）
+      const w = 130 + Math.random() * 80;
+      const dy = 40 + Math.random() * 60;
+      runner.terrain.push({ xStart: startX, xEnd: startX + w, yL: currentY, yR: bounded(currentY + dy) });
+    } else if (r < 0.86) {
+      // おとしあな（ジャンプで越える）
+      const gapW = 65 + Math.random() * (35 + difficulty * 25);
+      runner.terrain.push({ xStart: startX, xEnd: startX + gapW, gap: true });
+      const flatW = 160 + Math.random() * 100;
+      runner.terrain.push({ xStart: startX + gapW, xEnd: startX + gapW + flatW, yL: currentY, yR: currentY });
+    } else if (r < 0.95) {
+      // 高台（登って降りる）
+      const upW = 90;
+      const dy = 50 + Math.random() * 30;
+      const topY = bounded(currentY - dy);
+      runner.terrain.push({ xStart: startX, xEnd: startX + upW, yL: currentY, yR: topY });
+      const platW = 120 + Math.random() * 100;
+      runner.terrain.push({ xStart: startX + upW, xEnd: startX + upW + platW, yL: topY, yR: topY });
+      const downW = 90;
+      runner.terrain.push({ xStart: startX + upW + platW, xEnd: startX + upW + platW + downW, yL: topY, yR: currentY });
+    } else {
+      // 崖からの急降下
+      const w = 50;
+      const dy = 60 + Math.random() * 40;
+      runner.terrain.push({ xStart: startX, xEnd: startX + w, yL: currentY, yR: bounded(currentY + dy) });
+    }
+  }
+
+  function extendTerrain() {
+    const need = runner.worldOffset + GW * 1.5;
+    let guard = 0;
+    while (runner.terrain[runner.terrain.length - 1].xEnd < need && guard++ < 100) {
+      addTerrainSegment();
+    }
+    // 古いのを掃除
+    while (runner.terrain.length > 30 && runner.terrain[0].xEnd < runner.worldOffset - GW) {
+      runner.terrain.shift();
+    }
+  }
+
+  function groundYAt(wx) {
+    for (const seg of runner.terrain) {
+      if (wx >= seg.xStart && wx < seg.xEnd) {
+        if (seg.gap) return null;
+        const t = (wx - seg.xStart) / (seg.xEnd - seg.xStart);
+        return seg.yL + (seg.yR - seg.yL) * t;
+      }
+    }
+    return BASE_GROUND_Y;
+  }
+
+  function slopeAt(wx) {
+    for (const seg of runner.terrain) {
+      if (wx >= seg.xStart && wx < seg.xEnd && !seg.gap) {
+        return (seg.yR - seg.yL) / (seg.xEnd - seg.xStart);
+      }
+    }
+    return 0;
+  }
+
+  // ---- 雲 ----
   function initRunnerClouds() {
     runner.clouds = [];
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       runner.clouds.push({
         x: Math.random() * GW,
-        y: 40 + Math.random() * 120,
+        y: 30 + Math.random() * 130,
         r: 18 + Math.random() * 14,
-        speed: 0.3 + Math.random() * 0.4
+        speed: 0.2 + Math.random() * 0.4
       });
     }
   }
   initRunnerClouds();
+  initRunnerTerrain();
 
-  function drawRunnerBg() {
+  // ---- 描画 ----
+  function drawRunnerSky() {
     gCtx.clearRect(0, 0, GW, GH);
+    // 空グラデ
+    const grad = gCtx.createLinearGradient(0, 0, 0, GH);
+    grad.addColorStop(0, '#C6EAFF');
+    grad.addColorStop(0.7, '#E6F7FF');
+    grad.addColorStop(1, '#FFF3D6');
+    gCtx.fillStyle = grad;
+    gCtx.fillRect(0, 0, GW, GH);
     // 雲
     gCtx.fillStyle = 'rgba(255,255,255,0.85)';
     runner.clouds.forEach(c => {
@@ -2047,35 +2280,95 @@
       gCtx.arc(c.x - c.r * 0.9, c.y + 4, c.r * 0.8, 0, Math.PI * 2);
       gCtx.fill();
     });
-    // 地面ライン
-    gCtx.strokeStyle = 'rgba(166,107,52,0.4)';
-    gCtx.lineWidth = 2;
-    gCtx.beginPath();
-    gCtx.moveTo(0, GROUND_Y); gCtx.lineTo(GW, GROUND_Y); gCtx.stroke();
-    // 草
-    gCtx.fillStyle = 'rgba(76,212,176,0.5)';
-    const offset = (runner.frame * runner.scrollSpeed) % 40;
-    for (let x = -offset; x < GW; x += 40) {
+    // 遠くの山（パララックス）
+    const distant = (runner.worldOffset * 0.15) % 200;
+    gCtx.fillStyle = 'rgba(124,111,242,0.20)';
+    for (let x = -distant; x < GW; x += 200) {
       gCtx.beginPath();
-      gCtx.moveTo(x, GROUND_Y + 8);
-      gCtx.lineTo(x + 5, GROUND_Y + 2);
-      gCtx.lineTo(x + 10, GROUND_Y + 8);
+      gCtx.moveTo(x, 260);
+      gCtx.lineTo(x + 100, 180);
+      gCtx.lineTo(x + 200, 260);
+      gCtx.closePath();
       gCtx.fill();
     }
   }
 
+  function drawTerrain() {
+    // ぬり色（地面 + 土）
+    gCtx.beginPath();
+    let started = false;
+    for (const seg of runner.terrain) {
+      const xL = seg.xStart - runner.worldOffset;
+      const xR = seg.xEnd - runner.worldOffset;
+      if (xR < -10 || xL > GW + 10) continue;
+      if (seg.gap) {
+        // ギャップ: パスを一旦下ろす
+        if (started) {
+          gCtx.lineTo(xL, GH);
+          gCtx.lineTo(xL, GH);
+        }
+        gCtx.moveTo(xR, GH);
+        started = false;
+      } else {
+        if (!started) {
+          gCtx.moveTo(xL, GH);
+          gCtx.lineTo(xL, seg.yL);
+          started = true;
+        } else {
+          gCtx.lineTo(xL, seg.yL);
+        }
+        gCtx.lineTo(xR, seg.yR);
+      }
+    }
+    if (started) gCtx.lineTo(GW + 20, GH);
+    // 土のグラデ
+    const g = gCtx.createLinearGradient(0, BASE_GROUND_Y, 0, GH);
+    g.addColorStop(0, '#4CD4B0');
+    g.addColorStop(0.15, '#3BA88A');
+    g.addColorStop(0.15, '#B98554');
+    g.addColorStop(1, '#8B6238');
+    gCtx.fillStyle = g;
+    gCtx.fill();
+
+    // 地面の輪郭（草ライン）
+    gCtx.strokeStyle = '#2C8265';
+    gCtx.lineWidth = 3;
+    gCtx.beginPath();
+    let inSegment = false;
+    for (const seg of runner.terrain) {
+      const xL = seg.xStart - runner.worldOffset;
+      const xR = seg.xEnd - runner.worldOffset;
+      if (xR < -10 || xL > GW + 10) continue;
+      if (seg.gap) {
+        inSegment = false;
+        continue;
+      }
+      if (!inSegment) { gCtx.moveTo(xL, seg.yL); inSegment = true; }
+      else gCtx.lineTo(xL, seg.yL);
+      gCtx.lineTo(xR, seg.yR);
+    }
+    gCtx.stroke();
+  }
+
   function drawRunnerPlayer() {
     const p = runner.player;
+    const playerWX = PLAYER_X + runner.worldOffset;
+    const s = slopeAt(playerWX);
+    const tilt = p.onGround ? Math.atan(s) * 0.9 : p.vy * 0.02;
+    const bounce = p.onGround ? Math.sin(runner.frame * 0.4) * 2 : 0;
     if (p.img) {
       const iw = p.img.width, ih = p.img.height;
       const fit = Math.min(PLAYER_SIZE / iw, PLAYER_SIZE / ih);
       const w = iw * fit, h = ih * fit;
-      const bounce = p.onGround ? Math.sin(runner.frame * 0.4) * 2 : 0;
-      gCtx.drawImage(p.img, p.x + (PLAYER_SIZE - w) / 2, p.y + (PLAYER_SIZE - h) / 2 + bounce, w, h);
+      gCtx.save();
+      gCtx.translate(PLAYER_X + PLAYER_SIZE / 2, p.y + PLAYER_SIZE / 2 + bounce);
+      gCtx.rotate(tilt);
+      gCtx.drawImage(p.img, -w / 2, -h / 2, w, h);
+      gCtx.restore();
     } else {
       gCtx.fillStyle = '#7C6FF2';
       gCtx.beginPath();
-      gCtx.arc(p.x + PLAYER_SIZE / 2, p.y + PLAYER_SIZE / 2, PLAYER_SIZE / 2 - 4, 0, Math.PI * 2);
+      gCtx.arc(PLAYER_X + PLAYER_SIZE / 2, p.y + PLAYER_SIZE / 2, PLAYER_SIZE / 2 - 4, 0, Math.PI * 2);
       gCtx.fill();
     }
   }
@@ -2085,12 +2378,38 @@
     gCtx.textAlign = 'center';
     gCtx.textBaseline = 'bottom';
     runner.obstacles.forEach(o => {
-      gCtx.fillText(o.emoji, o.x + o.w / 2, GROUND_Y + 4);
+      const sx = o.worldX - runner.worldOffset;
+      if (sx < -60 || sx > GW + 20) return;
+      const gy = groundYAt(o.worldX + o.w / 2);
+      if (gy === null) return;
+      gCtx.fillText(o.emoji, sx + o.w / 2, gy + 4);
+    });
+  }
+
+  function drawRunnerCoins() {
+    runner.coins.forEach(c => {
+      if (c.collected) return;
+      const sx = c.worldX - runner.worldOffset;
+      if (sx < -20 || sx > GW + 20) return;
+      const wobble = Math.sin(runner.frame * 0.15 + c.worldX * 0.01) * 3;
+      gCtx.fillStyle = '#FFC93C';
+      gCtx.beginPath();
+      gCtx.arc(sx, c.y + wobble, 12, 0, Math.PI * 2);
+      gCtx.fill();
+      gCtx.strokeStyle = '#B8851E';
+      gCtx.lineWidth = 2;
+      gCtx.stroke();
+      gCtx.fillStyle = '#B8851E';
+      gCtx.font = '700 14px "Baloo 2",sans-serif';
+      gCtx.textAlign = 'center';
+      gCtx.textBaseline = 'middle';
+      gCtx.fillText('★', sx, c.y + wobble);
     });
   }
 
   function drawRunnerIdle() {
-    drawRunnerBg();
+    drawRunnerSky();
+    drawTerrain();
     drawRunnerPlayer();
     gCtx.fillStyle = 'rgba(46,42,71,0.75)';
     gCtx.font = '700 18px Nunito, sans-serif';
@@ -2102,44 +2421,7 @@
     }
   }
 
-  // 音（両ゲーム共用）
-  let audioCtx = null;
-  function beep(freq, duration, type = 'sine', volume = 0.15) {
-    try {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain); gain.connect(audioCtx.destination);
-      osc.type = type;
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(volume, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-      osc.start();
-      osc.stop(audioCtx.currentTime + duration);
-    } catch (e) { /* ignore */ }
-  }
-  function beepAt(freq, whenSec, duration, type = 'sine', volume = 0.15) {
-    try {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain); gain.connect(audioCtx.destination);
-      osc.type = type;
-      osc.frequency.value = freq;
-      const startAt = audioCtx.currentTime + whenSec;
-      gain.gain.setValueAtTime(volume, startAt);
-      gain.gain.exponentialRampToValueAtTime(0.001, startAt + duration);
-      osc.start(startAt);
-      osc.stop(startAt + duration + 0.02);
-    } catch (e) { /* ignore */ }
-  }
-  const soundJump = () => beep(660, 0.15, 'square', 0.1);
-  const soundStart = () => beep(880, 0.1, 'sine', 0.12);
-  const soundGameOver = () => { beep(300, 0.2, 'sawtooth', 0.15); setTimeout(() => beep(180, 0.4, 'sawtooth', 0.15), 180); };
-  const soundGood = () => beep(880, 0.08, 'triangle', 0.14);
-  const soundPerfect = () => { beep(1200, 0.08, 'triangle', 0.16); setTimeout(() => beep(1600, 0.08, 'triangle', 0.14), 60); };
-  const soundMiss = () => beep(200, 0.1, 'sawtooth', 0.1);
-
+  // ---- 入力 ----
   function tryJump() {
     if (runner.state !== 'playing') return;
     if (runner.player.onGround) {
@@ -2156,75 +2438,147 @@
   document.addEventListener('keydown', (e) => {
     const gameScreen = document.getElementById('screen-game');
     if (!gameScreen.classList.contains('active')) return;
-    if (e.code === 'Space') {
+    const runnerActive = document.getElementById('game-runner').classList.contains('active');
+    if (e.code === 'Space' && runnerActive) {
       e.preventDefault();
-      const runnerActive = document.getElementById('game-runner').classList.contains('active');
-      if (runnerActive) tryJump();
-      else rhythmTap();
+      tryJump();
     }
   });
 
+  // ---- 障害物 & コイン ----
   const OBSTACLE_PRESETS = [
     { emoji: '🌵', w: 42, h: 60 },
     { emoji: '🪨', w: 46, h: 40 },
-    { emoji: '🍄', w: 42, h: 50 }
+    { emoji: '🍄', w: 42, h: 50 },
+    { emoji: '🌷', w: 40, h: 50 }
   ];
-  function spawnObstacle() {
+  function spawnObstacleWorld() {
+    const targetWorldX = runner.worldOffset + GW + 60;
+    // 落とし穴の上には置かない
+    if (groundYAt(targetWorldX) === null) return;
     const preset = OBSTACLE_PRESETS[Math.floor(Math.random() * OBSTACLE_PRESETS.length)];
-    runner.obstacles.push({ x: GW + 10, w: preset.w, h: preset.h, emoji: preset.emoji });
+    runner.obstacles.push({ worldX: targetWorldX, w: preset.w, h: preset.h, emoji: preset.emoji });
+  }
+  function spawnCoinWorld() {
+    const targetWorldX = runner.worldOffset + GW + 40 + Math.random() * 100;
+    const gy = groundYAt(targetWorldX);
+    if (gy === null) return;
+    // 少し浮かせる（ジャンプで取る）
+    runner.coins.push({ worldX: targetWorldX, y: gy - 60 - Math.random() * 60, collected: false });
   }
 
   function runnerCollides() {
     const p = runner.player;
-    const pad = 14; // ちょっと甘めの判定
-    const px1 = p.x + pad, px2 = p.x + PLAYER_SIZE - pad;
+    const pWX = PLAYER_X + runner.worldOffset;
+    const pad = 14;
+    const px1 = pWX + pad, px2 = pWX + PLAYER_SIZE - pad;
     const py1 = p.y + pad, py2 = p.y + PLAYER_SIZE - pad;
     for (const o of runner.obstacles) {
-      const ox1 = o.x + 6, ox2 = o.x + o.w - 6;
-      const oy1 = GROUND_Y - o.h + 10, oy2 = GROUND_Y - 4;
+      const gy = groundYAt(o.worldX + o.w / 2);
+      if (gy === null) continue;
+      const ox1 = o.worldX + 6, ox2 = o.worldX + o.w - 6;
+      const oy1 = gy - o.h + 10, oy2 = gy - 4;
       if (px1 < ox2 && px2 > ox1 && py1 < oy2 && py2 > oy1) return true;
     }
     return false;
   }
 
+  function checkCoinPickup() {
+    const p = runner.player;
+    const pWX = PLAYER_X + runner.worldOffset;
+    const pcx = pWX + PLAYER_SIZE / 2, pcy = p.y + PLAYER_SIZE / 2;
+    for (const c of runner.coins) {
+      if (c.collected) continue;
+      if (Math.hypot(c.worldX - pcx, c.y - pcy) < PLAYER_SIZE / 2 + 12) {
+        c.collected = true;
+        runner.coinCount++;
+        runner.score += 10;
+        beep(1200, 0.08, 'triangle', 0.14);
+      }
+    }
+  }
+
+  // ---- ゲームループ ----
   function runnerTick() {
     runner.frame++;
     const p = runner.player;
+    const playerWX = PLAYER_X + runner.worldOffset;
+
+    // 豆腐スライド: 坂で速度が変わる
+    const s = slopeAt(playerWX);
+    let effective = runner.scrollSpeed;
+    if (p.onGround) {
+      // 下り坂 s>0 で加速、上り坂 s<0 で減速
+      effective += s * 18;
+      effective = Math.max(runner.scrollSpeed * 0.55, Math.min(runner.scrollSpeed * 2.2, effective));
+    }
+    runner.worldOffset += effective;
+
+    // 物理
     p.vy += GRAVITY;
     p.y += p.vy;
-    if (p.y >= GROUND_Y - PLAYER_SIZE) {
-      p.y = GROUND_Y - PLAYER_SIZE; p.vy = 0; p.onGround = true;
+    const gy = groundYAt(playerWX);
+    p.onGround = false;
+    if (gy !== null) {
+      if (p.y + PLAYER_SIZE >= gy) {
+        p.y = gy - PLAYER_SIZE;
+        p.vy = Math.max(0, p.vy); // 地面で下方向速度リセット
+        p.onGround = true;
+      }
     }
+    // 落下死
+    if (p.y > GH + 60) { endRunner(); return; }
+
+    // 地形を必要に応じて拡張
+    extendTerrain();
+
+    // 雲
     runner.clouds.forEach(c => {
       c.x -= c.speed;
-      if (c.x < -40) { c.x = GW + 20; c.y = 40 + Math.random() * 120; }
+      if (c.x < -40) { c.x = GW + 20; c.y = 30 + Math.random() * 130; }
     });
-    runner.obstacles.forEach(o => o.x -= runner.scrollSpeed);
-    runner.obstacles = runner.obstacles.filter(o => o.x + o.w > -10);
 
+    // 障害物&コイン掃除
+    runner.obstacles = runner.obstacles.filter(o => o.worldX + o.w > runner.worldOffset - 20);
+    runner.coins = runner.coins.filter(c => c.worldX > runner.worldOffset - 20);
+
+    // スポーン
     runner.spawnTimer++;
     if (runner.spawnTimer >= runner.spawnInterval) {
-      spawnObstacle();
+      spawnObstacleWorld();
       runner.spawnTimer = 0;
-      // やさしめ:間隔を広めに
-      runner.spawnInterval = 110 + Math.floor(Math.random() * 60);
+      runner.spawnInterval = 110 + Math.floor(Math.random() * 70);
+    }
+    runner.coinTimer++;
+    if (runner.coinTimer >= runner.coinInterval) {
+      spawnCoinWorld();
+      runner.coinTimer = 0;
+      runner.coinInterval = 70 + Math.floor(Math.random() * 60);
     }
 
-    runner.score = Math.floor(runner.frame / 6);
+    // スコア: 距離 + コインボーナス
+    runner.score = Math.floor(runner.worldOffset / 20) + runner.coinCount * 10;
     scoreValue.textContent = runner.score;
-    // やさしめ:200mごと、上限も控えめ
-    runner.scrollSpeed = 3.5 + Math.min(3.5, Math.floor(runner.score / 200));
+    runner.scrollSpeed = 3.5 + Math.min(3.5, Math.floor(runner.score / 250));
 
-    drawRunnerBg();
+    // 描画
+    drawRunnerSky();
+    drawTerrain();
     drawRunnerObstacles();
+    drawRunnerCoins();
     drawRunnerPlayer();
 
-    gCtx.fillStyle = 'rgba(46,42,71,0.8)';
+    // HUD
+    gCtx.fillStyle = 'rgba(46,42,71,0.85)';
     gCtx.font = '800 22px "Baloo 2", sans-serif';
     gCtx.textAlign = 'right';
     gCtx.textBaseline = 'top';
     gCtx.fillText(`${runner.score} m`, GW - 14, 14);
+    gCtx.textAlign = 'left';
+    gCtx.fillStyle = 'rgba(184,133,30,0.9)';
+    gCtx.fillText(`★ ${runner.coinCount}`, 14, 14);
 
+    checkCoinPickup();
     if (runnerCollides()) { endRunner(); return; }
     runner.raf = requestAnimationFrame(runnerTick);
   }
@@ -2237,14 +2591,17 @@
   function startRunner() {
     if (!runner.player.img) { showToast('さきに あばたー を えらんでね！'); return; }
     runner.state = 'playing';
-    runner.player.y = GROUND_Y - PLAYER_SIZE;
+    runner.player.y = BASE_GROUND_Y - PLAYER_SIZE;
     runner.player.vy = 0; runner.player.onGround = true;
     runner.obstacles = [];
+    runner.coins = [];
+    runner.worldOffset = 0;
     runner.scrollSpeed = 3.5;
-    runner.spawnTimer = 0;
-    runner.spawnInterval = 130;
-    runner.score = 0; runner.frame = 0;
+    runner.spawnTimer = 0; runner.spawnInterval = 140;
+    runner.coinTimer = 0; runner.coinInterval = 90;
+    runner.score = 0; runner.coinCount = 0; runner.frame = 0;
     scoreValue.textContent = 0;
+    initRunnerTerrain();
     gameOverlay.classList.remove('show');
     soundStart();
     stopRunnerLoop();
@@ -2264,12 +2621,12 @@
     }
     overlayTitle.textContent = isNewBest ? '🎉 ハイスコア！' : '💥 ゲームオーバー';
     finalScoreEl.textContent = `${runner.score} m`;
-    bestScoreLabel.textContent = `ベスト: ${runner.bestScore} m`;
+    bestScoreLabel.textContent = `ベスト: ${runner.bestScore} m ／ ★ ${runner.coinCount}`;
     overlayBtn.textContent = '🔁 もういちど';
     runnerLeaderboard.innerHTML = '';
     gameOverlay.classList.add('show');
-    // Firestoreに保存＆リーダーボード更新
     await saveScore('runner', runner.player.avatarId, runner.score);
+    await checkRewards({ game: 'runner', score: runner.score, coinCount: runner.coinCount, maxCombo: 0, fullCombo: false });
     const top = await fetchTopScores('runner', 3);
     renderLeaderboard(runnerLeaderboard, top, ' m');
   }
@@ -2284,7 +2641,7 @@
   drawRunnerIdle();
 
   // ================================================================
-  // 🎵 リズム ダンス（3レーン + ロングノート + 複数曲）
+  // 🎵 リズム ダンス（3レーン + ロングノート + 複数曲 + ダンス演出）
   // ================================================================
   const rhythmCanvas = document.getElementById('rhythmCanvas');
   const rCtx = rhythmCanvas.getContext('2d');
@@ -2411,6 +2768,66 @@
         { b: 49, lane: 0, f: 262 }, { b: 50, lane: 0, f: 262 },
         { b: 51, lane: 0, f: 262 }, { b: 52, lane: 0, f: 262, dur: 5 }
       ]
+    },
+    {
+      name: '🐑 メリーさんのひつじ',
+      difficulty: 'かんたん',
+      beatSec: 0.50,
+      notes: [
+        // Me ri sa n no (E D C D)
+        { b: 2, lane: 1, f: 330 }, { b: 3, lane: 0, f: 294 },
+        { b: 4, lane: 0, f: 262 }, { b: 5, lane: 0, f: 294 },
+        // Hi tsu ji (E E E-)
+        { b: 6, lane: 1, f: 330 }, { b: 7, lane: 1, f: 330 },
+        { b: 8, lane: 1, f: 330, dur: 2 },
+        // (D D D-)
+        { b: 11, lane: 0, f: 294 }, { b: 12, lane: 0, f: 294 },
+        { b: 13, lane: 0, f: 294, dur: 2 },
+        // (E G G-)
+        { b: 16, lane: 1, f: 330 }, { b: 17, lane: 2, f: 392 },
+        { b: 18, lane: 2, f: 392, dur: 2 },
+        // Me ri sa n no hi tsu ji
+        { b: 21, lane: 1, f: 330 }, { b: 22, lane: 0, f: 294 },
+        { b: 23, lane: 0, f: 262 }, { b: 24, lane: 0, f: 294 },
+        { b: 25, lane: 1, f: 330 }, { b: 26, lane: 1, f: 330 },
+        { b: 27, lane: 1, f: 330 }, { b: 28, lane: 1, f: 330 },
+        // ka wa i i na (D D E D C-)
+        { b: 29, lane: 0, f: 294 }, { b: 30, lane: 0, f: 294 },
+        { b: 31, lane: 1, f: 330 }, { b: 32, lane: 0, f: 294 },
+        { b: 33, lane: 0, f: 262, dur: 4 },
+        // Repeat once more
+        { b: 38, lane: 1, f: 330 }, { b: 39, lane: 0, f: 294 },
+        { b: 40, lane: 0, f: 262 }, { b: 41, lane: 0, f: 294 },
+        { b: 42, lane: 1, f: 330 }, { b: 43, lane: 1, f: 330 },
+        { b: 44, lane: 1, f: 330, dur: 2 },
+        { b: 47, lane: 0, f: 294 }, { b: 48, lane: 0, f: 294 },
+        { b: 49, lane: 1, f: 330 }, { b: 50, lane: 0, f: 294 },
+        { b: 51, lane: 0, f: 262, dur: 4 }
+      ]
+    },
+    {
+      name: '🎂 ハッピーバースデー',
+      difficulty: 'ふつう',
+      beatSec: 0.48,
+      notes: [
+        // Ha p py birth day to you (C C D C F E)
+        { b: 2, lane: 0, f: 262 }, { b: 2.75, lane: 0, f: 262 },
+        { b: 4, lane: 0, f: 294 }, { b: 6, lane: 0, f: 262 },
+        { b: 8, lane: 1, f: 349 }, { b: 10, lane: 1, f: 330, dur: 2 },
+        // Ha p py birth day to you (C C D C G F)
+        { b: 14, lane: 0, f: 262 }, { b: 14.75, lane: 0, f: 262 },
+        { b: 16, lane: 0, f: 294 }, { b: 18, lane: 0, f: 262 },
+        { b: 20, lane: 2, f: 392 }, { b: 22, lane: 1, f: 349, dur: 2 },
+        // Ha p py birth day dear (C C C' A F E D)
+        { b: 26, lane: 0, f: 262 }, { b: 26.75, lane: 0, f: 262 },
+        { b: 28, lane: 2, f: 523 }, { b: 30, lane: 2, f: 440 },
+        { b: 32, lane: 1, f: 349 }, { b: 33, lane: 1, f: 330 },
+        { b: 34, lane: 0, f: 294, dur: 2 },
+        // Ha p py birth day to you (Bb Bb A F G F)
+        { b: 38, lane: 2, f: 466 }, { b: 38.75, lane: 2, f: 466 },
+        { b: 40, lane: 2, f: 440 }, { b: 42, lane: 1, f: 349 },
+        { b: 44, lane: 2, f: 392 }, { b: 46, lane: 1, f: 349, dur: 4 }
+      ]
     }
   ];
 
@@ -2443,6 +2860,8 @@
     lastJudgmentAt: 0,
     lastJudgmentLane: -1,
     hitFlashes: [], // {lane, at, type}
+    sparkles: [],
+    pose: { jumpUntil: 0, auraLevel: 0 },
     raf: null
   };
 
@@ -2536,27 +2955,121 @@
 
   function drawRhythmAvatar() {
     if (!rhythm.img) return;
-    const size = 100;
+    const size = 110;
     const iw = rhythm.img.width, ih = rhythm.img.height;
     const fit = Math.min(size / iw, size / ih);
-    const w = iw * fit, h = ih * fit;
-    const t = performance.now() * 0.001;
+    let w = iw * fit, h = ih * fit;
+    const now = performance.now();
+    const t = now * 0.001;
+
     // 曲テンポに合わせて弾む
     const beatSec = SONGS[rhythm.songIndex].beatSec;
     const beatPhase = (t / beatSec) * Math.PI;
-    const bounce = Math.abs(Math.sin(beatPhase)) * 8;
-    const tilt = Math.sin(t * 4) * 0.08;
-    const cx = RW / 2, cy = RH - 60 - bounce;
+    const bounce = Math.abs(Math.sin(beatPhase)) * 10;
+
+    // Perfect ヒット時のジャンプ演出
+    const jumpProgress = Math.max(0, (rhythm.pose.jumpUntil - now) / 260);
+    const jumpBoost = Math.sin(jumpProgress * Math.PI) * 26;
+    const scaleBoost = 1 + Math.sin(jumpProgress * Math.PI) * 0.18;
+    w *= scaleBoost; h *= scaleBoost;
+
+    // ダンスの傾き（ステップに合わせて左右）
+    const stepPhase = Math.floor(t / beatSec) % 2 === 0 ? 1 : -1;
+    const beatFraction = ((t / beatSec) % 1);
+    const stepTilt = Math.sin(beatFraction * Math.PI) * 0.12 * stepPhase;
+    const stepShift = Math.sin(beatFraction * Math.PI) * 8 * stepPhase;
+
+    const cx = RW / 2 + stepShift, cy = RH - 65 - bounce - jumpBoost;
+
+    // オーラ（コンボ 8+ で光る）
+    if (rhythm.pose.auraLevel > 0) {
+      const auraRadius = 65 + Math.sin(t * 4) * 6;
+      const hue = (t * 60) % 360;
+      const grad = rCtx.createRadialGradient(cx, cy, 20, cx, cy, auraRadius);
+      if (rhythm.pose.auraLevel >= 2) {
+        // レインボー
+        grad.addColorStop(0, `hsla(${hue}, 90%, 65%, 0.6)`);
+        grad.addColorStop(1, `hsla(${(hue + 60) % 360}, 90%, 65%, 0)`);
+      } else {
+        grad.addColorStop(0, 'rgba(255,201,60,0.55)');
+        grad.addColorStop(1, 'rgba(255,201,60,0)');
+      }
+      rCtx.fillStyle = grad;
+      rCtx.beginPath();
+      rCtx.arc(cx, cy, auraRadius, 0, Math.PI * 2);
+      rCtx.fill();
+    }
+
+    // 影
+    rCtx.fillStyle = 'rgba(46,42,71,0.18)';
+    rCtx.beginPath();
+    rCtx.ellipse(RW / 2, RH - 12, w * 0.42, 6, 0, 0, Math.PI * 2);
+    rCtx.fill();
+
+    // アバター
     rCtx.save();
     rCtx.translate(cx, cy);
-    rCtx.rotate(tilt);
+    rCtx.rotate(stepTilt);
     rCtx.drawImage(rhythm.img, -w / 2, -h / 2, w, h);
     rCtx.restore();
-    // 影
-    rCtx.fillStyle = 'rgba(46,42,71,0.15)';
-    rCtx.beginPath();
-    rCtx.ellipse(cx, RH - 12, w * 0.4, 5, 0, 0, Math.PI * 2);
-    rCtx.fill();
+
+    // キラキラ パーティクル
+    rhythm.sparkles.forEach(s => {
+      const alpha = s.life;
+      const size2 = 3 + s.life * 3;
+      rCtx.fillStyle = s.color;
+      rCtx.globalAlpha = alpha;
+      rCtx.beginPath();
+      rCtx.arc(s.x, s.y, size2, 0, Math.PI * 2);
+      rCtx.fill();
+      // 十字きらめき
+      rCtx.strokeStyle = s.color;
+      rCtx.lineWidth = 1;
+      rCtx.beginPath();
+      rCtx.moveTo(s.x - size2 * 1.6, s.y); rCtx.lineTo(s.x + size2 * 1.6, s.y);
+      rCtx.moveTo(s.x, s.y - size2 * 1.6); rCtx.lineTo(s.x, s.y + size2 * 1.6);
+      rCtx.stroke();
+    });
+    rCtx.globalAlpha = 1;
+  }
+
+  function spawnSparkles(x, y, count, color) {
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1 + Math.random() * 3;
+      rhythm.sparkles.push({
+        x: x + (Math.random() - 0.5) * 20,
+        y: y + (Math.random() - 0.5) * 20,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1,
+        life: 1.0,
+        color: color || ['#FF6B9D', '#FFC93C', '#4CD4B0', '#7C6FF2'][Math.floor(Math.random() * 4)]
+      });
+    }
+  }
+
+  function updateSparkles() {
+    rhythm.sparkles.forEach(s => {
+      s.x += s.vx;
+      s.y += s.vy;
+      s.vy += 0.13;
+      s.life -= 0.025;
+    });
+    rhythm.sparkles = rhythm.sparkles.filter(s => s.life > 0);
+  }
+
+  function triggerDance(judge, lane) {
+    const now = performance.now();
+    if (judge === 'Perfect') {
+      rhythm.pose.jumpUntil = now + 260;
+      spawnSparkles(RW / 2, RH - 80, 14, LANE_COLORS[lane]);
+    } else if (judge === 'Good') {
+      rhythm.pose.jumpUntil = Math.max(rhythm.pose.jumpUntil, now + 140);
+      spawnSparkles(RW / 2, RH - 90, 5, LANE_COLORS[lane]);
+    }
+    if (rhythm.combo >= 20) rhythm.pose.auraLevel = 2;
+    else if (rhythm.combo >= 8) rhythm.pose.auraLevel = 1;
+    else rhythm.pose.auraLevel = 0;
   }
 
   function drawNote(note, i, currentTime) {
@@ -2736,6 +3249,7 @@
     rhythm.lastJudgment = judge;
     rhythm.lastJudgmentAt = performance.now() * 0.001;
     rhythm.hitFlashes.push({ lane, at: performance.now() * 0.001, type: judge });
+    triggerDance(judge, lane);
     updateJudgmentUI(judge === 'Perfect' ? '⭐ Perfect!' : judge === 'Good' ? '👍 Good' : '💦 Miss');
 
     if (note.dur > 0 && judge !== 'Miss') {
@@ -2785,6 +3299,7 @@
     rhythm.lastJudgmentAt = performance.now() * 0.001;
     rhythm.lastJudgmentLane = lane;
     rhythm.hitFlashes.push({ lane, at: performance.now() * 0.001, type: judge });
+    triggerDance(judge, lane);
     updateJudgmentUI(judge === 'Perfect' ? '⭐ Perfect!' : judge === 'Good' ? '👍 Good' : '💦 Miss');
     note.taken = true;
     rhythm.laneHeld[lane] = null;
@@ -2884,6 +3399,7 @@
     }
 
     drawRhythmBg(elapsed);
+    updateSparkles();
     drawRhythmAvatar();
     rhythm.notes.forEach((n, i) => drawNote(n, i, elapsed));
     drawHitFlashes();
@@ -2919,6 +3435,8 @@
     rhythm.laneHeld = [null, null, null];
     rhythm.lanePressed = [false, false, false];
     rhythm.hitFlashes = [];
+    rhythm.sparkles = [];
+    rhythm.pose = { jumpUntil: 0, auraLevel: 0 };
     rhythm.lastJudgment = '';
     rhythmScoreValue.textContent = 0;
     rhythmComboValue.textContent = 0;
@@ -2959,6 +3477,13 @@
     rhythmLeaderboardEl.innerHTML = '';
     rhythmOverlay.classList.add('show');
     await saveScore(`rhythm_${rhythm.songIndex}`, rhythm.avatarId, rhythm.score);
+    await checkRewards({
+      game: `rhythm_${rhythm.songIndex}`,
+      score: rhythm.score,
+      maxCombo: rhythm.maxCombo,
+      fullCombo: isFullCombo,
+      coinCount: 0
+    });
     const top = await fetchTopScores(`rhythm_${rhythm.songIndex}`, 3);
     renderLeaderboard(rhythmLeaderboardEl, top, ' てん');
     renderSongPicker(); // ベスト表示を更新
