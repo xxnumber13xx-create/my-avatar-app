@@ -2261,6 +2261,44 @@
   initRunnerClouds();
   initRunnerTerrain();
 
+  // 音（両ゲーム共用）
+  let audioCtx = null;
+  function beep(freq, duration, type = 'sine', volume = 0.15) {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    } catch (e) { /* ignore */ }
+  }
+  function beepAt(freq, whenSec, duration, type = 'sine', volume = 0.15) {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.type = type;
+      osc.frequency.value = freq;
+      const startAt = audioCtx.currentTime + whenSec;
+      gain.gain.setValueAtTime(volume, startAt);
+      gain.gain.exponentialRampToValueAtTime(0.001, startAt + duration);
+      osc.start(startAt);
+      osc.stop(startAt + duration + 0.02);
+    } catch (e) { /* ignore */ }
+  }
+  const soundJump = () => beep(660, 0.15, 'square', 0.1);
+  const soundStart = () => beep(880, 0.1, 'sine', 0.12);
+  const soundGameOver = () => { beep(300, 0.2, 'sawtooth', 0.15); setTimeout(() => beep(180, 0.4, 'sawtooth', 0.15), 180); };
+  const soundGood = () => beep(880, 0.08, 'triangle', 0.14);
+  const soundPerfect = () => { beep(1200, 0.08, 'triangle', 0.16); setTimeout(() => beep(1600, 0.08, 'triangle', 0.14), 60); };
+  const soundMiss = () => beep(200, 0.1, 'sawtooth', 0.1);
+
   // ---- 描画 ----
   function drawRunnerSky() {
     gCtx.clearRect(0, 0, GW, GH);
