@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" class="app-fullscreen">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -9,10 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/shared/styles.css">
 <style>
-  html, body { height: 100%; margin: 0; overflow: hidden; overscroll-behavior: none; touch-action: none; }
-  body {
-    display: flex;
-    flex-direction: column;
+  /* 高さ・スクロール制御は shared/styles.css の .app-fullscreen クラス */
+  body.app-fullscreen {
     background:
       radial-gradient(circle at 20% 0%, #FFE9C7, transparent 30%),
       radial-gradient(circle at 90% 100%, #DDEEFF, transparent 40%),
@@ -43,7 +41,8 @@
   .side-panel {
     background: rgba(255,255,255,0.95);
     border-right: 2px solid #EDE9FF;
-    padding: 12px; overflow-y: auto;
+    padding: 12px 12px calc(24px + env(safe-area-inset-bottom, 0));
+    overflow-y: auto;
     display: flex; flex-direction: column; gap: 10px;
     min-height: 0;
   }
@@ -138,7 +137,8 @@
   .draw-dock {
     flex: 0 0 auto;
     background: #fff; border-top: 2px solid #EDE9FF;
-    padding: 8px 14px; display: flex; align-items: center; gap: 12px;
+    padding: 8px 14px calc(8px + env(safe-area-inset-bottom, 0));
+    display: flex; align-items: center; gap: 12px;
     flex-wrap: wrap; z-index: 5;
   }
   .dock-slider {
@@ -203,7 +203,7 @@
     .side-panel.open { transform: translateX(0); }
     .panel-toggle { display: flex; }
     .panel-close { display: flex; }
-    .draw-dock { padding: 6px 8px; gap: 6px; }
+    .draw-dock { padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0)); gap: 6px; }
     .dock-slider { min-width: 120px; }
     .dock-btn { width: 36px; height: 36px; font-size: 15px; }
   }
@@ -226,7 +226,7 @@
   }
 </style>
 </head>
-<body>
+<body class="app-fullscreen">
 
 <header class="draw-header">
   <a href="/index.html" class="back-link">← もどる</a>
