@@ -252,3 +252,243 @@ export const MAKEUP_COLORS = {
   highlight: ['#FFFAF0', '#FFFDE4', '#FFF0E8', '#F5EEDF', '#FFE4A0'],
   paint: ['#FFC93C', '#FF6B9D', '#FF9EBB', '#7C6FF2', '#4CD4B0', '#5AB8FF', '#FFA34D', '#B77FE0']
 };
+
+// ============================================================
+// 家具ライブラリ（お部屋画面 room.html 用）
+// ============================================================
+// 2.5Dアイソメトリック風の家具SVG群。
+// 各アイテムは正面〜3/4視点で描画し、床タイル上に置かれる。
+//
+//   footprintW / footprintD: 占有タイル数（幅・奥行）
+//   imgWidth / imgHeight:    SVGの表示サイズ（px）
+//   anchorX / anchorY:       SVG内で「床タイル中心に着地する点」の座標（画像内座標）
+//   wall:                    true なら壁面に貼るタイプ（壁飾り・窓）
+//
+// TILE_W=64, TILE_H=32 のアイソメ座標系を想定。
+// 1タイルの床は、菱形として画面座標で幅64px高32pxに描画される。
+
+export const FURNITURE_LIBRARY = {
+  bed: [
+    { label: 'ふつう', footprintW: 2, footprintD: 2, imgWidth: 140, imgHeight: 110, anchorX: 70, anchorY: 100,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="110" viewBox="0 0 140 110">
+        <ellipse cx="70" cy="102" rx="60" ry="6" fill="rgba(0,0,0,0.18)"/>
+        <path d="M 15 78 L 70 62 L 125 78 L 125 92 L 70 108 L 15 92 Z" fill="#8B6B4A" stroke="#2E2A47" stroke-width="1.5"/>
+        <path d="M 15 68 L 70 52 L 125 68 L 125 78 L 70 62 L 15 78 Z" fill="#F5E6D3" stroke="#2E2A47" stroke-width="1.5"/>
+        <ellipse cx="35" cy="63" rx="16" ry="6" fill="#FFC5D8" stroke="#2E2A47" stroke-width="1.2"/>
+        <path d="M 55 59 L 90 50 L 125 62 L 125 74 L 90 66 L 55 65 Z" fill="#B77FE0" stroke="#2E2A47" stroke-width="1.2"/>
+      </svg>` },
+    { label: 'ダブル', footprintW: 3, footprintD: 2, imgWidth: 180, imgHeight: 115, anchorX: 90, anchorY: 105,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="115" viewBox="0 0 180 115">
+        <ellipse cx="90" cy="106" rx="78" ry="6" fill="rgba(0,0,0,0.18)"/>
+        <path d="M 12 78 L 90 60 L 168 78 L 168 92 L 90 110 L 12 92 Z" fill="#6B4E2E" stroke="#2E2A47" stroke-width="1.5"/>
+        <path d="M 12 66 L 90 48 L 168 66 L 168 78 L 90 60 L 12 78 Z" fill="#FFFAF0" stroke="#2E2A47" stroke-width="1.5"/>
+        <ellipse cx="34" cy="60" rx="14" ry="5" fill="#5AB8FF" stroke="#2E2A47" stroke-width="1"/>
+        <ellipse cx="60" cy="58" rx="14" ry="5" fill="#FFC5D8" stroke="#2E2A47" stroke-width="1"/>
+        <path d="M 78 57 L 130 48 L 168 62 L 168 74 L 130 62 L 78 62 Z" fill="#7C6FF2" stroke="#2E2A47" stroke-width="1.2"/>
+      </svg>` }
+  ],
+  desk: [
+    { label: 'つくえ', footprintW: 2, footprintD: 1, imgWidth: 130, imgHeight: 90, anchorX: 65, anchorY: 82,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="130" height="90" viewBox="0 0 130 90">
+        <ellipse cx="65" cy="82" rx="55" ry="5" fill="rgba(0,0,0,0.15)"/>
+        <path d="M 15 42 L 65 30 L 115 42 L 65 54 Z" fill="#B78C5A" stroke="#2E2A47" stroke-width="1.5"/>
+        <path d="M 15 42 L 15 50 L 65 62 L 65 54 Z" fill="#8B6B3F" stroke="#2E2A47" stroke-width="1.5"/>
+        <path d="M 115 42 L 115 50 L 65 62 L 65 54 Z" fill="#96774A" stroke="#2E2A47" stroke-width="1.5"/>
+        <rect x="18" y="52" width="4" height="28" fill="#8B6B3F" stroke="#2E2A47" stroke-width="1"/>
+        <rect x="60" y="60" width="4" height="20" fill="#8B6B3F" stroke="#2E2A47" stroke-width="1"/>
+        <rect x="108" y="52" width="4" height="28" fill="#8B6B3F" stroke="#2E2A47" stroke-width="1"/>
+      </svg>` },
+    { label: 'イス', footprintW: 1, footprintD: 1, imgWidth: 60, imgHeight: 90, anchorX: 30, anchorY: 82,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="90" viewBox="0 0 60 90">
+        <ellipse cx="30" cy="82" rx="22" ry="4" fill="rgba(0,0,0,0.15)"/>
+        <path d="M 8 50 L 30 44 L 52 50 L 30 56 Z" fill="#FF9EBB" stroke="#2E2A47" stroke-width="1.5"/>
+        <rect x="10" y="20" width="6" height="30" fill="#E14E7F" stroke="#2E2A47" stroke-width="1.5"/>
+        <rect x="44" y="20" width="6" height="30" fill="#E14E7F" stroke="#2E2A47" stroke-width="1.5"/>
+        <path d="M 10 20 L 16 20 L 44 20 L 50 20 L 44 26 L 16 26 Z" fill="#E14E7F" stroke="#2E2A47" stroke-width="1.5"/>
+        <rect x="10" y="55" width="4" height="25" fill="#8B6B3F" stroke="#2E2A47" stroke-width="1"/>
+        <rect x="46" y="55" width="4" height="25" fill="#8B6B3F" stroke="#2E2A47" stroke-width="1"/>
+      </svg>` }
+  ],
+  closet: [
+    { label: 'たんす', footprintW: 2, footprintD: 1, imgWidth: 120, imgHeight: 130, anchorX: 60, anchorY: 122,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="130" viewBox="0 0 120 130">
+        <ellipse cx="60" cy="122" rx="52" ry="5" fill="rgba(0,0,0,0.18)"/>
+        <path d="M 10 30 L 60 20 L 110 30 L 110 118 L 60 128 L 10 118 Z" fill="#96774A" stroke="#2E2A47" stroke-width="1.5"/>
+        <path d="M 60 20 L 60 128" stroke="#2E2A47" stroke-width="1"/>
+        <path d="M 60 20 L 110 30 L 110 118 L 60 128 Z" fill="#B78C5A" stroke="#2E2A47" stroke-width="1"/>
+        <rect x="18" y="40" width="34" height="20" fill="#B78C5A" stroke="#2E2A47" stroke-width="0.8" transform="skewY(11)"/>
+        <rect x="18" y="72" width="34" height="20" fill="#B78C5A" stroke="#2E2A47" stroke-width="0.8" transform="skewY(11)"/>
+        <circle cx="35" cy="52" r="2" fill="#FFC93C" transform="skewY(11)"/>
+        <circle cx="35" cy="84" r="2" fill="#FFC93C" transform="skewY(11)"/>
+      </svg>` },
+    { label: 'クローゼット', footprintW: 2, footprintD: 1, imgWidth: 130, imgHeight: 150, anchorX: 65, anchorY: 142,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="130" height="150" viewBox="0 0 130 150">
+        <ellipse cx="65" cy="142" rx="55" ry="5" fill="rgba(0,0,0,0.18)"/>
+        <path d="M 10 20 L 65 8 L 120 20 L 120 135 L 65 148 L 10 135 Z" fill="#7C6FF2" stroke="#2E2A47" stroke-width="1.5"/>
+        <path d="M 65 8 L 65 148" stroke="#2E2A47" stroke-width="1"/>
+        <path d="M 65 8 L 120 20 L 120 135 L 65 148 Z" fill="#9D91FF" stroke="#2E2A47" stroke-width="1"/>
+        <circle cx="55" cy="80" r="2.5" fill="#FFC93C"/>
+        <circle cx="76" cy="82" r="2.5" fill="#FFC93C"/>
+      </svg>` }
+  ],
+  sofa: [
+    { label: 'ソファ', footprintW: 3, footprintD: 1, imgWidth: 180, imgHeight: 90, anchorX: 90, anchorY: 82,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="90" viewBox="0 0 180 90">
+        <ellipse cx="90" cy="82" rx="80" ry="5" fill="rgba(0,0,0,0.18)"/>
+        <path d="M 15 55 L 90 42 L 165 55 L 165 76 L 90 90 L 15 76 Z" fill="#F296B5" stroke="#2E2A47" stroke-width="1.5"/>
+        <path d="M 15 55 L 15 30 L 90 20 L 165 30 L 165 55 L 90 42 Z" fill="#FFA5C2" stroke="#2E2A47" stroke-width="1.5"/>
+        <path d="M 15 30 L 15 55 L 30 60 L 30 34 Z" fill="#E14E7F" stroke="#2E2A47" stroke-width="1.2"/>
+        <path d="M 165 30 L 165 55 L 150 60 L 150 34 Z" fill="#E14E7F" stroke="#2E2A47" stroke-width="1.2"/>
+        <ellipse cx="55" cy="58" rx="10" ry="5" fill="#B77FE0" stroke="#2E2A47" stroke-width="1"/>
+        <ellipse cx="125" cy="58" rx="10" ry="5" fill="#7C6FF2" stroke="#2E2A47" stroke-width="1"/>
+      </svg>` }
+  ],
+  bookshelf: [
+    { label: 'ほんだな', footprintW: 2, footprintD: 1, imgWidth: 120, imgHeight: 140, anchorX: 60, anchorY: 132,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="140" viewBox="0 0 120 140">
+        <ellipse cx="60" cy="132" rx="52" ry="5" fill="rgba(0,0,0,0.18)"/>
+        <path d="M 10 25 L 60 15 L 110 25 L 110 125 L 60 137 L 10 125 Z" fill="#96774A" stroke="#2E2A47" stroke-width="1.5"/>
+        <path d="M 60 15 L 60 137" stroke="#2E2A47" stroke-width="1"/>
+        <path d="M 60 15 L 110 25 L 110 125 L 60 137 Z" fill="#7A5A38" stroke="#2E2A47" stroke-width="1"/>
+        <g transform="skewY(11)" stroke="#2E2A47" stroke-width="0.8">
+          <rect x="16" y="34" width="6" height="22" fill="#FF6B9D"/>
+          <rect x="24" y="34" width="6" height="22" fill="#5AB8FF"/>
+          <rect x="32" y="34" width="6" height="22" fill="#FFC93C"/>
+          <rect x="40" y="34" width="6" height="22" fill="#4CD4B0"/>
+          <rect x="16" y="60" width="6" height="22" fill="#B77FE0"/>
+          <rect x="24" y="60" width="6" height="22" fill="#FF9EBB"/>
+          <rect x="32" y="60" width="6" height="22" fill="#7C6FF2"/>
+          <rect x="40" y="60" width="6" height="22" fill="#FFA34D"/>
+          <rect x="16" y="86" width="6" height="22" fill="#4CD4B0"/>
+          <rect x="24" y="86" width="6" height="22" fill="#FF6B9D"/>
+          <rect x="32" y="86" width="6" height="22" fill="#5AB8FF"/>
+          <rect x="40" y="86" width="6" height="22" fill="#FFC93C"/>
+        </g>
+      </svg>` }
+  ],
+  rug: [
+    { label: 'まる ラグ', footprintW: 2, footprintD: 2, imgWidth: 140, imgHeight: 80, anchorX: 70, anchorY: 40, flat: true,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="80" viewBox="0 0 140 80">
+        <ellipse cx="70" cy="40" rx="65" ry="32" fill="#FF9EBB" stroke="#2E2A47" stroke-width="1.5"/>
+        <ellipse cx="70" cy="40" rx="50" ry="24" fill="#FFC5D8" stroke="#2E2A47" stroke-width="1" stroke-dasharray="4 3"/>
+        <ellipse cx="70" cy="40" rx="30" ry="15" fill="#FFB8D0" stroke="#2E2A47" stroke-width="1"/>
+        <circle cx="70" cy="40" r="6" fill="#E14E7F"/>
+      </svg>` },
+    { label: 'しかく ラグ', footprintW: 3, footprintD: 2, imgWidth: 200, imgHeight: 100, anchorX: 100, anchorY: 50, flat: true,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="100" viewBox="0 0 200 100">
+        <path d="M 100 8 L 192 50 L 100 92 L 8 50 Z" fill="#B77FE0" stroke="#2E2A47" stroke-width="1.5"/>
+        <path d="M 100 22 L 174 50 L 100 78 L 26 50 Z" fill="#D4B5F0" stroke="#2E2A47" stroke-width="1" stroke-dasharray="4 3"/>
+        <path d="M 100 40 L 138 50 L 100 60 L 62 50 Z" fill="#7C6FF2" stroke="#2E2A47" stroke-width="1"/>
+      </svg>` }
+  ],
+  lamp: [
+    { label: 'フロアランプ', footprintW: 1, footprintD: 1, imgWidth: 55, imgHeight: 130, anchorX: 28, anchorY: 122,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="55" height="130" viewBox="0 0 55 130">
+        <ellipse cx="28" cy="122" rx="20" ry="4" fill="rgba(0,0,0,0.18)"/>
+        <ellipse cx="28" cy="118" rx="16" ry="5" fill="#8B6B3F" stroke="#2E2A47" stroke-width="1.2"/>
+        <rect x="26" y="30" width="4" height="90" fill="#8B6B3F"/>
+        <path d="M 10 18 L 46 18 L 40 40 L 16 40 Z" fill="#FFF5C4" stroke="#2E2A47" stroke-width="1.5"/>
+        <ellipse cx="28" cy="18" rx="18" ry="4" fill="#FFEA88" stroke="#2E2A47" stroke-width="1.2"/>
+      </svg>` },
+    { label: 'テーブルランプ', footprintW: 1, footprintD: 1, imgWidth: 55, imgHeight: 75, anchorX: 28, anchorY: 68,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="55" height="75" viewBox="0 0 55 75">
+        <ellipse cx="28" cy="68" rx="18" ry="4" fill="rgba(0,0,0,0.18)"/>
+        <ellipse cx="28" cy="65" rx="14" ry="4" fill="#8B6B3F" stroke="#2E2A47" stroke-width="1.2"/>
+        <rect x="26" y="30" width="4" height="35" fill="#8B6B3F"/>
+        <path d="M 10 8 L 46 8 L 42 30 L 14 30 Z" fill="#FFF5C4" stroke="#2E2A47" stroke-width="1.5"/>
+      </svg>` }
+  ],
+  window: [
+    { label: 'まど', footprintW: 2, footprintD: 1, imgWidth: 130, imgHeight: 120, anchorX: 65, anchorY: 100, wall: true,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="130" height="120" viewBox="0 0 130 120">
+        <rect x="12" y="20" width="106" height="80" fill="#8B6B3F" stroke="#2E2A47" stroke-width="2"/>
+        <rect x="18" y="26" width="94" height="68" fill="#B8E4FF" stroke="#2E2A47" stroke-width="1"/>
+        <line x1="65" y1="26" x2="65" y2="94" stroke="#8B6B3F" stroke-width="3"/>
+        <line x1="18" y1="60" x2="112" y2="60" stroke="#8B6B3F" stroke-width="3"/>
+        <circle cx="94" cy="42" r="10" fill="#FFF5C4" opacity="0.85"/>
+        <path d="M 30 76 Q 40 68 50 76 Q 60 84 70 76" stroke="#FFFFFF" stroke-width="2" fill="none" opacity="0.7"/>
+        <path d="M 8 20 L 8 100 L 20 108 L 20 22 Z" fill="#FF9EBB" stroke="#2E2A47" stroke-width="1.5"/>
+        <path d="M 122 20 L 122 100 L 110 108 L 110 22 Z" fill="#FF9EBB" stroke="#2E2A47" stroke-width="1.5"/>
+      </svg>` },
+    { label: 'カーテン', footprintW: 2, footprintD: 1, imgWidth: 130, imgHeight: 120, anchorX: 65, anchorY: 100, wall: true,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="130" height="120" viewBox="0 0 130 120">
+        <rect x="5" y="15" width="120" height="4" fill="#8B6B3F" stroke="#2E2A47" stroke-width="1"/>
+        <path d="M 10 19 Q 12 30 8 40 Q 12 50 8 60 Q 12 70 8 80 Q 12 90 8 100 L 55 105 L 55 19 Z" fill="#7C6FF2" stroke="#2E2A47" stroke-width="1.5"/>
+        <path d="M 120 19 Q 118 30 122 40 Q 118 50 122 60 Q 118 70 122 80 Q 118 90 122 100 L 75 105 L 75 19 Z" fill="#7C6FF2" stroke="#2E2A47" stroke-width="1.5"/>
+        <path d="M 55 19 Q 60 60 55 105 L 75 105 Q 70 60 75 19 Z" fill="#B8E4FF" stroke="#2E2A47" stroke-width="1.5"/>
+      </svg>` }
+  ],
+  plant: [
+    { label: 'かんようしょくぶつ', footprintW: 1, footprintD: 1, imgWidth: 80, imgHeight: 110, anchorX: 40, anchorY: 105,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="110" viewBox="0 0 80 110">
+        <ellipse cx="40" cy="103" rx="26" ry="5" fill="rgba(0,0,0,0.18)"/>
+        <path d="M 22 80 L 58 80 L 55 105 L 25 105 Z" fill="#B78C5A" stroke="#2E2A47" stroke-width="1.5"/>
+        <ellipse cx="40" cy="80" rx="18" ry="4" fill="#8B6B3F" stroke="#2E2A47" stroke-width="1.2"/>
+        <g fill="#4CD4B0" stroke="#2E2A47" stroke-width="1.2">
+          <ellipse cx="30" cy="60" rx="10" ry="22" transform="rotate(-25 30 60)"/>
+          <ellipse cx="50" cy="55" rx="10" ry="24" transform="rotate(20 50 55)"/>
+          <ellipse cx="40" cy="45" rx="9" ry="26"/>
+          <ellipse cx="22" cy="70" rx="8" ry="18" transform="rotate(-45 22 70)"/>
+          <ellipse cx="58" cy="70" rx="8" ry="18" transform="rotate(40 58 70)"/>
+        </g>
+      </svg>` },
+    { label: 'サボテン', footprintW: 1, footprintD: 1, imgWidth: 60, imgHeight: 90, anchorX: 30, anchorY: 85,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="90" viewBox="0 0 60 90">
+        <ellipse cx="30" cy="84" rx="20" ry="4" fill="rgba(0,0,0,0.15)"/>
+        <path d="M 15 68 L 45 68 L 42 86 L 18 86 Z" fill="#E14E7F" stroke="#2E2A47" stroke-width="1.5"/>
+        <path d="M 22 34 Q 20 55 30 68 Q 40 55 38 34 Q 38 24 30 20 Q 22 24 22 34 Z" fill="#4CD4B0" stroke="#2E2A47" stroke-width="1.5"/>
+        <path d="M 15 46 Q 10 50 12 58 Q 18 55 22 52" fill="#4CD4B0" stroke="#2E2A47" stroke-width="1.5"/>
+        <path d="M 45 40 Q 52 42 52 52 Q 46 52 40 50" fill="#4CD4B0" stroke="#2E2A47" stroke-width="1.5"/>
+        <circle cx="26" cy="24" r="2" fill="#FF6B9D"/>
+        <path d="M 24 32 L 26 34 M 28 40 L 30 42 M 32 30 L 34 32" stroke="#FFF" stroke-width="1"/>
+      </svg>` }
+  ],
+  wall_decor: [
+    { label: 'え', footprintW: 1, footprintD: 1, imgWidth: 70, imgHeight: 60, anchorX: 35, anchorY: 55, wall: true,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="70" height="60" viewBox="0 0 70 60">
+        <rect x="6" y="6" width="58" height="48" fill="#B78C5A" stroke="#2E2A47" stroke-width="1.5"/>
+        <rect x="10" y="10" width="50" height="40" fill="#B8E4FF"/>
+        <path d="M 10 40 L 20 30 L 28 35 L 40 20 L 50 30 L 60 25 L 60 50 L 10 50 Z" fill="#4CD4B0" stroke="#2E2A47" stroke-width="0.8"/>
+        <circle cx="50" cy="18" r="4" fill="#FFC93C"/>
+      </svg>` },
+    { label: 'ポスター', footprintW: 1, footprintD: 1, imgWidth: 60, imgHeight: 80, anchorX: 30, anchorY: 75, wall: true,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="80" viewBox="0 0 60 80">
+        <rect x="4" y="4" width="52" height="72" fill="#F296B5" stroke="#2E2A47" stroke-width="1.5"/>
+        <text x="30" y="26" text-anchor="middle" font-family="'Baloo 2',sans-serif" font-weight="800" font-size="12" fill="#fff">MUSIC</text>
+        <circle cx="30" cy="50" r="14" fill="#2E2A47"/>
+        <circle cx="30" cy="50" r="4" fill="#F296B5"/>
+        <path d="M 20 68 L 40 68" stroke="#fff" stroke-width="2"/>
+      </svg>` },
+    { label: 'とけい', footprintW: 1, footprintD: 1, imgWidth: 60, imgHeight: 60, anchorX: 30, anchorY: 55, wall: true,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60">
+        <circle cx="30" cy="30" r="26" fill="#FFFFFF" stroke="#2E2A47" stroke-width="2"/>
+        <circle cx="30" cy="30" r="22" fill="#FFF5C4"/>
+        <g stroke="#2E2A47" stroke-width="1" stroke-linecap="round">
+          <line x1="30" y1="10" x2="30" y2="14"/>
+          <line x1="50" y1="30" x2="46" y2="30"/>
+          <line x1="30" y1="50" x2="30" y2="46"/>
+          <line x1="10" y1="30" x2="14" y2="30"/>
+        </g>
+        <line x1="30" y1="30" x2="30" y2="16" stroke="#E14E7F" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="30" y1="30" x2="42" y2="30" stroke="#E14E7F" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="30" cy="30" r="2.5" fill="#2E2A47"/>
+      </svg>` }
+  ]
+};
+
+export const FURNITURE_CATEGORIES = [
+  { key: 'bed',        icon: '🛏️', label: 'ベッド' },
+  { key: 'desk',       icon: '🪑', label: 'つくえ・イス' },
+  { key: 'closet',     icon: '🚪', label: 'たんす' },
+  { key: 'sofa',       icon: '🛋️', label: 'ソファ' },
+  { key: 'bookshelf',  icon: '📚', label: 'ほんだな' },
+  { key: 'rug',        icon: '🟪', label: 'ラグ' },
+  { key: 'lamp',       icon: '💡', label: 'ランプ' },
+  { key: 'window',     icon: '🪟', label: 'まど' },
+  { key: 'plant',      icon: '🌱', label: 'しょくぶつ' },
+  { key: 'wall_decor', icon: '🖼️', label: 'かべ かざり' }
+];
+
+/** 壁の色 / 床の色のプリセット */
+export const ROOM_WALL_COLORS = ['#F5EEDF', '#FFE5EC', '#E4DAF5', '#DDEEFF', '#E4F5DA', '#FFF3C9', '#F0E0D0'];
+export const ROOM_FLOOR_COLORS = ['#D4B896', '#B78C5A', '#96774A', '#F5D5B0', '#D8CDBD', '#C69C6D', '#EED6B8'];
