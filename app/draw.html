@@ -805,6 +805,12 @@
           <button class="part-cat-btn" data-cat="makeup_brow_makeup">✏️ メイクまゆ</button>
           <button class="part-cat-btn" data-cat="makeup_highlight">✨ ハイライト</button>
           <button class="part-cat-btn" data-cat="makeup_paint">🖌️ ペイント</button>
+          <button class="part-cat-btn" data-cat="clothing_dress">👗 ワンピ</button>
+          <button class="part-cat-btn" data-cat="clothing_skirt">🩱 スカート</button>
+          <button class="part-cat-btn" data-cat="clothing_top">👕 トップス</button>
+          <button class="part-cat-btn" data-cat="clothing_shoes">👟 くつ</button>
+          <button class="part-cat-btn" data-cat="clothing_hat">🎩 ぼうし</button>
+          <button class="part-cat-btn" data-cat="clothing_bag">🎒 かばん</button>
         </div>
         <div class="part-grid" id="partGrid"></div>
       </section>
@@ -882,7 +888,7 @@
 import { isConfigured, saveAvatar } from '/shared/firebase.js';
 import {
   extractOpaqueImageDataURL, hexToRgb, rgbToHex, showToast,
-  PART_LIBRARY, MAKEUP_LIBRARY, MAKEUP_CATEGORIES, svgToImage, tintSvg
+  PART_LIBRARY, MAKEUP_LIBRARY, MAKEUP_CATEGORIES, CLOTHING_LIBRARY, CLOTHING_CATEGORIES, svgToImage, tintSvg
 } from '/shared/utils.js';
 
 // ============================================================
@@ -1246,6 +1252,33 @@ function renderPartGrid() {
         } catch (e) {
           console.error(e);
           showToast('パーツの よみこみ に しっぱい');
+          return;
+        }
+        partGrid.querySelectorAll('.part-item').forEach(x => x.classList.remove('selected'));
+        it.classList.add('selected');
+        showToast(`「${p.label}」えらんだよ！キャンバスに タップ`);
+      });
+      partGrid.appendChild(it);
+    });
+    return;
+  }
+  // 服カテゴリ（"clothing_" プレフィックス付き）
+  if (state.activePartCat.startsWith('clothing_')) {
+    const clothingKey = state.activePartCat.slice(9);
+    const items = CLOTHING_LIBRARY[clothingKey] || [];
+    items.forEach(p => {
+      const it = document.createElement('button');
+      it.className = 'part-item';
+      it.innerHTML = p.svg;
+      it.addEventListener('click', async () => {
+        state.tool = 'stamp';
+        document.querySelectorAll('[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === 'stamp'));
+        state.activeEmoji = null;
+        try {
+          state.activePartImg = await svgToImage(p.svg);
+        } catch (e) {
+          console.error(e);
+          showToast('ふくの よみこみ に しっぱい');
           return;
         }
         partGrid.querySelectorAll('.part-item').forEach(x => x.classList.remove('selected'));
