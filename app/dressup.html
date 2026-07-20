@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="ja" class="app-fullscreen">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>きせかえ｜あばたーめーかー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared/styles.css">
+<style>
+  /* 高さ・スクロール制御は shared/styles.css の .app-fullscreen クラス */
+  body.app-fullscreen {
+    background:
+      radial-gradient(circle at 20% 0%, #FFE9C7, transparent 30%),
+      radial-gradient(circle at 90% 100%, #F1EEFF, transparent 40%),
+      var(--bg);
+  }
+
+  /* ==== ヘッダー ==== */
+  .draw-header {
+    flex: 0 0 auto; display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+    border-bottom: 2px solid #EDE9FF;
+    position: relative; z-index: 200;
+  }
+  .draw-header .back-link { padding: 6px 12px; font-size: 13px; }
+  .draw-header h1 {
+    flex: 1; margin: 0;
+    font-family: 'Baloo 2', sans-serif;
+    color: var(--purple);
+    font-size: clamp(16px, 3.5vw, 22px); letter-spacing: 0.3px;
+  }
+
+  /* ==== レイアウト ==== */
+  .draw-main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 240px 1fr 240px;
+    min-height: 0; min-width: 0;
+    position: relative;
+  }
+  .side-panel {
+    background: rgba(255,255,255,0.95);
+    border-right: 2px solid #EDE9FF;
+    padding: 12px 12px calc(24px + env(safe-area-inset-bottom, 0));
+    overflow-y: auto;
+    display: flex; flex-direction: column; gap: 10px;
+    min-height: 0;
+  }
+  .side-panel.right {
+    border-right: 0;
+    border-left: 2px solid #EDE9FF;
+  }
+  .picker-title {
+    font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 13px;
+    color: var(--ink-soft); letter-spacing: 0.4px; padding: 4px 0;
+    text-align: center;
+  }
+  .empty-hint {
+    padding: 16px 10px; text-align: center;
+    color: var(--ink-soft); font-size: 11px; font-weight: 700;
+    background: #F4F1FF; border-radius: 10px;
+    border: 2px dashed #DCD5FF;
+    line-height: 1.6;
+  }
+
+  /* ==== 棚のカード ==== */
+  .shelf-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .shelf-card {
+    position: relative;
+    background: var(--paper);
+    border: 3px solid transparent;
+    border-radius: 12px;
+    padding: 6px;
+    cursor: pointer;
+    display: flex; flex-direction: column;
+    gap: 4px;
+    transition: transform .1s;
+  }
+  .shelf-card:active { transform: translateY(1px); }
+  .shelf-card.selected {
+    border-color: var(--purple);
+    background: #F1EEFF;
+    box-shadow: 0 4px 0 rgba(124,111,242,0.35);
+  }
+  .shelf-card .thumb-wrap {
+    aspect-ratio: 1;
+    background: #fff;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .shelf-card .thumb-wrap img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+  }
+  .shelf-card .card-tag {
+    position: absolute;
+    top: -4px; left: -4px;
+    background: var(--yellow); color: var(--ink);
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 9px; letter-spacing: 0.3px;
+    padding: 2px 6px; border-radius: 999px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .shelf-card .card-tag.look { background: var(--pink); color: #fff; }
+  .shelf-card .card-tag.madeup { background: #FFA1CA; color: #fff; }
+  .shelf-card .card-tag.realistic { background: var(--green); color: #fff; top: auto; bottom: -4px; }
+  .shelf-card .card-btns {
+    display: flex; gap: 4px;
+    justify-content: center;
+  }
+  .card-btn {
+    flex: 1;
+    background: #fff;
+    border: 2px solid #EDE9FF;
+    border-radius: 8px;
+    padding: 4px 0;
+    font-size: 12px;
+    cursor: pointer;
+    transition: transform .1s;
+  }
+  .card-btn:active { transform: translateY(1px); }
+  .card-btn.gemini { border-color: #C9EFDF; background: #E8FBF4; }
+  .card-btn.gemini:disabled { opacity: 0.6; cursor: wait; }
+  .card-btn.danger { border-color: #FFD5DA; background: #FFF0F2; }
+
+  /* ==== キャンバスエリア ==== */
+  .canvas-area {
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: #F5EEFF; padding: 12px;
+    min-width: 0; min-height: 0;
+  }
+  .canvas-container {
+    position: relative;
+    max-width: 100%; max-height: 100%;
+    aspect-ratio: 1;
+    box-shadow: 0 10px 30px rgba(46,42,71,0.2);
+    border-radius: 14px; overflow: hidden;
+    background: var(--paper);
+    touch-action: none;
+  }
+  #stage {
+    display: block;
+    width: 100%; height: 100%;
+    touch-action: none;
+    cursor: grab;
+  }
+  #stage.dragging { cursor: grabbing; }
+  .canvas-hint {
+    position: absolute;
+    left: 50%; top: 8px; transform: translateX(-50%);
+    background: rgba(46,42,71,0.7); color: #fff;
+    padding: 4px 12px; border-radius: 999px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 700;
+    font-size: 11px; pointer-events: none;
+    opacity: 0; transition: opacity .3s;
+  }
+  .canvas-hint.show { opacity: 1; }
+
+  /* ==== 下部ドック ==== */
+  .draw-dock {
+    flex: 0 0 auto;
+    background: #fff; border-top: 2px solid #EDE9FF;
+    padding: 8px 14px calc(8px + env(safe-area-inset-bottom, 0));
+    display: flex; align-items: center; gap: 8px;
+    flex-wrap: wrap; z-index: 5;
+    justify-content: center;
+  }
+  .dock-btn {
+    background: #F8F5FF;
+    border: 2px solid #EDE9FF;
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 700;
+    font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; gap: 4px;
+    transition: transform .1s;
+  }
+  .dock-btn:active { transform: translateY(1px); }
+  .dock-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .dock-btn.danger {
+    border-color: #FFD5DA; background: #FFF0F2; color: var(--danger);
+  }
+  .dock-spacer { flex: 1; }
+
+  /* ==== パネル開閉（モバイル） ==== */
+  .panel-backdrop {
+    display: none; position: fixed; inset: 0;
+    background: rgba(46,42,71,0.35); z-index: 90;
+  }
+  .panel-backdrop.show { display: block; }
+  .panel-close {
+    display: none; position: absolute; top: 8px; right: 8px;
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 2px solid #EDE9FF; background: #fff;
+    cursor: pointer; font-size: 15px;
+    align-items: center; justify-content: center; padding: 0;
+    z-index: 110; box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  }
+  .panel-toggle {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: linear-gradient(180deg, #E4DDFF, #C7BDFF);
+    border: 2px solid var(--purple);
+    cursor: pointer; font-size: 18px;
+    align-items: center; justify-content: center; padding: 0;
+    display: none;
+  }
+  .panel-toggle.active { background: var(--purple); color: #fff; }
+
+  @media (max-width: 900px) {
+    .draw-main { grid-template-columns: 1fr; }
+    .side-panel {
+      position: fixed; left: 0; top: 60px; bottom: 0;
+      width: min(260px, 88vw);
+      transform: translateX(-100%); transition: transform .25s;
+      z-index: 100; box-shadow: 10px 0 30px rgba(0,0,0,0.15);
+    }
+    .side-panel.right {
+      left: auto; right: 0;
+      transform: translateX(100%);
+      box-shadow: -10px 0 30px rgba(0,0,0,0.15);
+    }
+    .side-panel.open { transform: translateX(0); }
+    .panel-toggle { display: flex; }
+    .panel-close { display: flex; }
+    .draw-dock { padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0)); gap: 6px; }
+    .dock-btn { padding: 6px 10px; font-size: 12px; }
+  }
+</style>
+</head>
+<body class="app-fullscreen">
+
+<header class="draw-header">
+  <a href="/index.html" class="back-link">← もどる</a>
+  <h1>👗 きせかえ</h1>
+  <button class="panel-toggle" id="avatarToggle" title="あばたー">👧</button>
+  <button class="panel-toggle" id="itemToggle" title="ふく">👕</button>
+  <button class="btn-primary" id="saveLookBtn">💾 ほぞん</button>
+</header>
+
+<div class="draw-main">
+  <div class="panel-backdrop" id="panelBackdrop"></div>
+
+  <!-- 左: あばたー たな -->
+  <aside class="side-panel" id="avatarPanel">
+    <button class="panel-close" id="avatarClose">✕</button>
+    <div class="picker-title">👧 あばたー を えらんで</div>
+    <div class="shelf-grid" id="avatarShelf"></div>
+    <div class="empty-hint" id="avatarEmpty" style="display:none;">
+      まだ あばたー が いないよ！<br>「おえかき」で つくってね 🎨
+    </div>
+  </aside>
+
+  <!-- 中央: きせかえ ステージ -->
+  <main class="canvas-area">
+    <div class="canvas-container">
+      <canvas id="stage" width="480" height="480"></canvas>
+      <div class="canvas-hint" id="canvasHint">タップで えらぶ / ドラッグで うごかす</div>
+    </div>
+  </main>
+
+  <!-- 右: クローゼット -->
+  <aside class="side-panel right" id="itemPanel">
+    <button class="panel-close" id="itemClose">✕</button>
+    <div class="picker-title">👕 ふく を タップして きせる</div>
+    <div class="shelf-grid" id="itemCloset"></div>
+    <div class="empty-hint" id="itemEmpty" style="display:none;">
+      まだ ふく が ないよ！<br>「おえかき」で えを かいて<br>「ふく・アイテム」で ほぞん してね
+    </div>
+  </aside>
+</div>
+
+<!-- 下部ドック: 選択中アイテムの操作 -->
+<div class="draw-dock">
+  <button class="dock-btn" id="itemBigger" disabled>🔍＋</button>
+  <button class="dock-btn" id="itemSmaller" disabled>🔍－</button>
+  <button class="dock-btn" id="itemRotateL" disabled>⟲</button>
+  <button class="dock-btn" id="itemRotateR" disabled>⟳</button>
+  <button class="dock-btn" id="itemFront" disabled>⬆️ まえに</button>
+  <button class="dock-btn danger" id="itemRemove" disabled>🗑️ はずす</button>
+</div>
+
+<script type="module">
+import { isConfigured, saveAvatar, watchAvatars, deleteAvatar, updateAvatar } from '/shared/firebase.js';
+import { showToast, loadImage } from '/shared/utils.js';
+
+// ============================================================
+// DOM
+// ============================================================
+const stage = document.getElementById('stage');
+const stageCtx = stage.getContext('2d');
+const avatarShelf = document.getElementById('avatarShelf');
+const itemCloset = document.getElementById('itemCloset');
+const avatarEmpty = document.getElementById('avatarEmpty');
+const itemEmpty = document.getElementById('itemEmpty');
+const saveLookBtn = document.getElementById('saveLookBtn');
+const canvasHint = document.getElementById('canvasHint');
+
+const itemBigger = document.getElementById('itemBigger');
+const itemSmaller = document.getElementById('itemSmaller');
+const itemRotateL = document.getElementById('itemRotateL');
+const itemRotateR = document.getElementById('itemRotateR');
+const itemFront = document.getElementById('itemFront');
+const itemRemove = document.getElementById('itemRemove');
+
+const avatarToggle = document.getElementById('avatarToggle');
+const itemToggle = document.getElementById('itemToggle');
+const avatarClose = document.getElementById('avatarClose');
+const itemClose = document.getElementById('itemClose');
+const avatarPanel = document.getElementById('avatarPanel');
+const itemPanel = document.getElementById('itemPanel');
+const panelBackdrop = document.getElementById('panelBackdrop');
+
+// ============================================================
+// 状態
+// ============================================================
+const PAPER = '#FFFDF7';
+// stageAvatar: { id, img }
+// stageItems:  [{ id?, img, x, y, scale, rotation }]
+let avatars = [];   // type: 'avatar' | 'look' | 'madeup'
+let items = [];     // type: 'item'
+let stageAvatar = null;
+let stageItems = [];
+let selectedStageItem = null;
+let stageDragging = false;
+let dragOffset = { x: 0, y: 0 };
+const imgCache = {};
+
+function cachedLoad(src) {
+  if (imgCache[src]) return Promise.resolve(imgCache[src]);
+  return loadImage(src).then(img => { imgCache[src] = img; return img; });
+}
+
+// ============================================================
+// 棚の描画
+// ============================================================
+function renderAvatarShelf() {
+  avatarShelf.innerHTML = '';
+  if (avatars.length === 0) {
+    avatarEmpty.style.display = 'block';
+    return;
+  }
+  avatarEmpty.style.display = 'none';
+
+  avatars.forEach(av => {
+    const card = document.createElement('div');
+    card.className = 'shelf-card' + (stageAvatar && stageAvatar.id === av.id ? ' selected' : '');
+
+    // タグ
+    if (av.type === 'look') {
+      const t = document.createElement('div');
+      t.className = 'card-tag look'; t.textContent = 'コーデ';
+      card.appendChild(t);
+    } else if (av.type === 'madeup') {
+      const t = document.createElement('div');
+      t.className = 'card-tag madeup'; t.textContent = 'メイク';
+      card.appendChild(t);
+    }
+    if (av.realisticImageData) {
+      const t = document.createElement('div');
+      t.className = 'card-tag realistic'; t.textContent = '✨リアル';
+      card.appendChild(t);
+    }
+
+    // サムネイル (タップで選択)
+    const wrap = document.createElement('div');
+    wrap.className = 'thumb-wrap';
+    const img = document.createElement('img');
+    img.src = av.realisticImageData || av.imageData;
+    wrap.appendChild(img);
+    wrap.addEventListener('click', async () => {
+      const loaded = await cachedLoad(av.realisticImageData || av.imageData);
+      stageAvatar = { id: av.id, img: loaded };
+      renderAvatarShelf();
+      drawStage();
+      if (window.innerWidth <= 900) closeAllPanels();
+    });
+    card.appendChild(wrap);
+
+    // ボタン
+    const btns = document.createElement('div');
+    btns.className = 'card-btns';
+    if (!av.realisticImageData) {
+      const bGem = document.createElement('button');
+      bGem.className = 'card-btn gemini';
+      bGem.textContent = '✨';
+      bGem.title = 'リアルに へんかん';
+      bGem.addEventListener('click', (e) => {
+        e.stopPropagation();
+        generateRealistic(av.id, av.imageData, bGem);
+      });
+      btns.appendChild(bGem);
+    } else {
+      const bAgain = document.createElement('button');
+      bAgain.className = 'card-btn gemini';
+      bAgain.textContent = '🔄';
+      bAgain.title = 'もういちど へんかん';
+      bAgain.addEventListener('click', (e) => {
+        e.stopPropagation();
+        generateRealistic(av.id, av.imageData, bAgain);
+      });
+      btns.appendChild(bAgain);
+    }
+    const bDel = document.createElement('button');
+    bDel.className = 'card-btn danger';
+    bDel.textContent = '🗑️';
+    bDel.title = 'さくじょ';
+    bDel.addEventListener('click', (e) => {
+      e.stopPropagation();
+      confirmDelete(av);
+    });
+    btns.appendChild(bDel);
+    card.appendChild(btns);
+
+    avatarShelf.appendChild(card);
+  });
+}
+
+function renderItemCloset() {
+  itemCloset.innerHTML = '';
+  if (items.length === 0) {
+    itemEmpty.style.display = 'block';
+    return;
+  }
+  itemEmpty.style.display = 'none';
+
+  items.forEach(it => {
+    const card = document.createElement('div');
+    card.className = 'shelf-card';
+
+    if (it.realisticImageData) {
+      const t = document.createElement('div');
+      t.className = 'card-tag realistic'; t.textContent = '✨リアル';
+      card.appendChild(t);
+    }
+
+    const wrap = document.createElement('div');
+    wrap.className = 'thumb-wrap';
+    const img = document.createElement('img');
+    img.src = it.imageData;
+    wrap.appendChild(img);
+    wrap.addEventListener('click', async () => {
+      if (!stageAvatar) {
+        showToast('さきに あばたー を えらんでね！');
+        return;
+      }
+      const loaded = await cachedLoad(it.imageData);
+      const maxDim = Math.max(loaded.width, loaded.height);
+      const scale = Math.min(1, 160 / maxDim);
+      const newItem = {
+        img: loaded,
+        x: stage.width / 2,
+        y: stage.height / 2,
+        scale, rotation: 0
+      };
+      stageItems.push(newItem);
+      selectedStageItem = newItem;
+      updateItemControls();
+      drawStage();
+      if (window.innerWidth <= 900) closeAllPanels();
+    });
+    card.appendChild(wrap);
+
+    const btns = document.createElement('div');
+    btns.className = 'card-btns';
+    if (!it.realisticImageData) {
+      const bGem = document.createElement('button');
+      bGem.className = 'card-btn gemini';
+      bGem.textContent = '✨';
+      bGem.title = 'リアルに へんかん';
+      bGem.addEventListener('click', (e) => {
+        e.stopPropagation();
+        generateRealistic(it.id, it.imageData, bGem);
+      });
+      btns.appendChild(bGem);
+    }
+    const bDel = document.createElement('button');
+    bDel.className = 'card-btn danger';
+    bDel.textContent = '🗑️';
+    bDel.title = 'さくじょ';
+    bDel.addEventListener('click', (e) => {
+      e.stopPropagation();
+      confirmDelete(it);
+    });
+    btns.appendChild(bDel);
+    card.appendChild(btns);
+
+    itemCloset.appendChild(card);
+  });
+}
+
+async function confirmDelete(record) {
+  const label = record.type === 'item' ? 'ふく' : record.type === 'look' ? 'コーデ' : 'あばたー';
+  if (!confirm(`この ${label} を さくじょ しますか？`)) return;
+  try {
+    await deleteAvatar(record.id);
+    // 使っていた場合はステージからも消す
+    if (stageAvatar && stageAvatar.id === record.id) {
+      stageAvatar = null;
+      drawStage();
+    }
+    showToast('さくじょ したよ');
+  } catch (err) {
+    console.error(err);
+    showToast('さくじょ に しっぱい');
+  }
+}
+
+async function generateRealistic(id, imageData, btn) {
+  if (!isConfigured) {
+    showToast('Firebase の せってい が まだ です');
+    return;
+  }
+  btn.disabled = true;
+  const origText = btn.textContent;
+  btn.textContent = '⏳';
+  try {
+    const res = await fetch('/api/generate-avatar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageData })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.imageData) {
+      throw new Error(data.error || 'unknown error');
+    }
+    await updateAvatar(id, { realisticImageData: data.imageData });
+    showToast('リアルに へんかん できたよ！ ✨');
+  } catch (err) {
+    console.error('generateRealistic', err);
+    showToast('へんかん に しっぱい…');
+    btn.disabled = false;
+    btn.textContent = origText;
+  }
+}
+
+// ============================================================
+// ステージ描画
+// ============================================================
+function drawStage() {
+  stageCtx.fillStyle = PAPER;
+  stageCtx.fillRect(0, 0, stage.width, stage.height);
+
+  if (stageAvatar) {
+    const img = stageAvatar.img;
+    const fit = Math.min(stage.width / img.width, stage.height / img.height);
+    const w = img.width * fit, h = img.height * fit;
+    stageCtx.drawImage(img, (stage.width - w) / 2, (stage.height - h) / 2, w, h);
+  } else {
+    stageCtx.fillStyle = '#B8B2CC';
+    stageCtx.font = '700 18px Nunito, sans-serif';
+    stageCtx.textAlign = 'center';
+    stageCtx.fillText('👈 あばたー を えらんでね', stage.width / 2, stage.height / 2);
+  }
+
+  stageItems.forEach(item => {
+    stageCtx.save();
+    stageCtx.translate(item.x, item.y);
+    stageCtx.rotate(item.rotation);
+    const w = item.img.width * item.scale;
+    const h = item.img.height * item.scale;
+    stageCtx.drawImage(item.img, -w / 2, -h / 2, w, h);
+    if (item === selectedStageItem) {
+      stageCtx.strokeStyle = 'rgba(124,111,242,0.9)';
+      stageCtx.lineWidth = 3;
+      stageCtx.setLineDash([8, 6]);
+      stageCtx.strokeRect(-w / 2 - 5, -h / 2 - 5, w + 10, h + 10);
+      stageCtx.setLineDash([]);
+    }
+    stageCtx.restore();
+  });
+}
+
+function updateItemControls() {
+  const has = !!selectedStageItem;
+  [itemBigger, itemSmaller, itemRotateL, itemRotateR, itemFront, itemRemove].forEach(b => {
+    b.disabled = !has;
+  });
+}
+
+// ============================================================
+// ステージ ヒットテスト + ドラッグ
+// ============================================================
+function stagePointerPos(e) {
+  const rect = stage.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left) * (stage.width / rect.width),
+    y: (e.clientY - rect.top) * (stage.height / rect.height)
+  };
+}
+
+function hitTestItem(item, px, py) {
+  const dx = px - item.x;
+  const dy = py - item.y;
+  const cos = Math.cos(-item.rotation), sin = Math.sin(-item.rotation);
+  const lx = dx * cos - dy * sin;
+  const ly = dx * sin + dy * cos;
+  const w = item.img.width * item.scale;
+  const h = item.img.height * item.scale;
+  return Math.abs(lx) <= w / 2 + 8 && Math.abs(ly) <= h / 2 + 8;
+}
+
+stage.addEventListener('pointerdown', (e) => {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  stage.setPointerCapture(e.pointerId);
+  const p = stagePointerPos(e);
+  // 上のレイヤーから当たり判定
+  for (let i = stageItems.length - 1; i >= 0; i--) {
+    if (hitTestItem(stageItems[i], p.x, p.y)) {
+      selectedStageItem = stageItems[i];
+      stageDragging = true;
+      dragOffset.x = p.x - selectedStageItem.x;
+      dragOffset.y = p.y - selectedStageItem.y;
+      stage.classList.add('dragging');
+      updateItemControls();
+      drawStage();
+      return;
+    }
+  }
+  selectedStageItem = null;
+  updateItemControls();
+  drawStage();
+});
+
+stage.addEventListener('pointermove', (e) => {
+  if (!stageDragging || !selectedStageItem) return;
+  const p = stagePointerPos(e);
+  selectedStageItem.x = p.x - dragOffset.x;
+  selectedStageItem.y = p.y - dragOffset.y;
+  drawStage();
+});
+
+['pointerup', 'pointercancel'].forEach(ev =>
+  stage.addEventListener(ev, () => {
+    stageDragging = false;
+    stage.classList.remove('dragging');
+  })
+);
+
+// ============================================================
+// ドックのボタン
+// ============================================================
+itemBigger.addEventListener('click', () => {
+  if (!selectedStageItem) return;
+  selectedStageItem.scale *= 1.15;
+  drawStage();
+});
+itemSmaller.addEventListener('click', () => {
+  if (!selectedStageItem) return;
+  selectedStageItem.scale /= 1.15;
+  drawStage();
+});
+itemRotateL.addEventListener('click', () => {
+  if (!selectedStageItem) return;
+  selectedStageItem.rotation -= Math.PI / 12;
+  drawStage();
+});
+itemRotateR.addEventListener('click', () => {
+  if (!selectedStageItem) return;
+  selectedStageItem.rotation += Math.PI / 12;
+  drawStage();
+});
+itemFront.addEventListener('click', () => {
+  if (!selectedStageItem) return;
+  const idx = stageItems.indexOf(selectedStageItem);
+  if (idx >= 0 && idx < stageItems.length - 1) {
+    stageItems.splice(idx, 1);
+    stageItems.push(selectedStageItem);
+    drawStage();
+  }
+});
+itemRemove.addEventListener('click', () => {
+  if (!selectedStageItem) return;
+  const idx = stageItems.indexOf(selectedStageItem);
+  if (idx >= 0) stageItems.splice(idx, 1);
+  selectedStageItem = null;
+  updateItemControls();
+  drawStage();
+});
+
+// ============================================================
+// ほぞん
+// ============================================================
+saveLookBtn.addEventListener('click', async () => {
+  if (!stageAvatar) {
+    showToast('さきに あばたー を えらんでね！');
+    return;
+  }
+  if (!isConfigured) {
+    showToast('Firebase の せってい が まだ です');
+    return;
+  }
+  // 選択枠を消してから保存
+  const prevSel = selectedStageItem;
+  selectedStageItem = null;
+  drawStage();
+  const dataUrl = stage.toDataURL('image/png');
+  selectedStageItem = prevSel;
+  drawStage();
+
+  try {
+    showToast('ほぞん ちゅう…');
+    await saveAvatar({
+      imageData: dataUrl,
+      type: 'look',
+      extra: { baseAvatarId: stageAvatar.id }
+    });
+    showToast('コーデ を たな に ほぞん したよ！ 💕');
+  } catch (err) {
+    console.error(err);
+    showToast('ほぞん に しっぱい');
+  }
+});
+
+// ============================================================
+// パネル開閉
+// ============================================================
+function updatePanelState() {
+  const anyOpen = avatarPanel.classList.contains('open') || itemPanel.classList.contains('open');
+  panelBackdrop.classList.toggle('show', anyOpen);
+  avatarToggle.classList.toggle('active', avatarPanel.classList.contains('open'));
+  itemToggle.classList.toggle('active', itemPanel.classList.contains('open'));
+}
+function closeAllPanels() {
+  avatarPanel.classList.remove('open');
+  itemPanel.classList.remove('open');
+  updatePanelState();
+}
+avatarToggle.addEventListener('click', () => {
+  avatarPanel.classList.toggle('open');
+  itemPanel.classList.remove('open');
+  updatePanelState();
+});
+itemToggle.addEventListener('click', () => {
+  itemPanel.classList.toggle('open');
+  avatarPanel.classList.remove('open');
+  updatePanelState();
+});
+avatarClose.addEventListener('click', closeAllPanels);
+itemClose.addEventListener('click', closeAllPanels);
+panelBackdrop.addEventListener('click', closeAllPanels);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllPanels(); });
+
+// ============================================================
+// 初期化 + Firestore 監視
+// ============================================================
+drawStage();
+updateItemControls();
+
+// 最初の数秒だけキャンバスヒントを表示
+canvasHint.classList.add('show');
+setTimeout(() => canvasHint.classList.remove('show'), 3500);
+
+if (isConfigured) {
+  watchAvatars(all => {
+    // avatar / look / madeup を「たな」に、item を「クローゼット」に
+    // type未設定は firebase.js 側で 'avatar' に補正済み
+    avatars = all.filter(x => x.type === 'avatar' || x.type === 'look' || x.type === 'madeup');
+    items = all.filter(x => x.type === 'item');
+    renderAvatarShelf();
+    renderItemCloset();
+  });
+} else {
+  renderAvatarShelf();
+  renderItemCloset();
+  showToast('Firebase の せってい が まだ です', 3000);
+}
+</script>
+
+</body>
+</html>
