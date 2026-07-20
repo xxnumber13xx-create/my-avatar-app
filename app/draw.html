@@ -866,6 +866,13 @@
           <div class="save-desc">まわりの しろ を すきとおる ように する</div>
         </div>
       </button>
+      <button class="save-option" data-savetype="furniture">
+        <span class="icon">🪑</span>
+        <div>
+          <div class="save-title">かぐ（おへや に おける）</div>
+          <div class="save-desc">まわりを すきとおして、おへや画面で ばいちできる</div>
+        </div>
+      </button>
     </div>
     <button class="btn-ghost" id="closeSaveModal" style="width:100%;">とじる</button>
   </div>
@@ -1902,10 +1909,17 @@ document.querySelectorAll('[data-savetype]').forEach(btn => {
         imageData = extractOpaqueImageDataURL(compositeCanvas, { paper: PAPER, tolerance: 22, padding: 6 });
         if (!imageData) { showToast('なにも かかれて ないよ！'); return; }
         savedType = 'item';
+      } else if (type === 'furniture') {
+        imageData = extractOpaqueImageDataURL(compositeCanvas, { paper: PAPER, tolerance: 22, padding: 6 });
+        if (!imageData) { showToast('なにも かかれて ないよ！'); return; }
+        savedType = 'furniture';
       }
       showToast('ほぞん ちゅう...');
       await saveAvatar({ imageData, type: savedType });
-      showToast(savedType === 'item' ? '👗 ふく を ほぞん したよ！' : '👧 あばたー を ほぞん したよ！');
+      const msg = savedType === 'item' ? '👗 ふく を ほぞん したよ！'
+                : savedType === 'furniture' ? '🪑 かぐ を ほぞん したよ！おへや で つかえるよ'
+                : '👧 あばたー を ほぞん したよ！';
+      showToast(msg);
     } catch (err) {
       console.error(err);
       showToast('ほぞん に しっぱい しました');
