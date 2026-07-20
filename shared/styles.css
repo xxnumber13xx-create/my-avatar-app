@@ -1,0 +1,153 @@
+/* shared/styles.css
+   全画面で共通のデザイントークン・汎用UIパーツ。
+   個別画面のスタイルは各HTMLの<style>内に書く。 */
+
+:root {
+  --bg: #EAF6FF;
+  --bg-2: #DCEFFF;
+  --paper: #FFFDF7;
+  --pink: #FF6B9D;
+  --pink-dark: #E14E7F;
+  --yellow: #FFC93C;
+  --green: #4CD4B0;
+  --purple: #7C6FF2;
+  --purple-dark: #5D51CC;
+  --ink: #2E2A47;
+  --ink-soft: #6A6486;
+  --wood: #C98A4B;
+  --wood-dark: #A66B34;
+  --danger: #FF5A6E;
+
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+  --shadow-card: 0 14px 0 rgba(124,111,242,0.10), 0 20px 40px rgba(46,42,71,0.08);
+  --shadow-btn: 0 4px 0 rgba(46,42,71,0.15);
+
+  font-size: 16px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 10% 10%, var(--bg-2), transparent 40%),
+    radial-gradient(circle at 90% 0%, #FFE9C7, transparent 35%),
+    var(--bg);
+  font-family: 'Nunito', sans-serif;
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wrap { max-width: 940px; margin: 0 auto; padding: 28px 16px 60px; }
+
+.card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 24px;
+}
+
+/* ===== 汎用ボタン ===== */
+
+button { font-family: 'Baloo 2', sans-serif; }
+
+.btn-primary {
+  background: var(--pink);
+  color: #fff;
+  border: 0;
+  border-radius: 16px;
+  padding: 12px 20px;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: var(--shadow-btn);
+  transition: transform .1s;
+}
+.btn-primary:active { transform: translateY(2px); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-soft {
+  background: #F4F1FF;
+  color: var(--ink);
+  border: 2px solid #E4DDFF;
+  border-radius: 14px;
+  padding: 8px 14px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform .1s;
+}
+.btn-soft:active { transform: translateY(1px); }
+
+.btn-ghost {
+  background: transparent;
+  border: 0;
+  color: var(--ink-soft);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 8px 12px;
+}
+
+/* ===== 共通トップバー ===== */
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.top-bar h1 {
+  font-family: 'Baloo 2', sans-serif;
+  margin: 0;
+  color: var(--purple);
+  font-size: clamp(20px, 4vw, 30px);
+  flex: 1;
+  letter-spacing: 0.3px;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--ink);
+  font-weight: 800;
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 14px;
+  box-shadow: var(--shadow-btn);
+  font-size: 14px;
+  font-family: 'Baloo 2', sans-serif;
+}
+
+/* ===== トースト ===== */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%) translateY(20px);
+  background: #2E2A47;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 700;
+  opacity: 0;
+  transition: all .25s;
+  pointer-events: none;
+  z-index: 500;
+  font-size: 14px;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===== フォーカス表示（アクセシビリティ） ===== */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--purple);
+  outline-offset: 2px;
+}
