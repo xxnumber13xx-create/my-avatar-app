@@ -151,3 +151,35 @@ input:focus-visible {
   outline: 3px solid var(--purple);
   outline-offset: 2px;
 }
+
+/* =========================================================
+   モバイル "下が見切れる" 対策
+   iOS Safari / Chrome ではアドレスバーが表示されているとき
+   100vh がビジブルエリアより大きくなり、フルスクリーンレイアウトの
+   下部が画面外に出てしまう。100dvh で対応する（フォールバック 100vh）。
+
+   使い方: 全画面固定レイアウトを組むページ（draw / room / makeup /
+   scene / dressup / game / play など）は、以下のクラスを body に付ける:
+       <body class="app-fullscreen">
+   これで自動的に「動的ビューポート高」＋「セーフエリア尊重」になる。
+   ========================================================= */
+html.app-fullscreen,
+body.app-fullscreen {
+  height: 100vh;         /* 古いブラウザ向けフォールバック */
+  height: 100dvh;        /* iOS/Android 最新: アドレスバーを差し引いた高さ */
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+body.app-fullscreen {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  display: flex;
+  flex-direction: column;
+}
+
+/* スクロール可能な内側パネルの底に セーフエリア分の余白を確保。
+   親が overflow: hidden で切ってしまうケース向けに padding-bottom を追加。 */
+.app-scroll-safe {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0)) !important;
+}
