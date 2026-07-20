@@ -31,10 +31,11 @@
     align-items: center;
     gap: 10px;
     padding: 10px 14px;
-    background: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.95);
     backdrop-filter: blur(10px);
     border-bottom: 2px solid #EDE9FF;
-    z-index: 10;
+    position: relative;
+    z-index: 200;
   }
   .draw-header .back-link { padding: 6px 12px; font-size: 13px; }
   .draw-header h1 {
@@ -430,6 +431,36 @@
   .save-option .save-title { font-size: 15px; }
   .save-option .save-desc { font-size: 11px; color: var(--ink-soft); font-weight: 600; margin-top: 2px; }
 
+  /* パネル外タップで閉じるオーバーレイ */
+  .panel-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(46,42,71,0.35);
+    z-index: 90;
+  }
+  .panel-backdrop.show { display: block; }
+
+  /* パネル内の閉じるボタン */
+  .panel-close {
+    display: none;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #EDE9FF;
+    background: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    z-index: 110;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  }
+
   /* モバイル */
   @media (max-width: 900px) {
     .draw-main {
@@ -437,7 +468,9 @@
     }
     .avatar-picker {
       position: fixed;
-      left: 0; top: 0; bottom: 0;
+      left: 0;
+      top: 60px;  /* ヘッダーの下から */
+      bottom: 0;
       width: min(260px, 85vw);
       transform: translateX(-100%);
       transition: transform .25s;
@@ -447,7 +480,9 @@
     .avatar-picker.open { transform: translateX(0); }
     .makeup-panel {
       position: fixed;
-      right: 0; top: 0; bottom: 0;
+      right: 0;
+      top: 60px;  /* ヘッダーの下から */
+      bottom: 0;
       width: min(320px, 90vw);
       transform: translateX(100%);
       transition: transform .25s;
@@ -456,6 +491,7 @@
     }
     .makeup-panel.open { transform: translateX(0); }
     .panel-toggle { display: flex !important; }
+    .panel-close { display: flex; }
     .draw-dock { padding: 6px 8px; gap: 6px; }
     .dock-slider { min-width: 100px; }
     .dock-btn { width: 36px; height: 36px; font-size: 15px; }
@@ -463,6 +499,7 @@
   }
   @media (min-width: 901px) {
     .panel-toggle { display: none; }
+    .panel-close { display: none; }
   }
   .panel-toggle {
     width: 40px;
@@ -477,6 +514,10 @@
     padding: 0;
     display: none;
   }
+  .panel-toggle.active {
+    background: linear-gradient(180deg, var(--pink), var(--pink-dark));
+    color: #fff;
+  }
 </style>
 </head>
 <body>
@@ -490,8 +531,12 @@
 </header>
 
 <div class="draw-main">
+  <!-- モバイル：パネル外タップで閉じるオーバーレイ -->
+  <div class="panel-backdrop" id="panelBackdrop"></div>
+
   <!-- 左：アバター選択 -->
   <aside class="avatar-picker" id="avatarPicker">
+    <button class="panel-close" id="avatarClose" title="とじる">✕</button>
     <div class="picker-title">👧 アバターを えらんでね</div>
     <div class="avatar-list" id="avatarList">
       <div class="avatar-empty" id="avatarEmpty">まだ アバター が ないよ！<br>「おえかき」で つくってね 🎨</div>
@@ -507,6 +552,7 @@
 
   <!-- 右：メイクパネル -->
   <aside class="makeup-panel" id="makeupPanel">
+    <button class="panel-close" id="makeupClose" title="とじる">✕</button>
     <div class="category-tabs" id="catTabs"></div>
 
     <div class="panel-body">
@@ -772,7 +818,11 @@ async function selectAvatar(a) {
   renderApplied();
   updateUndoBtn();
   // モバイルではアバターパネルを閉じる
-  if (window.innerWidth <= 900) avatarPicker.classList.remove('open');
+  if (window.innerWidth <= 900) {
+    avatarPicker.classList.remove('open');
+    // updatePanelState は下で定義されているが、DOMイベント経由なので存在時のみ呼ぶ
+    if (typeof updatePanelState === 'function') updatePanelState();
+  }
   showToast('アバターを えらんだよ！');
 }
 
@@ -1154,13 +1204,42 @@ function renderApplied() {
 // ============================================================
 // パネル開閉（モバイル）
 // ============================================================
-avatarToggle.addEventListener('click', () => {
-  avatarPicker.classList.toggle('open');
-  makeupPanel.classList.remove('open');
-});
-makeupToggle.addEventListener('click', () => {
-  makeupPanel.classList.toggle('open');
+const panelBackdrop = document.getElementById('panelBackdrop');
+const avatarClose = document.getElementById('avatarClose');
+const makeupClose = document.getElementById('makeupClose');
+
+function updatePanelState() {
+  const anyOpen = avatarPicker.classList.contains('open') || makeupPanel.classList.contains('open');
+  panelBackdrop.classList.toggle('show', anyOpen);
+  avatarToggle.classList.toggle('active', avatarPicker.classList.contains('open'));
+  makeupToggle.classList.toggle('active', makeupPanel.classList.contains('open'));
+}
+function closeAllPanels() {
   avatarPicker.classList.remove('open');
+  makeupPanel.classList.remove('open');
+  updatePanelState();
+}
+function toggleAvatarPanel() {
+  const willOpen = !avatarPicker.classList.contains('open');
+  avatarPicker.classList.toggle('open', willOpen);
+  makeupPanel.classList.remove('open');
+  updatePanelState();
+}
+function toggleMakeupPanel() {
+  const willOpen = !makeupPanel.classList.contains('open');
+  makeupPanel.classList.toggle('open', willOpen);
+  avatarPicker.classList.remove('open');
+  updatePanelState();
+}
+
+avatarToggle.addEventListener('click', toggleAvatarPanel);
+makeupToggle.addEventListener('click', toggleMakeupPanel);
+avatarClose.addEventListener('click', closeAllPanels);
+makeupClose.addEventListener('click', closeAllPanels);
+panelBackdrop.addEventListener('click', closeAllPanels);
+// Escキーでも閉じる
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeAllPanels();
 });
 
 // ============================================================
