@@ -6,13 +6,13 @@
 // Firebaseコンソール → プロジェクトの設定 → 全般 → マイアプリ → SDK設定 の「構成」からコピーできます。
 // このapiKeyは公開して問題ない種類です（アクセス制御はFirestoreのセキュリティルール側で行います）。
 
-export const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+const firebaseConfig = {
+  apiKey: "AIzaSyD9QLN8R_Io5yiNBpb74w3KCM4kkQijsPU",
+  authDomain: "dressup-avatars.firebaseapp.com",
+  projectId: "dressup-avatars",
+  storageBucket: "dressup-avatars.firebasestorage.app",
+  messagingSenderId: "875993188844",
+  appId: "1:875993188844:web:01da8d07ca4c69eec518c9"
 };
 
 export const COLLECTION_NAME = 'dressup_avatars';
