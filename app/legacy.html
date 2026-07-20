@@ -1481,37 +1481,34 @@
 </div>
 
 <script type="module">
-  // ==== Firebase 設定（ここを あなたの プロジェクトの ものに 書き換えてください） ====
-  // Firebaseコンソール → プロジェクトの設定 → 全般 → マイアプリ の SDK設定 からコピーできます。
-  // このapiKeyはブラウザに公開しても問題ない種類のキーです（アクセス制御はFirestoreのセキュリティルール側で行います）。
-const firebaseConfig = {
-  apiKey: "AIzaSyD9QLN8R_Io5yiNBpb74w3KCM4kkQijsPU",
-  authDomain: "dressup-avatars.firebaseapp.com",
-  projectId: "dressup-avatars",
-  storageBucket: "dressup-avatars.firebasestorage.app",
-  messagingSenderId: "875993188844",
-  appId: "1:875993188844:web:01da8d07ca4c69eec518c9"
-};
-  const COLLECTION_NAME = 'dressup_avatars'; // 他プロジェクトのFirestoreと共有する場合の衝突を避けるための専用コレクション名
-
-  import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js').then(async ({ initializeApp }) => {
-    const {
-      getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, where, limit, getDocs, serverTimestamp
-    } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-
-    const isConfigured = !Object.values(firebaseConfig).some(v => String(v).includes('YOUR_'));
-    let db = null;
-    if (isConfigured) {
-      try {
-        const app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-      } catch (err) {
-        console.error('Firebase init error', err);
-      }
+  // Firebase 設定は /shared/firebase.js に一元化しています。
+  // legacy.html 内では従来コードとの互換のため window.__dressupFirestore を維持します。
+  import('/shared/firebase.js').then((mod) => {
+    if (!mod.isConfigured || !mod.db) {
+      window.__dressupFirestore = null;
+      window.dispatchEvent(new CustomEvent('firestore-ready'));
+      return;
     }
-    window.__dressupFirestore = db
-      ? { db, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, where, limit, getDocs, serverTimestamp, COLLECTION_NAME }
-      : null;
+    window.__dressupFirestore = {
+      db: mod.db,
+      collection: mod.collection,
+      addDoc: mod.addDoc,
+      updateDoc: mod.updateDoc,
+      deleteDoc: mod.deleteDoc,
+      doc: mod.doc,
+      onSnapshot: mod.onSnapshot,
+      query: mod.query,
+      orderBy: mod.orderBy,
+      where: mod.where,
+      limit: mod.limit,
+      getDocs: mod.getDocs,
+      serverTimestamp: mod.serverTimestamp,
+      COLLECTION_NAME: mod.COLLECTION_NAME
+    };
+    window.dispatchEvent(new CustomEvent('firestore-ready'));
+  }).catch((err) => {
+    console.error('shared/firebase.js の よみこみに しっぱい', err);
+    window.__dressupFirestore = null;
     window.dispatchEvent(new CustomEvent('firestore-ready'));
   });
 </script>
