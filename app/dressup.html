@@ -287,6 +287,7 @@
   <button class="dock-btn" id="itemSmaller" disabled>🔍－</button>
   <button class="dock-btn" id="itemRotateL" disabled>⟲</button>
   <button class="dock-btn" id="itemRotateR" disabled>⟳</button>
+  <button class="dock-btn" id="itemFlip" disabled>⇄ はんてん</button>
   <button class="dock-btn" id="itemFront" disabled>⬆️ まえに</button>
   <button class="dock-btn danger" id="itemRemove" disabled>🗑️ はずす</button>
 </div>
@@ -311,6 +312,7 @@ const itemBigger = document.getElementById('itemBigger');
 const itemSmaller = document.getElementById('itemSmaller');
 const itemRotateL = document.getElementById('itemRotateL');
 const itemRotateR = document.getElementById('itemRotateR');
+const itemFlip = document.getElementById('itemFlip');
 const itemFront = document.getElementById('itemFront');
 const itemRemove = document.getElementById('itemRemove');
 
@@ -465,7 +467,7 @@ function renderItemCloset() {
         img: loaded,
         x: stage.width / 2,
         y: stage.height / 2,
-        scale, rotation: 0
+        scale, rotation: 0, flipped: false
       };
       stageItems.push(newItem);
       selectedStageItem = newItem;
@@ -571,10 +573,13 @@ function drawStage() {
     stageCtx.save();
     stageCtx.translate(item.x, item.y);
     stageCtx.rotate(item.rotation);
+    if (item.flipped) stageCtx.scale(-1, 1);
     const w = item.img.width * item.scale;
     const h = item.img.height * item.scale;
     stageCtx.drawImage(item.img, -w / 2, -h / 2, w, h);
     if (item === selectedStageItem) {
+      // 反転しても選択枠が正しく見えるよう scale を打ち消す
+      if (item.flipped) stageCtx.scale(-1, 1);
       stageCtx.strokeStyle = 'rgba(124,111,242,0.9)';
       stageCtx.lineWidth = 3;
       stageCtx.setLineDash([8, 6]);
@@ -587,7 +592,7 @@ function drawStage() {
 
 function updateItemControls() {
   const has = !!selectedStageItem;
-  [itemBigger, itemSmaller, itemRotateL, itemRotateR, itemFront, itemRemove].forEach(b => {
+  [itemBigger, itemSmaller, itemRotateL, itemRotateR, itemFlip, itemFront, itemRemove].forEach(b => {
     b.disabled = !has;
   });
 }
@@ -672,6 +677,11 @@ itemRotateL.addEventListener('click', () => {
 itemRotateR.addEventListener('click', () => {
   if (!selectedStageItem) return;
   selectedStageItem.rotation += Math.PI / 12;
+  drawStage();
+});
+itemFlip.addEventListener('click', () => {
+  if (!selectedStageItem) return;
+  selectedStageItem.flipped = !selectedStageItem.flipped;
   drawStage();
 });
 itemFront.addEventListener('click', () => {
