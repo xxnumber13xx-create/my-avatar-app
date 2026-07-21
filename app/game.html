@@ -45,6 +45,13 @@
     padding: 22px;
     box-shadow: 0 14px 0 rgba(124,111,242,0.10), 0 20px 40px rgba(46,42,71,0.08);
   }
+  @media (max-width: 640px) {
+    .game-outer > .card {
+      padding: 14px 12px;
+      border-radius: 18px;
+    }
+    .game-outer { padding: 10px 8px calc(24px + env(safe-area-inset-bottom, 0)); }
+  }
 
   /* ==== 以下 legacy.html から抽出した ゲーム関連 CSS ==== */
   .picker-row { margin-bottom: 12px; }
@@ -107,14 +114,21 @@
 
   .game-holder {
     position: relative;
-    padding: 18px;
+    padding: 12px;
     background: linear-gradient(180deg, #E7C79A, #D8AE73);
     border-radius: 18px;
     box-shadow: 0 10px 24px rgba(166,107,52,0.25);
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
   }
 
   #gameCanvas {
     display: block;
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+    aspect-ratio: 1;
     background: linear-gradient(180deg, #C6EAFF 0%, #E6F7FF 65%, #FFF3D6 65%, #FFE9B8 100%);
     border-radius: 10px;
     touch-action: none;
@@ -122,9 +136,16 @@
     box-shadow: inset 0 0 0 2px #F0E6D2;
   }
 
+  /* .canvas-stage: legacyでは flexのみ。中央寄せしつつ小画面でも収まるように */
+  .canvas-stage {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+  }
+
   .game-overlay {
     position: absolute;
-    inset: 18px;
+    inset: 12px;
     border-radius: 10px;
     background: rgba(46,42,71,0.55);
     display: none;
@@ -273,6 +294,10 @@
   /* ==== リズムゲーム ==== */
   #rhythmCanvas {
     display: block;
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+    aspect-ratio: 1;
     background: linear-gradient(180deg, #FFE0F0 0%, #FFF3D6 100%);
     border-radius: 10px;
     touch-action: none;
@@ -594,19 +619,6 @@
 
   /* ==== 太鼓風ノート表示（大ノート・ドン/カツ）は canvas 側で描画 ==== */
 
-</style>
-</head>
-<body>
-<div class="wrap">
-
-  <div style="max-width:940px;margin:8px auto 0;padding:0 16px;">
-    <a href="/index.html" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#2E2A47;font-weight:800;background:#fff;border-radius:999px;padding:6px 14px;box-shadow:0 4px 0 rgba(46,42,71,0.15);font-family:'Baloo 2',sans-serif;font-size:13px;">← トップ に もどる</a>
-  </div>
-
-  <nav class="tabs">
-    <button class="tab active" data-screen="draw">👗 きせかえ</button>
-    <button class="tab" data-screen="game">🏃 ミニゲーム</button>
-    <button class="tab" data-screen="room">🏠 おへや</button>
 </style>
 </head>
 <body class="app-fullscreen">
