@@ -173,7 +173,10 @@ body.app-fullscreen {
   touch-action: none;
 }
 body.app-fullscreen {
-  padding-bottom: env(safe-area-inset-bottom, 0);
+  /* Android のジェスチャーバー付近 & iPhone のホームインジケーターを避けるため、
+     最低 28px（Android）〜 iPhone セーフエリア分 のマージンを常時確保。
+     これで下部のドックや色パレットが「操作しづらい」ほど下に張り付かなくなる。 */
+  padding-bottom: max(28px, env(safe-area-inset-bottom, 28px));
   display: flex;
   flex-direction: column;
 }
