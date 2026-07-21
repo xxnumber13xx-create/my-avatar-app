@@ -300,6 +300,197 @@
     font-size: 11px; color: var(--ink-soft);
     font-weight: 600; margin-top: 2px;
   }
+
+  /* ==== ヘッダーのアバターボタン ==== */
+  .header-avatar-btn {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: linear-gradient(180deg, #FFDCEA, #FFB6D0);
+    border: 2px solid #E14E7F;
+    cursor: pointer; font-size: 18px;
+    display: flex; align-items: center; justify-content: center; padding: 0;
+    transition: transform .1s;
+  }
+  .header-avatar-btn:active { transform: translateY(1px); }
+  .header-avatar-btn.has-avatar {
+    background: linear-gradient(180deg, #FFF3C9, #FFD966);
+    border-color: #E8A200;
+  }
+
+  /* ==== ヘッダーの ばしょ ボタン ==== */
+  .header-location-btn {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: linear-gradient(180deg, #C6F5E4, #A2E9C9);
+    border: 2px solid #4CD4B0;
+    cursor: pointer; font-size: 18px;
+    display: flex; align-items: center; justify-content: center; padding: 0;
+    transition: transform .1s;
+  }
+  .header-location-btn:active { transform: translateY(1px); }
+
+  /* ==== ばしょピッカーのグリッド ==== */
+  .location-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    max-height: 55vh;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    padding: 4px;
+  }
+  .location-card {
+    aspect-ratio: 3/2;
+    background: #F8F5FF;
+    border: 3px solid transparent;
+    border-radius: 14px;
+    padding: 6px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    overflow: hidden;
+    transition: transform .1s;
+    position: relative;
+  }
+  .location-card:active { transform: translateY(1px); }
+  .location-card.selected {
+    border-color: #4CD4B0;
+    background: #E8FBF4;
+    box-shadow: 0 4px 0 rgba(76,212,176,0.35);
+  }
+  .location-card .loc-svg-wrap {
+    flex: 1; width: 100%;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .location-card .loc-svg-wrap svg { width: 100%; height: 100%; }
+  .location-card .loc-svg-wrap .home-icon {
+    font-size: 44px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+  }
+  .location-card .loc-label {
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    color: var(--ink);
+  }
+
+  /* ==== アバターピッカーのグリッド ==== */
+  .avatar-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    max-height: 55vh;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    padding: 4px;
+  }
+  .avatar-pick-card {
+    aspect-ratio: 1;
+    background: #F8F5FF;
+    border: 3px solid transparent;
+    border-radius: 14px;
+    padding: 6px;
+    cursor: pointer;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    transition: transform .1s;
+  }
+  .avatar-pick-card:active { transform: translateY(1px); }
+  .avatar-pick-card.selected {
+    border-color: var(--purple);
+    background: #F1EEFF;
+    box-shadow: 0 4px 0 rgba(124,111,242,0.35);
+  }
+  .avatar-pick-card img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+  }
+  .avatar-pick-card .card-tag {
+    position: absolute;
+    top: -2px; left: -2px;
+    background: var(--yellow);
+    color: var(--ink);
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 800;
+    font-size: 9px;
+    letter-spacing: 0.3px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  }
+  .avatar-pick-card .card-tag.look { background: var(--pink); color: #fff; }
+  .avatar-pick-card .card-tag.madeup { background: #FFA1CA; color: #fff; }
+
+  .avatar-picker-empty {
+    padding: 30px 20px;
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.6;
+    background: #F4F1FF;
+    border-radius: 14px;
+    border: 2px dashed #DCD5FF;
+    margin-bottom: 16px;
+  }
+
+  /* ==== アクションバー（アバター配置時） ==== */
+  .action-bar {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    padding: 8px;
+    border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(46,42,71,0.2);
+    z-index: 4;
+    animation: actionBarIn .3s ease-out;
+  }
+  @keyframes actionBarIn {
+    from { opacity: 0; transform: translate(-50%, 10px); }
+    to   { opacity: 1; transform: translate(-50%, 0); }
+  }
+  .act-btn {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: 2px solid #EDE9FF;
+    background: #F8F5FF;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0;
+    transition: transform .1s;
+  }
+  .act-btn:active { transform: translateY(1px); }
+  .act-btn.selected {
+    background: linear-gradient(180deg, #DDEEFF, #C4E0FF);
+    border-color: var(--purple);
+    box-shadow: 0 3px 0 rgba(124,111,242,0.35);
+  }
+  .act-btn.danger {
+    background: #FFE8EC;
+    border-color: #FFB8C7;
+  }
+  .act-divider {
+    width: 1px;
+    height: 24px;
+    background: #DCD5FF;
+    margin: 0 2px;
+  }
+
+  @media (max-width: 900px) {
+    .action-bar { padding: 6px; gap: 4px; }
+    .act-btn { width: 38px; height: 38px; font-size: 17px; }
+  }
 </style>
 
 <!-- Three.js を importmap で読み込む -->
@@ -319,6 +510,8 @@
   <h1><span class="badge3d">3D</span>🏠 おへや</h1>
   <button class="panel-toggle" id="catToggle" title="家具">🪑</button>
   <button class="panel-toggle" id="adjustToggle" title="ちょうせい">⚙️</button>
+  <button class="header-avatar-btn" id="pickAvatarBtn" title="あばたー を えらぶ">👧</button>
+  <button class="header-location-btn" id="pickLocationBtn" title="どこ に いく？">🌍</button>
   <button class="btn-primary" id="saveBtn">💾 ほぞん</button>
 </header>
 
@@ -348,6 +541,18 @@
         <button class="cam-btn" id="camResetBtn" title="ビューを リセット">🎯</button>
       </div>
       <div class="loading-overlay" id="loadingOverlay">3D おへや を じゅんび中…</div>
+      <div class="action-bar" id="actionBar" style="display:none;">
+        <button class="act-btn" data-act="idle" title="とまる">🛑</button>
+        <button class="act-btn" data-act="wave" title="てを ふる">🙋</button>
+        <button class="act-btn" data-act="jump" title="ジャンプ">🦘</button>
+        <button class="act-btn" data-act="dance" title="おどる">💃</button>
+        <button class="act-btn" data-act="float" title="うかぶ">🎈</button>
+        <div class="act-divider"></div>
+        <button class="act-btn" id="walkModeBtn" title="タップで あるく">🚶</button>
+        <button class="act-btn" id="flipAvatarBtn" title="むきを かえる">⇄</button>
+        <div class="act-divider"></div>
+        <button class="act-btn danger" id="removeAvatarBtn" title="はずす">🗑️</button>
+      </div>
     </div>
   </div>
 
@@ -398,15 +603,44 @@
   </div>
 </div>
 
+<!-- アバターピッカー -->
+<div class="modal-backdrop" id="avatarPickerModal">
+  <div class="modal-card">
+    <h3>👧 あばたー を えらんで</h3>
+    <p style="color:var(--ink-soft);font-size:12px;font-weight:600;margin:0 0 12px;">
+      おへや に アバター を おくよ。タップで えらんでね。
+    </p>
+    <div id="avatarPickerGrid" class="avatar-picker-grid"></div>
+    <div id="avatarPickerEmpty" class="avatar-picker-empty" style="display:none;">
+      まだ アバター が いないよ！<br>
+      「おえかき」で アバター を つくってね 🎨
+    </div>
+    <button class="btn-ghost" id="closeAvatarPickerBtn" style="width:100%;">とじる</button>
+  </div>
+</div>
+
+<!-- ばしょピッカー -->
+<div class="modal-backdrop" id="locationModal">
+  <div class="modal-card">
+    <h3 style="color:#4CD4B0;">🌍 どこ に いく？</h3>
+    <p style="color:var(--ink-soft);font-size:12px;font-weight:600;margin:0 0 12px;">
+      アバター と かぐ は そのまま つれていくよ 🎒
+    </p>
+    <div id="locationGrid" class="location-grid"></div>
+    <button class="btn-ghost" id="closeLocationBtn" style="width:100%;">とじる</button>
+  </div>
+</div>
+
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 import { isConfigured, saveAvatar, updateAvatar, watchAvatars } from '/shared/firebase.js';
 import {
-  showToast, loadImage, svgToImage,
+  showToast, loadImage, loadImageTransparent, svgToImage,
   FURNITURE_LIBRARY, FURNITURE_CATEGORIES,
-  ROOM_WALL_COLORS, ROOM_FLOOR_COLORS
+  ROOM_WALL_COLORS, ROOM_FLOOR_COLORS,
+  SCENE_LIBRARY
 } from '/shared/utils.js';
 
 // ============================================================
@@ -422,6 +656,37 @@ const ROOM_SIZE = 8;
 const WALL_HEIGHT = 4.5;
 // 元の 2.5D で「64px = 1 タイル」だったので、画像 px → ワールド単位は /64
 const PX_TO_WORLD = 1 / 64;
+
+// ============================================================
+// ばしょ（location）定義
+// ============================================================
+// 'home' = 3Dおへや（壁＋タイル床）
+// それ以外 = SCENE_LIBRARY にある背景。scene.html を統合した「おでかけ先」。
+const LOCATIONS = [
+  { key: 'home', label: '🏠 おうち', icon: '🏠', isHome: true },
+  ...SCENE_LIBRARY.map(s => ({
+    key: s.key, label: s.label, icon: s.label.split(' ')[0],
+    svg: s.svg, isHome: false
+  }))
+];
+// 屋外シーンの地面の色（3D床面の色）
+const OUTDOOR_GROUND_COLORS = {
+  park:   '#7BC868',
+  beach:  '#F5D5B0',
+  school: '#B8945F',
+  forest: '#5FA23D',
+  cafe:   '#B78C5A',
+  town:   '#5A5A5A'
+};
+// 屋外シーンの空の色（背景色）
+const OUTDOOR_SKY_COLORS = {
+  park:   '#DDEEFF',
+  beach:  '#B8E4FF',
+  school: '#F5EEDF',
+  forest: '#C8E6D0',
+  cafe:   '#F5EEDF',
+  town:   '#D5DDE8'
+};
 
 // ============================================================
 // DOM
@@ -450,6 +715,19 @@ const furniturePanel = document.getElementById('furniturePanel');
 const adjustPanel = document.getElementById('adjustPanel');
 const panelBackdrop = document.getElementById('panelBackdrop');
 const camResetBtn = document.getElementById('camResetBtn');
+const pickAvatarBtn = document.getElementById('pickAvatarBtn');
+const avatarPickerModal = document.getElementById('avatarPickerModal');
+const avatarPickerGrid = document.getElementById('avatarPickerGrid');
+const avatarPickerEmpty = document.getElementById('avatarPickerEmpty');
+const closeAvatarPickerBtn = document.getElementById('closeAvatarPickerBtn');
+const actionBar = document.getElementById('actionBar');
+const removeAvatarBtn = document.getElementById('removeAvatarBtn');
+const walkModeBtn = document.getElementById('walkModeBtn');
+const flipAvatarBtn = document.getElementById('flipAvatarBtn');
+const pickLocationBtn = document.getElementById('pickLocationBtn');
+const locationModal = document.getElementById('locationModal');
+const locationGrid = document.getElementById('locationGrid');
+const closeLocationBtn = document.getElementById('closeLocationBtn');
 
 // ============================================================
 // 状態
@@ -458,12 +736,21 @@ const state = {
   currentCategory: 'bed',
   wallColor: ROOM_WALL_COLORS[0],
   floorColor: ROOM_FLOOR_COLORS[0],
+  // どこの ばしょ にいるか（'home' / 'park' / 'beach' / 'school' / 'forest' / 'cafe' / 'town'）
+  locationKey: 'home',
   // items: { id, kind, category, variantIndex, customId, tileX, tileY, scale }
   items: [],
-  selectedId: null,
+  selectedId: null, // 数値ID = 家具、文字列 'avatar' = アバター
   customFurniture: [],
   currentRoomId: null,
-  undoStack: []
+  undoStack: [],
+  // アバター配置（お部屋にひとつだけ）
+  // { id, imageData, _img, tileX, tileY, scale, action, flipped, walkTarget }
+  avatar: null,
+  // Firestore から読んだ配置可能アバター一覧（type: avatar/madeup/look）
+  availableAvatars: [],
+  // 「あるく モード」（次の 床タップ が walk 先）
+  walkMode: false
 };
 
 let nextItemId = 1;
@@ -525,9 +812,10 @@ scene.add(fill);
 const roomGroup = new THREE.Group();
 scene.add(roomGroup);
 
-let floorMesh, wallBackMesh, wallLeftMesh;
+let floorMesh, wallBackMesh, wallLeftMesh, backdropMesh;
 
-function buildRoom() {
+/** ばしょ を セットアップ（home ならおへや、それ以外は 屋外シーン） */
+async function buildRoom() {
   // 既存を削除
   while (roomGroup.children.length) {
     const c = roomGroup.children[0];
@@ -538,7 +826,20 @@ function buildRoom() {
       c.material.dispose();
     }
   }
+  wallBackMesh = wallLeftMesh = backdropMesh = null;
 
+  const loc = LOCATIONS.find(l => l.key === state.locationKey) || LOCATIONS[0];
+  if (loc.isHome) {
+    buildHomeRoom();
+    scene.background = new THREE.Color(0xE8F2FF);
+  } else {
+    await buildOutdoorScene(loc);
+    scene.background = new THREE.Color(OUTDOOR_SKY_COLORS[loc.key] || 0xE8F2FF);
+  }
+}
+
+/** おうちの部屋（床＋壁） */
+function buildHomeRoom() {
   // 床（チェッカー模様のCanvasTexture）
   const floorTex = makeCheckerFloorTexture(state.floorColor);
   const floorGeom = new THREE.PlaneGeometry(ROOM_SIZE, ROOM_SIZE);
@@ -582,6 +883,65 @@ function buildRoom() {
   const skirtLeft = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.18, ROOM_SIZE), skirtingMat);
   skirtLeft.position.set(-ROOM_SIZE / 2 + wallThickness / 2 + 0.01, 0.09, 0);
   roomGroup.add(skirtLeft);
+}
+
+/** 屋外シーン（地面＋背景の SVG 板） */
+async function buildOutdoorScene(loc) {
+  const groundColor = OUTDOOR_GROUND_COLORS[loc.key] || '#B78C5A';
+
+  // 地面: 単色の大きめの円盤（8x8タイル分の中心＋周辺の余白）
+  const groundGeom = new THREE.PlaneGeometry(ROOM_SIZE * 1.6, ROOM_SIZE * 1.6);
+  const groundMat = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(groundColor),
+    roughness: 0.95, metalness: 0
+  });
+  floorMesh = new THREE.Mesh(groundGeom, groundMat);
+  floorMesh.rotation.x = -Math.PI / 2;
+  floorMesh.position.y = 0;
+  floorMesh.receiveShadow = true;
+  floorMesh.userData.isFloor = true;
+  roomGroup.add(floorMesh);
+
+  // 8x8 の「配置エリア」ガイド（薄い枠だけ）
+  const gridEdges = new THREE.EdgesGeometry(new THREE.PlaneGeometry(ROOM_SIZE, ROOM_SIZE));
+  const gridLines = new THREE.LineSegments(
+    gridEdges,
+    new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35 })
+  );
+  gridLines.rotation.x = -Math.PI / 2;
+  gridLines.position.y = 0.005;
+  roomGroup.add(gridLines);
+
+  // 背景: SCENE_LIBRARY の SVG をテクスチャにして 大きな板ポリで背後に立てる（diorama風）
+  try {
+    const svgImg = await svgToImage(loc.svg);
+    const c = document.createElement('canvas');
+    c.width = svgImg.width; c.height = svgImg.height;
+    c.getContext('2d').drawImage(svgImg, 0, 0);
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    tex.needsUpdate = true;
+
+    // SVG は 720x500 (aspect 1.44)。大きさ:
+    // 高さ = 壁より少し高く、幅は アスペクトで
+    const bh = WALL_HEIGHT * 1.8;
+    const bw = bh * (svgImg.width / svgImg.height);
+    const bdrGeom = new THREE.PlaneGeometry(bw, bh);
+    const bdrMat = new THREE.MeshBasicMaterial({
+      map: tex, side: THREE.DoubleSide, transparent: false
+    });
+    backdropMesh = new THREE.Mesh(bdrGeom, bdrMat);
+    // 奥壁の位置あたりに立てる。少しだけ床にめり込ませて 地面と繋げる
+    backdropMesh.position.set(0, bh / 2 - 0.05, -ROOM_SIZE / 2);
+    // カメラは +X +Z 方向にいるので 背景は +Z を向いていればOK（rotation.y=0）
+    // ただし少しY回転して左右対称なアングルにする
+    roomGroup.add(backdropMesh);
+
+    // 左右にも 同じ SVG を薄く追加してもいいが、まずはシンプルに 1 枚だけ
+  } catch (err) {
+    console.warn('シーン背景の生成に失敗', err);
+  }
 }
 
 function makeCheckerFloorTexture(baseColor) {
@@ -872,6 +1232,188 @@ function updateSelectionVisual() {
     // 選択中はほんの少しふわっと持ち上げるアニメ用フラグ
     obj.userData.selected = isSel;
   }
+  if (avatarObj) {
+    const isSel = state.selectedId === 'avatar';
+    avatarObj.userData.ring.visible = isSel;
+    avatarObj.userData.selected = isSel;
+  }
+}
+
+// ============================================================
+// アバター（3Dオブジェクト）
+// ============================================================
+// アバターは板ポリのビルボード。おへや に ひとつだけ 配置できる。
+// アクション（wave/jump/dance/float/idle）は animate ループで transform を動かす。
+
+let avatarObj = null;         // THREE.Group
+const AVATAR_BASE_HEIGHT = 2.5; // ワールド単位（壁高さ 4.5 の約半分）
+
+async function ensureAvatarObject() {
+  if (!state.avatar) return;
+  // 画像が変わったら作り直す（別アバターに切り替えた時）
+  if (avatarObj && avatarObj.userData.imgSrc !== state.avatar.imageData) {
+    removeAvatarObject();
+  }
+  if (avatarObj) {
+    updateAvatarTransform();
+    return;
+  }
+  if (!state.avatar._img) {
+    state.avatar._img = await loadImageTransparent(state.avatar.imageData);
+  }
+  const img = state.avatar._img;
+  const aspect = img.width / img.height;
+  const baseH = AVATAR_BASE_HEIGHT;
+  const baseW = baseH * aspect;
+
+  const c = document.createElement('canvas');
+  c.width = img.width; c.height = img.height;
+  c.getContext('2d').drawImage(img, 0, 0);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  tex.magFilter = THREE.LinearFilter;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  tex.needsUpdate = true;
+
+  const geom = new THREE.PlaneGeometry(baseW, baseH);
+  const mat = new THREE.MeshBasicMaterial({
+    map: tex, transparent: true, alphaTest: 0.02,
+    side: THREE.DoubleSide
+  });
+  const mesh = new THREE.Mesh(geom, mat);
+
+  // 足元の楕円影（家具より少し濃く）
+  const shadowC = document.createElement('canvas');
+  shadowC.width = 128; shadowC.height = 64;
+  const sctx = shadowC.getContext('2d');
+  const grad = sctx.createRadialGradient(64, 32, 4, 64, 32, 60);
+  grad.addColorStop(0, 'rgba(0,0,0,0.42)');
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  sctx.fillStyle = grad;
+  sctx.fillRect(0, 0, 128, 64);
+  const shTex = new THREE.CanvasTexture(shadowC);
+  const shadow = new THREE.Mesh(
+    new THREE.PlaneGeometry(baseW * 0.7, baseW * 0.35),
+    new THREE.MeshBasicMaterial({ map: shTex, transparent: true, depthWrite: false })
+  );
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.position.y = 0.01;
+
+  // 選択リング（アバターは目立つ色に）
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(baseW * 0.38, baseW * 0.48, 32),
+    new THREE.MeshBasicMaterial({
+      color: 0xFF6B9D, transparent: true, opacity: 0.9,
+      side: THREE.DoubleSide, depthWrite: false
+    })
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.03;
+  ring.visible = false;
+
+  const group = new THREE.Group();
+  group.add(mesh);
+  group.add(shadow);
+  group.add(ring);
+  group.userData.isAvatar = true;
+  group.userData.mesh = mesh;
+  group.userData.shadow = shadow;
+  group.userData.ring = ring;
+  group.userData.baseH = baseH;
+  group.userData.baseW = baseW;
+  group.userData.imgSrc = state.avatar.imageData;
+  scene.add(group);
+  avatarObj = group;
+  updateAvatarTransform();
+}
+
+function updateAvatarTransform() {
+  if (!avatarObj || !state.avatar) return;
+  const baseH = avatarObj.userData.baseH;
+  const scale = state.avatar.scale || 1;
+  const wH = baseH * scale;
+  const wx = state.avatar.tileX + 0.5 - ROOM_SIZE / 2;
+  const wz = state.avatar.tileY + 0.5 - ROOM_SIZE / 2;
+  avatarObj.position.set(wx, 0, wz);
+  const mesh = avatarObj.userData.mesh;
+  // flip は mesh.scale.x を負にして 実現
+  const sx = scale * (state.avatar.flipped ? -1 : 1);
+  mesh.scale.set(sx, scale, scale);
+  mesh.position.set(0, wH / 2, 0);
+  avatarObj.userData.shadow.scale.set(scale, scale, scale);
+  avatarObj.userData.ring.scale.set(scale, scale, scale);
+}
+
+function removeAvatarObject() {
+  if (!avatarObj) return;
+  scene.remove(avatarObj);
+  avatarObj.traverse(o => {
+    if (o.geometry) o.geometry.dispose();
+    if (o.material) {
+      if (o.material.map) o.material.map.dispose();
+      o.material.dispose();
+    }
+  });
+  avatarObj = null;
+}
+
+/** アバターを配置（既存があれば入れ替え） */
+async function placeAvatar(avDoc, opts = {}) {
+  const src = avDoc.realisticImageData || avDoc.imageData;
+  const img = await loadImageTransparent(src);
+  const wasSelected = state.selectedId === 'avatar';
+  // 位置は継続 or 中央
+  const prev = state.avatar;
+  state.avatar = {
+    id: avDoc.id,
+    imageData: src,
+    _img: img,
+    tileX: opts.tileX ?? prev?.tileX ?? 4,
+    tileY: opts.tileY ?? prev?.tileY ?? 5,
+    scale: opts.scale ?? prev?.scale ?? 1,
+    action: opts.action ?? prev?.action ?? 'idle'
+  };
+  await ensureAvatarObject();
+  if (wasSelected) state.selectedId = 'avatar';
+  updateActionBar();
+  updatePickAvatarBtn();
+  updateSelectionVisual();
+  renderAdjust();
+}
+
+/** アバターをおへやから消す */
+function clearAvatar() {
+  state.avatar = null;
+  removeAvatarObject();
+  if (state.selectedId === 'avatar') state.selectedId = null;
+  updateActionBar();
+  updatePickAvatarBtn();
+  renderAdjust();
+}
+
+function setAction(action) {
+  if (!state.avatar) return;
+  state.avatar.action = action;
+  updateActionBar();
+}
+
+function updateActionBar() {
+  if (!state.avatar) {
+    actionBar.style.display = 'none';
+    state.walkMode = false;
+    return;
+  }
+  actionBar.style.display = 'flex';
+  actionBar.querySelectorAll('.act-btn[data-act]').forEach(b => {
+    b.classList.toggle('selected', b.dataset.act === state.avatar.action);
+  });
+  walkModeBtn.classList.toggle('selected', state.walkMode);
+  flipAvatarBtn.classList.toggle('selected', !!state.avatar.flipped);
+}
+
+function updatePickAvatarBtn() {
+  pickAvatarBtn.classList.toggle('has-avatar', !!state.avatar);
 }
 
 // ============================================================
@@ -931,6 +1473,165 @@ function buildCustomGrid() {
       if (window.innerWidth <= 900) closeAllPanels();
     });
     customGrid.appendChild(it);
+  });
+}
+
+// ============================================================
+// アバターピッカー
+// ============================================================
+function openAvatarPicker() {
+  buildAvatarPickerGrid();
+  avatarPickerModal.classList.add('show');
+}
+function closeAvatarPicker() {
+  avatarPickerModal.classList.remove('show');
+}
+
+function buildAvatarPickerGrid() {
+  avatarPickerGrid.innerHTML = '';
+  if (state.availableAvatars.length === 0) {
+    avatarPickerGrid.style.display = 'none';
+    avatarPickerEmpty.style.display = 'block';
+    return;
+  }
+  avatarPickerGrid.style.display = 'grid';
+  avatarPickerEmpty.style.display = 'none';
+
+  // 新しい順（最近作ったものを上）
+  const sorted = [...state.availableAvatars].sort((a, b) => {
+    const ta = a.createdAt?.seconds || 0;
+    const tb = b.createdAt?.seconds || 0;
+    return tb - ta;
+  });
+
+  sorted.forEach(av => {
+    const card = document.createElement('button');
+    card.className = 'avatar-pick-card' + (state.avatar && state.avatar.id === av.id ? ' selected' : '');
+
+    if (av.type === 'look') {
+      const t = document.createElement('div');
+      t.className = 'card-tag look'; t.textContent = 'コーデ';
+      card.appendChild(t);
+    } else if (av.type === 'madeup') {
+      const t = document.createElement('div');
+      t.className = 'card-tag madeup'; t.textContent = 'メイク';
+      card.appendChild(t);
+    }
+    const img = document.createElement('img');
+    img.src = av.realisticImageData || av.imageData;
+    card.appendChild(img);
+    card.addEventListener('click', async () => {
+      pushUndo();
+      closeAvatarPicker();
+      try {
+        showToast('アバター を おいてるよ…');
+        await placeAvatar(av);
+        showToast('👧 アバター を おいたよ！ドラッグで うごかせるよ');
+      } catch (err) {
+        console.error(err);
+        showToast('アバター の おきかえに しっぱい');
+      }
+    });
+    avatarPickerGrid.appendChild(card);
+  });
+}
+
+pickAvatarBtn.addEventListener('click', openAvatarPicker);
+closeAvatarPickerBtn.addEventListener('click', closeAvatarPicker);
+avatarPickerModal.addEventListener('click', e => {
+  if (e.target === avatarPickerModal) closeAvatarPicker();
+});
+
+// アクションバーのボタン
+actionBar.querySelectorAll('.act-btn[data-act]').forEach(b => {
+  b.addEventListener('click', () => {
+    setAction(b.dataset.act);
+  });
+});
+removeAvatarBtn.addEventListener('click', () => {
+  if (!state.avatar) return;
+  if (!confirm('アバター を おへや から はずす？')) return;
+  pushUndo();
+  clearAvatar();
+});
+
+// あるく モードの ON/OFF（トグル）
+walkModeBtn.addEventListener('click', () => {
+  if (!state.avatar) return;
+  state.walkMode = !state.walkMode;
+  updateActionBar();
+  if (state.walkMode) {
+    showToast('🚶 タップした ばしょ に あるくよ');
+  }
+});
+
+// 左右はんてん
+flipAvatarBtn.addEventListener('click', () => {
+  if (!state.avatar) return;
+  pushUndo();
+  state.avatar.flipped = !state.avatar.flipped;
+  updateAvatarTransform();
+  updateActionBar();
+});
+
+// ============================================================
+// ばしょピッカー（home / 屋外シーン）
+// ============================================================
+function openLocationPicker() {
+  buildLocationGrid();
+  locationModal.classList.add('show');
+}
+function closeLocationPickerModal() {
+  locationModal.classList.remove('show');
+}
+function buildLocationGrid() {
+  locationGrid.innerHTML = '';
+  LOCATIONS.forEach(loc => {
+    const card = document.createElement('button');
+    card.className = 'location-card' + (loc.key === state.locationKey ? ' selected' : '');
+    const wrap = document.createElement('div');
+    wrap.className = 'loc-svg-wrap';
+    if (loc.isHome) {
+      wrap.innerHTML = '<div class="home-icon">🏠</div>';
+    } else {
+      wrap.innerHTML = loc.svg;
+    }
+    card.appendChild(wrap);
+    const lb = document.createElement('div');
+    lb.className = 'loc-label';
+    lb.textContent = loc.label;
+    card.appendChild(lb);
+    card.addEventListener('click', () => setLocation(loc.key));
+    locationGrid.appendChild(card);
+  });
+}
+async function setLocation(key) {
+  if (key === state.locationKey) { closeLocationPickerModal(); return; }
+  pushUndo();
+  state.locationKey = key;
+  closeLocationPickerModal();
+  const loc = LOCATIONS.find(l => l.key === key);
+  // 屋外シーンの選択肢では 壁/床 色スウォッチは無効になる（見た目で示す）
+  updateSwatchesEnabled();
+  await buildRoom();
+  showToast(`${loc.label} に きたよ！`);
+}
+pickLocationBtn.addEventListener('click', openLocationPicker);
+closeLocationBtn.addEventListener('click', closeLocationPickerModal);
+locationModal.addEventListener('click', e => {
+  if (e.target === locationModal) closeLocationPickerModal();
+});
+
+/** 屋外シーンでは 壁/床 色のスウォッチはグレーアウト */
+function updateSwatchesEnabled() {
+  const loc = LOCATIONS.find(l => l.key === state.locationKey);
+  const isHome = loc?.isHome !== false;
+  const dock = document.querySelector('.draw-dock');
+  if (!dock) return;
+  const rows = dock.querySelectorAll('.dock-swatch-row');
+  rows.forEach(r => {
+    r.style.opacity = isHome ? '1' : '0.35';
+    r.style.pointerEvents = isHome ? 'auto' : 'none';
   });
 }
 
@@ -1007,7 +1708,18 @@ function snapshot() {
     items: state.items.map(i => ({ ...i })),
     selectedId: state.selectedId,
     wallColor: state.wallColor,
-    floorColor: state.floorColor
+    floorColor: state.floorColor,
+    locationKey: state.locationKey,
+    // アバターは _img と Image オブジェクトを除いた最小情報だけ
+    avatar: state.avatar ? {
+      id: state.avatar.id,
+      imageData: state.avatar.imageData,
+      tileX: state.avatar.tileX,
+      tileY: state.avatar.tileY,
+      scale: state.avatar.scale,
+      action: state.avatar.action,
+      flipped: state.avatar.flipped
+    } : null
   };
 }
 function pushUndo() {
@@ -1020,23 +1732,52 @@ async function undo() {
   const prev = state.undoStack.pop();
   state.items = prev.items;
   state.selectedId = prev.selectedId;
-  const rebuildRoom = prev.wallColor !== state.wallColor || prev.floorColor !== state.floorColor;
+  const rebuildRoom =
+    prev.wallColor !== state.wallColor ||
+    prev.floorColor !== state.floorColor ||
+    (prev.locationKey || 'home') !== state.locationKey;
   state.wallColor = prev.wallColor;
   state.floorColor = prev.floorColor;
-  if (rebuildRoom) { buildSwatches(); buildRoom(); }
+  state.locationKey = prev.locationKey || 'home';
+  if (rebuildRoom) { buildSwatches(); updateSwatchesEnabled(); await buildRoom(); }
   await rebuildAllItems();
+
+  // アバターの復元
+  const prevAv = prev.avatar;
+  if (!prevAv && state.avatar) {
+    clearAvatar();
+  } else if (prevAv && (!state.avatar || state.avatar.id !== prevAv.id || state.avatar.imageData !== prevAv.imageData)) {
+    // 別アバター or 新規復元
+    removeAvatarObject();
+    state.avatar = { ...prevAv, _img: null, walkTarget: null };
+    await ensureAvatarObject();
+    updateActionBar();
+    updatePickAvatarBtn();
+  } else if (prevAv && state.avatar) {
+    // 同じアバターの位置・スケール・アクション・向き復元
+    state.avatar.tileX = prevAv.tileX;
+    state.avatar.tileY = prevAv.tileY;
+    state.avatar.scale = prevAv.scale;
+    state.avatar.action = prevAv.action;
+    state.avatar.flipped = prevAv.flipped;
+    state.avatar.walkTarget = null;
+    updateAvatarTransform();
+    updateActionBar();
+  }
+  updateSelectionVisual();
   renderAdjust();
   if (state.undoStack.length === 0) undoBtn.disabled = true;
 }
 undoBtn.addEventListener('click', undo);
 
 clearBtn.addEventListener('click', async () => {
-  if (state.items.length === 0) return;
-  if (!confirm('かぐを ぜんぶ けす？（かべ と ゆか の いろ は のこる よ）')) return;
+  if (state.items.length === 0 && !state.avatar) return;
+  if (!confirm('かぐと アバターを ぜんぶ けす？（かべ と ゆか の いろ は のこる よ）')) return;
   pushUndo();
   state.items = [];
   state.selectedId = null;
   await rebuildAllItems();
+  if (state.avatar) clearAvatar();
   renderAdjust();
 });
 
@@ -1052,19 +1793,22 @@ function setPointer(e) {
   pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 }
 
-/** 家具の当たり判定（グループ→中の mesh を対象に） */
+/** 家具・アバターの当たり判定（グループ→中の mesh を対象に） */
 function pickItem() {
   raycaster.setFromCamera(pointer, camera);
   const meshes = [];
   for (const [, obj] of itemObjects) {
     if (obj.userData.mesh) meshes.push(obj.userData.mesh);
   }
+  if (avatarObj) meshes.push(avatarObj.userData.mesh);
   const hits = raycaster.intersectObjects(meshes, false);
   if (hits.length === 0) return null;
-  // 一番前面のヒット → その親グループ の itemId
+  // 一番前面のヒット → 親グループから ID を取り出す
   let m = hits[0].object;
-  while (m && !m.userData.itemId) m = m.parent;
-  return m ? m.userData.itemId : null;
+  while (m && !m.userData.itemId && !m.userData.isAvatar) m = m.parent;
+  if (!m) return null;
+  if (m.userData.isAvatar) return 'avatar';
+  return m.userData.itemId;
 }
 
 /** 床平面との交点を取得 */
@@ -1074,7 +1818,7 @@ function pickFloorPoint() {
   return hits[0] ? hits[0].point : null;
 }
 
-let dragState = null; // { itemId, startPointerX/Y, origTileX/Y, moved }
+let dragState = null; // { itemId, origTileX/Y, moved }
 
 canvas.addEventListener('pointerdown', e => {
   if (e.pointerType === 'mouse' && e.button !== 0) return;
@@ -1082,19 +1826,42 @@ canvas.addEventListener('pointerdown', e => {
   setPointer(e);
   const hitId = pickItem();
   if (hitId != null) {
-    // 家具を掴んだ → 選択 + ドラッグ準備
+    // 家具 or アバターを掴んだ → 選択 + ドラッグ準備
     state.selectedId = hitId;
+    // 家具/アバターをタップしたので walk モードは解除
+    if (state.walkMode) {
+      state.walkMode = false;
+      updateActionBar();
+    }
     updateSelectionVisual();
     renderAdjust();
-    const item = state.items.find(i => i.id === hitId);
+    let orig;
+    if (hitId === 'avatar') {
+      orig = { tileX: state.avatar.tileX, tileY: state.avatar.tileY };
+      // ドラッグ 移動が始まったら walkTarget はキャンセル
+      state.avatar.walkTarget = null;
+    } else {
+      const item = state.items.find(i => i.id === hitId);
+      orig = { tileX: item.tileX, tileY: item.tileY };
+    }
     dragState = {
       itemId: hitId,
-      origTileX: item.tileX,
-      origTileY: item.tileY,
+      origTileX: orig.tileX,
+      origTileY: orig.tileY,
       moved: false
     };
     // OrbitControls を一時的に止める
     controls.enabled = false;
+  } else if (state.walkMode && state.avatar) {
+    // 「あるくモード」中に 床タップ → walk 先を セット
+    const p = pickFloorPoint();
+    if (p) {
+      const tx = Math.max(0, Math.min(ROOM_SIZE - 1, Math.floor(p.x + ROOM_SIZE / 2)));
+      const ty = Math.max(0, Math.min(ROOM_SIZE - 1, Math.floor(p.z + ROOM_SIZE / 2)));
+      state.avatar.walkTarget = { tileX: tx, tileY: ty };
+      state.walkMode = false;
+      updateActionBar();
+    }
   } else {
     // 何もない場所 → 選択解除。OrbitControls はそのまま（カメラ回転）
     if (state.selectedId != null) {
@@ -1110,19 +1877,28 @@ canvas.addEventListener('pointermove', e => {
   setPointer(e);
   const p = pickFloorPoint();
   if (!p) return;
-  // ワールド座標 → タイル
   const tx = Math.floor(p.x + ROOM_SIZE / 2);
   const ty = Math.floor(p.z + ROOM_SIZE / 2);
   const cx = Math.max(0, Math.min(ROOM_SIZE - 1, tx));
   const cy = Math.max(0, Math.min(ROOM_SIZE - 1, ty));
-  const item = state.items.find(i => i.id === dragState.itemId);
-  if (!item) return;
-  if (item.tileX !== cx || item.tileY !== cy) {
-    item.tileX = cx;
-    item.tileY = cy;
-    const obj = itemObjects.get(item.id);
-    if (obj) updateItemTransform(item, obj);
-    dragState.moved = true;
+  if (dragState.itemId === 'avatar') {
+    if (!state.avatar) return;
+    if (state.avatar.tileX !== cx || state.avatar.tileY !== cy) {
+      state.avatar.tileX = cx;
+      state.avatar.tileY = cy;
+      updateAvatarTransform();
+      dragState.moved = true;
+    }
+  } else {
+    const item = state.items.find(i => i.id === dragState.itemId);
+    if (!item) return;
+    if (item.tileX !== cx || item.tileY !== cy) {
+      item.tileX = cx;
+      item.tileY = cy;
+      const obj = itemObjects.get(item.id);
+      if (obj) updateItemTransform(item, obj);
+      dragState.moved = true;
+    }
   }
 });
 
@@ -1137,6 +1913,73 @@ canvas.addEventListener('pointercancel', endDrag);
 // 調整パネル
 // ============================================================
 function renderAdjust() {
+  // アバターが選択されているとき
+  if (state.selectedId === 'avatar' && state.avatar) {
+    const a = state.avatar;
+    adjustBody.innerHTML = `
+      <div class="selected-preview" style="background:linear-gradient(180deg,#FFF0F7,#FFE4EC);"><img src="${a.imageData}"/></div>
+      <div class="selected-title" style="color:#E14E7F;">👧 あばたー</div>
+      <div style="font-size:11px;color:var(--ink-soft);text-align:center;font-weight:700;">
+        いち: (${a.tileX}, ${a.tileY})<br>ドラッグ で うごかせるよ
+      </div>
+      <div>
+        <div class="section-title">おおきさ</div>
+        <input type="range" id="avatarScaleSlider" min="40" max="220" value="${Math.round((a.scale||1)*100)}" style="width:100%;accent-color:#E14E7F;">
+        <div style="text-align:right;font-family:'Baloo 2',sans-serif;font-weight:700;color:var(--ink);">${Math.round((a.scale||1)*100)}%</div>
+      </div>
+      <div class="adjust-btns">
+        <button class="adjust-btn" data-move-avatar="up">⬆️ おく</button>
+        <button class="adjust-btn" data-move-avatar="down">⬇️ てまえ</button>
+        <button class="adjust-btn" data-move-avatar="left">⬅️ ひだり</button>
+        <button class="adjust-btn" data-move-avatar="right">➡️ みぎ</button>
+      </div>
+      <div>
+        <div class="section-title">うごき</div>
+        <div style="font-size:11px;color:var(--ink-soft);font-weight:700;line-height:1.5;">
+          🛑 とまる / 🙋 てをふる / 🦘 ジャンプ / 💃 おどる / 🎈 うかぶ<br>
+          <span style="color:#E14E7F;">↓ 画面 下の ボタンで えらんでね</span>
+        </div>
+      </div>
+      <button class="adjust-btn" data-avatar-action="change" style="background:linear-gradient(180deg,#FFDCEA,#FFB6D0);border-color:#E14E7F;color:#E14E7F;">🔄 べつの アバターに かえる</button>
+      <button class="adjust-btn danger" data-avatar-action="remove">🗑️ アバター を はずす</button>
+    `;
+
+    adjustBody.querySelector('#avatarScaleSlider').addEventListener('input', e => {
+      state.avatar.scale = +e.target.value / 100;
+      updateAvatarTransform();
+      // 数字だけ更新（再描画はまだしない）
+      const label = adjustBody.querySelector('#avatarScaleSlider').nextElementSibling;
+      if (label) label.textContent = `${e.target.value}%`;
+    });
+
+    adjustBody.querySelectorAll('[data-move-avatar]').forEach(b => {
+      b.addEventListener('click', () => {
+        pushUndo();
+        const dir = b.dataset.moveAvatar;
+        if (dir === 'up')    state.avatar.tileY = Math.max(0, state.avatar.tileY - 1);
+        if (dir === 'down')  state.avatar.tileY = Math.min(ROOM_SIZE - 1, state.avatar.tileY + 1);
+        if (dir === 'left')  state.avatar.tileX = Math.max(0, state.avatar.tileX - 1);
+        if (dir === 'right') state.avatar.tileX = Math.min(ROOM_SIZE - 1, state.avatar.tileX + 1);
+        updateAvatarTransform();
+        renderAdjust();
+      });
+    });
+
+    adjustBody.querySelectorAll('[data-avatar-action]').forEach(b => {
+      b.addEventListener('click', () => {
+        const act = b.dataset.avatarAction;
+        if (act === 'change') {
+          openAvatarPicker();
+        } else if (act === 'remove') {
+          if (!confirm('アバター を おへや から はずす？')) return;
+          pushUndo();
+          clearAvatar();
+        }
+      });
+    });
+    return;
+  }
+
   const item = state.items.find(i => i.id === state.selectedId);
   if (!item) {
     adjustBody.innerHTML = '<div class="empty-hint">かぐ を えらぶと<br>ここに ちょうせい が でるよ</div>';
@@ -1256,8 +2099,13 @@ resize();
 // 描画ループ
 // ============================================================
 const clock = new THREE.Clock();
+let lastFrameTime = 0;
+const WALK_SPEED = 2.2; // ワールド単位 / 秒（≒ 1タイル/0.45秒）
 function animate() {
   const t = clock.getElapsedTime();
+  const dt = Math.max(0.001, Math.min(0.1, t - lastFrameTime));
+  lastFrameTime = t;
+
   for (const [, obj] of itemObjects) {
     const def = obj.userData.def;
     if (def.flat || def.wall) continue;
@@ -1272,6 +2120,85 @@ function animate() {
       obj.position.y = 0;
     }
   }
+
+  // アバターのアクション
+  if (avatarObj && state.avatar) {
+    const mesh = avatarObj.userData.mesh;
+    const baseH = avatarObj.userData.baseH;
+    const scale = state.avatar.scale || 1;
+    const wH = baseH * scale;
+    const flipSign = state.avatar.flipped ? -1 : 1;
+
+    // まずリセット（flip を反映）
+    mesh.rotation.z = 0;
+    mesh.position.set(0, wH / 2, 0);
+    mesh.scale.set(scale * flipSign, scale, scale);
+
+    // Y軸ビルボード（アバター自体は 立ち姿を保つ）
+    const adx = camera.position.x - avatarObj.position.x;
+    const adz = camera.position.z - avatarObj.position.z;
+    mesh.rotation.y = Math.atan2(adx, adz);
+
+    // 目標地点への 徐行（あるく）
+    const wt = state.avatar.walkTarget;
+    if (wt) {
+      const targetX = wt.tileX + 0.5 - ROOM_SIZE / 2;
+      const targetZ = wt.tileY + 0.5 - ROOM_SIZE / 2;
+      const cxNow = avatarObj.position.x;
+      const czNow = avatarObj.position.z;
+      const ddx = targetX - cxNow;
+      const ddz = targetZ - czNow;
+      const dist = Math.sqrt(ddx * ddx + ddz * ddz);
+      if (dist < 0.06) {
+        // 到着
+        state.avatar.tileX = wt.tileX;
+        state.avatar.tileY = wt.tileY;
+        state.avatar.walkTarget = null;
+        avatarObj.position.set(targetX, avatarObj.position.y, targetZ);
+      } else {
+        const step = Math.min(dist, WALK_SPEED * dt);
+        avatarObj.position.x = cxNow + (ddx / dist) * step;
+        avatarObj.position.z = czNow + (ddz / dist) * step;
+      }
+    }
+
+    // 選択中はふわっと（アクションで上書きされる場合もある）
+    if (avatarObj.userData.selected) {
+      avatarObj.position.y = 0.05 + Math.sin(t * 3) * 0.03;
+    } else {
+      avatarObj.position.y = 0;
+    }
+
+    // アクション: walkTarget があるときは 'walk' 扱い
+    const effAction = wt ? 'walk' : (state.avatar.action || 'idle');
+    if (effAction === 'walk') {
+      // 歩く: 小刻みに 上下 + わずかにゆれる
+      mesh.position.y = wH / 2 + Math.abs(Math.sin(t * 10)) * 0.06;
+      mesh.rotation.z = Math.sin(t * 10) * 0.05;
+    } else if (effAction === 'wave') {
+      mesh.rotation.z = Math.sin(t * 4) * 0.14;
+      mesh.position.y = wH / 2 + Math.abs(Math.sin(t * 4)) * 0.08;
+    } else if (effAction === 'jump') {
+      const cycle = (t % 1.2) / 1.2;
+      const jumpH = Math.max(0, Math.sin(cycle * Math.PI)) * 1.3;
+      mesh.position.y = wH / 2 + jumpH;
+      if (cycle > 0.92 || cycle < 0.08) {
+        const sq = 0.88;
+        mesh.scale.set(scale * flipSign * (2 - sq), scale * sq, scale);
+        mesh.position.y = wH * sq / 2;
+      }
+    } else if (effAction === 'dance') {
+      mesh.rotation.z = Math.sin(t * 6) * 0.2;
+      mesh.position.y = wH / 2 + Math.abs(Math.sin(t * 6)) * 0.18;
+      const pulse = 1 + Math.sin(t * 12) * 0.06;
+      mesh.scale.set(scale * flipSign * pulse, scale * pulse, scale * pulse);
+    } else if (effAction === 'float') {
+      avatarObj.position.y += 0.9 + Math.sin(t * 2) * 0.15;
+      mesh.rotation.z = Math.sin(t * 1.5) * 0.06;
+    }
+    // 'idle' は何もしない（ビルボードだけ）
+  }
+
   controls.update();
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
@@ -1306,7 +2233,17 @@ document.querySelectorAll('[data-savetype]').forEach(btn => {
     const roomData = {
       wallColor: state.wallColor,
       floorColor: state.floorColor,
+      locationKey: state.locationKey,
       items: state.items.map(i => ({ ...i })),
+      // アバター配置情報（あれば）。imageDataは重複を避けて id 参照のみ
+      avatar: state.avatar ? {
+        id: state.avatar.id,
+        tileX: state.avatar.tileX,
+        tileY: state.avatar.tileY,
+        scale: state.avatar.scale,
+        action: state.avatar.action,
+        flipped: !!state.avatar.flipped
+      } : null,
       renderer3d: true // 3D版で保存したことのフラグ
     };
 
@@ -1336,6 +2273,7 @@ buildCategoryTabs();
 buildPresetGrid();
 buildCustomGrid();
 buildSwatches();
+updateSwatchesEnabled();
 buildRoom();
 renderAdjust();
 undoBtn.disabled = true;
@@ -1351,7 +2289,13 @@ setTimeout(() => loadingOverlay.classList.add('hidden'), 300);
 if (isConfigured) {
   watchAvatars(async (all) => {
     state.customFurniture = all.filter(x => x.type === 'furniture');
+    // 配置可能アバター: avatar / madeup / look
+    state.availableAvatars = all.filter(x =>
+      x.type === 'avatar' || x.type === 'madeup' || x.type === 'look'
+    );
     buildCustomGrid();
+    // ピッカーを開いてる最中に反映
+    if (avatarPickerModal.classList.contains('show')) buildAvatarPickerGrid();
 
     // 部屋の初回読み込み（一番新しい）
     if (state.currentRoomId === null) {
@@ -1366,12 +2310,14 @@ if (isConfigured) {
         if (r.roomData) {
           state.wallColor = r.roomData.wallColor || state.wallColor;
           state.floorColor = r.roomData.floorColor || state.floorColor;
+          state.locationKey = r.roomData.locationKey || 'home';
           state.items = (r.roomData.items || []).map(i => ({ ...i }));
           for (const it of state.items) {
             if (it.id >= nextItemId) nextItemId = it.id + 1;
           }
           buildSwatches();
-          buildRoom();
+          updateSwatchesEnabled();
+          await buildRoom();
           // 自作家具の画像を先にロード
           for (const it of state.items) {
             if (it.kind === 'custom') {
@@ -1380,6 +2326,23 @@ if (isConfigured) {
             }
           }
           await rebuildAllItems();
+
+          // アバターの復元（あれば）
+          if (r.roomData.avatar) {
+            const av = r.roomData.avatar;
+            const avDoc = state.availableAvatars.find(x => x.id === av.id);
+            if (avDoc) {
+              try {
+                await placeAvatar(avDoc, {
+                  tileX: av.tileX, tileY: av.tileY,
+                  scale: av.scale, action: av.action
+                });
+              } catch (err) {
+                console.warn('アバター復元に失敗', err);
+              }
+            }
+          }
+
           showToast(`ほぞんずみの おへや を ひらいたよ`);
         }
       }
