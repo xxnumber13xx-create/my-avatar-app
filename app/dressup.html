@@ -144,7 +144,10 @@
     aspect-ratio: 1;
     box-shadow: 0 10px 30px rgba(46,42,71,0.2);
     border-radius: 14px; overflow: hidden;
-    background: var(--paper);
+    /* アバターの背景を透過表示するため、淡いグラデを敷く */
+    background:
+      radial-gradient(circle at 50% 100%, #FFE4EC 0%, transparent 55%),
+      linear-gradient(180deg, #FBF7FF 0%, #F1EEFF 100%);
     touch-action: none;
   }
   #stage {
@@ -290,7 +293,7 @@
 
 <script type="module">
 import { isConfigured, saveAvatar, watchAvatars, deleteAvatar, updateAvatar } from '/shared/firebase.js';
-import { showToast, loadImage } from '/shared/utils.js';
+import { showToast, loadImage, loadImageTransparent } from '/shared/utils.js';
 
 // ============================================================
 // DOM
@@ -377,7 +380,10 @@ function renderAvatarShelf() {
     img.src = av.realisticImageData || av.imageData;
     wrap.appendChild(img);
     wrap.addEventListener('click', async () => {
-      const loaded = await cachedLoad(av.realisticImageData || av.imageData);
+      // アバターは背景透過して読み込む（既存の紙色ベタ塗り背景を消す）
+      const src = av.realisticImageData || av.imageData;
+      const loaded = imgCache[src] || await loadImageTransparent(src);
+      imgCache[src] = loaded;
       stageAvatar = { id: av.id, img: loaded };
       renderAvatarShelf();
       drawStage();
@@ -546,8 +552,8 @@ async function generateRealistic(id, imageData, btn) {
 // ステージ描画
 // ============================================================
 function drawStage() {
-  stageCtx.fillStyle = PAPER;
-  stageCtx.fillRect(0, 0, stage.width, stage.height);
+  // 背景は透明に。canvas-container 側のCSSで淡いグラデ背景を出す
+  stageCtx.clearRect(0, 0, stage.width, stage.height);
 
   if (stageAvatar) {
     const img = stageAvatar.img;
