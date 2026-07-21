@@ -105,50 +105,6 @@ export function svgToImage(svgString) {
 }
 
 /**
- * canvas の「紙色に近いピクセル」を透明にした dataURL を返す（切り抜きなし・サイズ維持）。
- * extractOpaqueImageDataURL と違って外接矩形での crop はしないので、
- * アバターの全身レイアウトを保ったまま背景だけ透過できる。
- */
-export function stripPaperToTransparent(sourceCanvas, opts = {}) {
-  const paper = opts.paper || '#FFFDF7';
-  const tolerance = opts.tolerance ?? 22;
-  const w = sourceCanvas.width, h = sourceCanvas.height;
-  const src = sourceCanvas.getContext('2d').getImageData(0, 0, w, h);
-  const d = src.data;
-  const p = hexToRgb(paper);
-  const t2 = tolerance * tolerance * 3;
-  for (let i = 0; i < d.length; i += 4) {
-    const dr = d[i] - p.r, dg = d[i + 1] - p.g, db = d[i + 2] - p.b;
-    if ((dr * dr + dg * dg + db * db) < t2) d[i + 3] = 0;
-  }
-  const out = document.createElement('canvas');
-  out.width = w; out.height = h;
-  out.getContext('2d').putImageData(src, 0, 0);
-  return out.toDataURL('image/png');
-}
-
-/**
- * loadImage の背景透過版。既存アバター（紙色ベタ塗り背景付き）を読み込むときに使う。
- * 既に透過されているPNG（左上ピクセルalpha=0）はそのまま返す。
- */
-export async function loadImageTransparent(src, opts = {}) {
-  const img = await loadImage(src);
-  // 早期リターン: 既に透過なら加工しない
-  const probe = document.createElement('canvas');
-  probe.width = 1; probe.height = 1;
-  const pctx = probe.getContext('2d');
-  pctx.drawImage(img, 0, 0, 1, 1);
-  const pd = pctx.getImageData(0, 0, 1, 1).data;
-  if (pd[3] === 0) return img;
-
-  const c = document.createElement('canvas');
-  c.width = img.width; c.height = img.height;
-  c.getContext('2d').drawImage(img, 0, 0);
-  const dataURL = stripPaperToTransparent(c, opts);
-  return await loadImage(dataURL);
-}
-
-/**
  * 顔パーツのSVGライブラリ（お絵かき画面のスタンプ用）
  */
 export const PART_LIBRARY = {
@@ -883,3 +839,160 @@ export const CLOTHING_CATEGORIES = [
   { key: 'hat',   icon: '🎩', label: 'ぼうし' },
   { key: 'bag',   icon: '🎒', label: 'かばん' }
 ];
+
+
+// ============================================================
+// フェーズ4: 育成システム (ステータス・お世話)
+// ============================================================
+// avatar / madeup / look ドキュメントに以下フィールドが乗る想定:
+//   stats: {
+//     onaka, kiyoraka, genki, heart, kashikosa, exp, level
+//   }
+//   lastCareAt: Timestamp | number (ms)
+// stats 未設定の既存ドキュメントは DEFAULT_STATS で扱う（後方互換）。
+
+/** ステータスの初期値。既存アバターも読込時にこれで正規化される。 */
+export const DEFAULT_STATS = Object.freeze({
+  onaka: 100,     // 0-100 おなか
+  kiyoraka: 100,  // 0-100 きよらか
+  genki: 100,     // 0-100 げんき
+  heart: 100,     // 0-100 ハート
+  kashikosa: 0,   // 0- かしこさ（減らない）
+  exp: 0,         // 経験値
+  level: 1
+});
+
+/**
+ * ステータス定義。減衰は「1時間あたり」の減り値。floor は下限。
+ * ゆるめ設定: 3日で「お世話して」、7日で「しょんぼり」まで。絶対に 0 にならない。
+ */
+export const STAT_META = [
+  { key: 'onaka',     icon: '🍚', label: 'おなか',   decayPerHour: 1.0, floor: 15, color: '#FFB347' },
+  { key: 'kiyoraka',  icon: '🫧', label: 'きよらか', decayPerHour: 0.5, floor: 20, color: '#5AB8FF' },
+  { key: 'genki',     icon: '⚡', label: 'げんき',   decayPerHour: 0.5, floor: 25, color: '#FFC93C' },
+  { key: 'heart',     icon: '💗', label: 'ハート',   decayPerHour: 0.2, floor: 30, color: '#FF6B9D' },
+  { key: 'kashikosa', icon: '🧠', label: 'かしこさ', decayPerHour: 0,   floor: 0,  color: '#B77FE0' }
+];
+
+/** お世話アクション定義。 */
+export const CARE_ACTIONS = [
+  { key: 'feed',  icon: '🍎', label: 'ごはん', effect: { onaka: 40 },    exp: 5, cooldownSec: 0,  msg: 'おいしい〜！ 🍎' },
+  { key: 'bath',  icon: '🛁', label: 'おふろ', effect: { kiyoraka: 50 }, exp: 5, cooldownSec: 0,  msg: 'さっぱり！ 🫧' },
+  { key: 'sleep', icon: '😴', label: 'ねる',   effect: { genki: 40 },    exp: 3, cooldownSec: 0,  msg: 'ぐっすり… 💤' },
+  { key: 'pet',   icon: '🤗', label: 'なでる', effect: { heart: 20 },    exp: 2, cooldownSec: 30, msg: 'えへへ ♪' }
+];
+
+/** 生の stats を正規化。未設定フィールドはデフォルトで埋め、範囲外はクランプ。
+ *  level は必ず exp から算出（保存されている level は無視、表示用の派生値扱い）。 */
+export function normalizeStats(raw) {
+  const s = { ...DEFAULT_STATS };
+  if (raw && typeof raw === 'object') {
+    for (const k of Object.keys(DEFAULT_STATS)) {
+      const v = raw[k];
+      if (typeof v === 'number' && isFinite(v)) s[k] = v;
+    }
+  }
+  for (const k of ['onaka', 'kiyoraka', 'genki', 'heart']) {
+    s[k] = Math.max(0, Math.min(100, s[k]));
+  }
+  s.kashikosa = Math.max(0, s.kashikosa);
+  s.exp = Math.max(0, s.exp);
+  s.level = calcLevel(s.exp).level;
+  return s;
+}
+
+/** Firestore Timestamp | number | undefined を ms に変換。無効なら null。 */
+export function readLastCareAtMs(raw) {
+  if (raw == null) return null;
+  if (typeof raw === 'number' && isFinite(raw)) return raw;
+  if (typeof raw.toMillis === 'function') {
+    try { return raw.toMillis(); } catch (e) { /* ignore */ }
+  }
+  if (typeof raw.seconds === 'number') return raw.seconds * 1000;
+  return null;
+}
+
+/**
+ * lastCareAt からの経過時間で stats を減衰させる。
+ * @param {object} stats - 正規化ずみ stats
+ * @param {number|null} lastCareAtMs
+ * @param {number} nowMs
+ * @returns {{stats: object, hours: number}}
+ */
+export function applyStatsDecay(stats, lastCareAtMs, nowMs = Date.now()) {
+  const s = { ...stats };
+  if (!lastCareAtMs || lastCareAtMs > nowMs) return { stats: s, hours: 0 };
+  const hours = (nowMs - lastCareAtMs) / 3600000;
+  if (hours < 0.05) return { stats: s, hours: 0 }; // 3分未満は無視
+  for (const meta of STAT_META) {
+    if (meta.decayPerHour <= 0) continue;
+    const newVal = s[meta.key] - meta.decayPerHour * hours;
+    s[meta.key] = Math.max(meta.floor, newVal);
+  }
+  return { stats: s, hours };
+}
+
+/**
+ * お世話アクションを適用（1回分）。
+ * @returns {{stats, expGained, leveledUp, oldLevel, newLevel, action}}
+ */
+export function applyCareAction(stats, actionKey) {
+  const action = CARE_ACTIONS.find(a => a.key === actionKey);
+  if (!action) return { stats, expGained: 0, leveledUp: false, oldLevel: stats.level, newLevel: stats.level, action: null };
+  const s = { ...stats };
+  for (const [k, v] of Object.entries(action.effect)) {
+    s[k] = Math.max(0, Math.min(100, (s[k] || 0) + v));
+  }
+  // level は exp からの派生値なので、caring 前の真の level を再計算してから比較
+  const oldLevel = calcLevel(s.exp || 0).level;
+  s.exp = (s.exp || 0) + action.exp;
+  s.level = calcLevel(s.exp).level;
+  return {
+    stats: s,
+    expGained: action.exp,
+    leveledUp: s.level > oldLevel,
+    oldLevel,
+    newLevel: s.level,
+    action
+  };
+}
+
+/**
+ * exp → レベル計算。
+ *   level = floor(sqrt(exp / 20)) + 1
+ *   Lv2 で 80 exp、Lv5 で 500 exp、Lv10 で 2000 exp くらい。
+ */
+export function calcLevel(exp) {
+  const e = Math.max(0, exp || 0);
+  const level = Math.floor(Math.sqrt(e / 20)) + 1;
+  const curThreshold = (level - 1) * (level - 1) * 20;
+  const nextThreshold = level * level * 20;
+  const inLevel = e - curThreshold;
+  const span = Math.max(1, nextThreshold - curThreshold);
+  return {
+    level,
+    curThreshold,
+    nextThreshold,
+    inLevel,
+    span,
+    pct: Math.min(100, Math.max(0, (inLevel / span) * 100))
+  };
+}
+
+/** ステータスの状態バンド。UI 色分けに使う。 */
+export function getStatBand(value) {
+  if (value >= 50) return 'good';
+  if (value >= 20) return 'warn';
+  return 'bad';
+}
+
+/** stats の平均元気度から気分を返す（吹き出し等用）。 */
+export function getMood(stats) {
+  const care = [stats.onaka, stats.kiyoraka, stats.genki, stats.heart];
+  const avg = care.reduce((a, b) => a + b, 0) / care.length;
+  if (avg >= 80) return { key: 'happy',   icon: '😊', msg: 'たのしい！' };
+  if (avg >= 60) return { key: 'ok',      icon: '🙂', msg: 'げんき！' };
+  if (avg >= 40) return { key: 'meh',     icon: '😐', msg: 'ちょっと…' };
+  if (avg >= 25) return { key: 'sad',     icon: '😢', msg: 'さみしい…' };
+  return          { key: 'sleepy',  icon: '😪', msg: 'しょんぼり…' };
+}
