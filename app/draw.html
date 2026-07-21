@@ -182,6 +182,99 @@
   }
   .canvas-container.symmetry .symmetry-guide { display: block; }
 
+  /* ポーズガイド（描く時の下敷き） */
+  .pose-guide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    /* displayCanvas(1) と previewCanvas(2) の間に。うっすら乗せる */
+    z-index: 2;
+    display: none;
+    opacity: 0.22;
+    mix-blend-mode: multiply;
+  }
+  .canvas-container.pose-active .pose-guide { display: block; }
+  .pose-guide svg {
+    width: 100%; height: 100%;
+    display: block;
+  }
+  /* previewCanvas はポーズガイドより上に */
+  .canvas-container.pose-active #previewCanvas { z-index: 3; }
+
+  /* ポーズガイドの ピッカー */
+  .pose-picker-btn {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #FFEBB0, #FFD966);
+    border: 2px solid #E8A200;
+    cursor: pointer; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0;
+    transition: transform .1s;
+  }
+  .pose-picker-btn:active { transform: translateY(1px); }
+  .pose-picker-btn.active { background: linear-gradient(180deg, #FFC93C, #E8A200); }
+
+  .pose-picker-popup {
+    position: absolute;
+    top: 60px;
+    right: 12px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(46,42,71,0.25);
+    padding: 12px;
+    z-index: 250;
+    display: none;
+    max-width: min(320px, 90vw);
+  }
+  .pose-picker-popup.show { display: block; }
+  .pose-picker-popup h4 {
+    margin: 0 0 8px;
+    font-family: 'Baloo 2', sans-serif;
+    color: var(--purple);
+    font-size: 13px;
+  }
+  .pose-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .pose-option {
+    aspect-ratio: 2/3;
+    background: #F8F5FF;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 4px;
+    cursor: pointer;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2px;
+    transition: transform .1s;
+  }
+  .pose-option:active { transform: translateY(1px); }
+  .pose-option.selected { border-color: var(--purple); background: #F1EEFF; }
+  .pose-option svg { flex: 1; width: 100%; max-height: 70px; }
+  .pose-option .pose-label {
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700;
+    font-size: 10px;
+    color: var(--ink);
+  }
+  .pose-off-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 6px;
+    border-radius: 10px;
+    border: 2px solid #EDE9FF;
+    background: #F8F5FF;
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .pose-off-btn.active { background: #FFE8EC; border-color: #FFB8C7; color: #E14E7F; }
+
   /* =========================================================
      右パネル（PC）
      ========================================================= */
@@ -669,9 +762,16 @@
 <header class="draw-header">
   <a href="/index.html" class="back-link">← もどる</a>
   <h1>🎨 おえかき</h1>
+  <button class="pose-picker-btn" id="posePickerBtn" title="ポーズガイド">🎭</button>
   <button class="panel-toggle" id="panelToggle" title="いろ・レイヤー・パーツ">🎨</button>
   <button class="btn-primary" id="saveBtn">💾 ほぞん</button>
 </header>
+
+<div class="pose-picker-popup" id="posePickerPopup">
+  <h4>🎭 ポーズガイド（うすく でるよ）</h4>
+  <div class="pose-options" id="poseOptions"></div>
+  <button class="pose-off-btn" id="poseOffBtn">👁️‍🗨️ ガイドを けす</button>
+</div>
 
 <div class="draw-main">
   <!-- ============================= 左サイドツール ============================ -->
@@ -741,6 +841,7 @@
   <!-- ============================= キャンバスエリア ============================ -->
   <div class="canvas-area" id="canvasArea">
     <div class="canvas-container" id="canvasContainer">
+      <div class="pose-guide" id="poseGuide"></div>
       <canvas id="displayCanvas" width="480" height="720"></canvas>
       <canvas id="previewCanvas" width="480" height="720"></canvas>
       <div class="symmetry-guide"></div>
@@ -1974,6 +2075,136 @@ window.addEventListener('resize', () => {
   // ズームがかかっていた場合、範囲を再適用
   applyZoom();
 });
+
+// ============================================================
+// ポーズガイド（着せ替え時の 位置あわせ を たすける）
+// ============================================================
+// キャンバスは 480x720。以下のSVGは同じviewBoxで作ってあるので
+// キャンバスに ぴったり重なる。子供が上からトレース or レイアウトの
+// 参考にできる薄い下敷き。保存時には含まれない（<img> ではなく
+// canvas に描かれたピクセルだけが保存される）。
+const POSE_LIBRARY = [
+  {
+    key: 'front-stand', label: 'まえ たち',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 720" preserveAspectRatio="xMidYMid meet">
+      <g fill="#5D51CC" stroke="#5D51CC" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="240" cy="130" r="65"/>
+        <path d="M 200 200 Q 195 240 200 300 L 280 300 Q 285 240 280 200 Z" fill-opacity="0.4"/>
+        <rect x="195" y="290" width="90" height="200" rx="20" fill-opacity="0.35"/>
+        <path d="M 195 300 Q 145 350 145 460 L 175 460 Q 175 355 205 320 Z" fill-opacity="0.35"/>
+        <path d="M 285 300 Q 335 350 335 460 L 305 460 Q 305 355 275 320 Z" fill-opacity="0.35"/>
+        <path d="M 210 485 L 195 690 L 235 690 L 245 485 Z" fill-opacity="0.35"/>
+        <path d="M 270 485 L 285 690 L 245 690 L 235 485 Z" fill-opacity="0.35"/>
+      </g>
+    </svg>`
+  },
+  {
+    key: 'arms-up', label: 'てを あげる',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 720" preserveAspectRatio="xMidYMid meet">
+      <g fill="#5D51CC" stroke="#5D51CC" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="240" cy="180" r="60"/>
+        <path d="M 200 245 Q 195 285 200 345 L 280 345 Q 285 285 280 245 Z" fill-opacity="0.4"/>
+        <rect x="195" y="335" width="90" height="200" rx="20" fill-opacity="0.35"/>
+        <path d="M 200 250 Q 155 200 145 90 L 175 85 Q 195 190 220 260 Z" fill-opacity="0.35"/>
+        <path d="M 280 250 Q 325 200 335 90 L 305 85 Q 285 190 260 260 Z" fill-opacity="0.35"/>
+        <path d="M 210 530 L 195 690 L 235 690 L 245 530 Z" fill-opacity="0.35"/>
+        <path d="M 270 530 L 285 690 L 245 690 L 235 530 Z" fill-opacity="0.35"/>
+      </g>
+    </svg>`
+  },
+  {
+    key: 'arms-wide', label: 'ばんざい',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 720" preserveAspectRatio="xMidYMid meet">
+      <g fill="#5D51CC" stroke="#5D51CC" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="240" cy="145" r="60"/>
+        <path d="M 200 215 Q 195 255 200 315 L 280 315 Q 285 255 280 215 Z" fill-opacity="0.4"/>
+        <rect x="195" y="305" width="90" height="200" rx="20" fill-opacity="0.35"/>
+        <path d="M 200 220 Q 130 240 55 200 L 45 235 Q 130 285 215 275 Z" fill-opacity="0.35"/>
+        <path d="M 280 220 Q 350 240 425 200 L 435 235 Q 350 285 265 275 Z" fill-opacity="0.35"/>
+        <path d="M 210 500 L 195 690 L 235 690 L 245 500 Z" fill-opacity="0.35"/>
+        <path d="M 270 500 L 285 690 L 245 690 L 235 500 Z" fill-opacity="0.35"/>
+      </g>
+    </svg>`
+  },
+  {
+    key: 'running', label: 'はしる',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 720" preserveAspectRatio="xMidYMid meet">
+      <g fill="#5D51CC" stroke="#5D51CC" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="255" cy="145" r="60"/>
+        <path d="M 220 215 Q 200 260 220 320 L 290 320 Q 300 260 285 215 Z" fill-opacity="0.4" transform="rotate(-4 250 270)"/>
+        <rect x="215" y="310" width="85" height="180" rx="18" fill-opacity="0.35" transform="rotate(-4 250 400)"/>
+        <path d="M 220 220 Q 155 265 105 320 L 130 345 Q 190 300 240 265 Z" fill-opacity="0.35"/>
+        <path d="M 290 220 Q 330 275 355 355 L 325 365 Q 315 305 275 260 Z" fill-opacity="0.35"/>
+        <path d="M 225 485 L 165 640 L 205 655 L 260 500 Z" fill-opacity="0.35"/>
+        <path d="M 275 485 L 340 570 L 310 600 L 250 505 Z" fill-opacity="0.35"/>
+      </g>
+    </svg>`
+  },
+  {
+    key: 'sitting', label: 'すわる',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 720" preserveAspectRatio="xMidYMid meet">
+      <g fill="#5D51CC" stroke="#5D51CC" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="240" cy="200" r="60"/>
+        <path d="M 205 265 Q 200 305 205 370 L 275 370 Q 280 305 275 265 Z" fill-opacity="0.4"/>
+        <rect x="200" y="360" width="80" height="140" rx="18" fill-opacity="0.35"/>
+        <path d="M 205 275 Q 155 320 155 415 L 185 415 Q 190 325 220 305 Z" fill-opacity="0.35"/>
+        <path d="M 275 275 Q 325 320 325 415 L 295 415 Q 290 325 260 305 Z" fill-opacity="0.35"/>
+        <path d="M 200 495 Q 130 540 100 630 L 210 630 Q 220 560 230 500 Z" fill-opacity="0.35"/>
+        <path d="M 280 495 Q 350 540 380 630 L 270 630 Q 260 560 250 500 Z" fill-opacity="0.35"/>
+      </g>
+    </svg>`
+  }
+];
+
+const posePickerBtn = document.getElementById('posePickerBtn');
+const posePickerPopup = document.getElementById('posePickerPopup');
+const poseOptionsEl = document.getElementById('poseOptions');
+const poseOffBtn = document.getElementById('poseOffBtn');
+const poseGuide = document.getElementById('poseGuide');
+let currentPose = null;
+
+function buildPoseOptions() {
+  poseOptionsEl.innerHTML = '';
+  POSE_LIBRARY.forEach(p => {
+    const b = document.createElement('button');
+    b.className = 'pose-option' + (currentPose === p.key ? ' selected' : '');
+    b.dataset.pose = p.key;
+    b.innerHTML = p.svg + `<span class="pose-label">${p.label}</span>`;
+    b.addEventListener('click', () => setPose(p.key));
+    poseOptionsEl.appendChild(b);
+  });
+}
+function setPose(key) {
+  currentPose = key;
+  const p = POSE_LIBRARY.find(x => x.key === key);
+  if (p) {
+    poseGuide.innerHTML = p.svg;
+    canvasContainer.classList.add('pose-active');
+    posePickerBtn.classList.add('active');
+  }
+  buildPoseOptions();
+}
+function clearPose() {
+  currentPose = null;
+  poseGuide.innerHTML = '';
+  canvasContainer.classList.remove('pose-active');
+  posePickerBtn.classList.remove('active');
+  buildPoseOptions();
+}
+posePickerBtn.addEventListener('click', () => {
+  posePickerPopup.classList.toggle('show');
+});
+poseOffBtn.addEventListener('click', () => {
+  clearPose();
+  posePickerPopup.classList.remove('show');
+});
+// 画面のどこかを タップ したら閉じる
+document.addEventListener('click', e => {
+  if (!posePickerPopup.classList.contains('show')) return;
+  if (posePickerPopup.contains(e.target) || posePickerBtn.contains(e.target)) return;
+  posePickerPopup.classList.remove('show');
+});
+buildPoseOptions();
 </script>
 
 </body>
