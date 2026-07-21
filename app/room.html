@@ -3,14 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>おへや｜あばたーめーかー</title>
+<title>おへや 3D｜あばたーめーかー</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/shared/styles.css">
 <style>
-  /* ページ全体の高さ・スクロール制御は shared/styles.css の
-     .app-fullscreen クラスに集約（100dvh + safe-area-inset 対応） */
   body.app-fullscreen {
     background:
       radial-gradient(circle at 20% 0%, #FFE9C7, transparent 30%),
@@ -18,156 +16,147 @@
       var(--bg);
   }
   .draw-header {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    flex: 0 0 auto; display: flex; align-items: center; gap: 10px;
     padding: 10px 14px;
-    background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(10px);
+    background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
     border-bottom: 2px solid #EDE9FF;
-    position: relative;
-    z-index: 200;
+    position: relative; z-index: 200;
   }
   .draw-header .back-link { padding: 6px 12px; font-size: 13px; }
   .draw-header h1 {
-    flex: 1;
-    margin: 0;
+    flex: 1; margin: 0;
     font-family: 'Baloo 2', sans-serif;
     color: #7C6FF2;
-    font-size: clamp(16px, 3.5vw, 22px);
-    letter-spacing: 0.3px;
+    font-size: clamp(16px, 3.5vw, 22px); letter-spacing: 0.3px;
+  }
+  .badge3d {
+    background: linear-gradient(180deg, #FFC93C, #FFA34D);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    margin-right: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
   }
 
   .draw-main {
     flex: 1;
     display: grid;
     grid-template-columns: 260px 1fr 240px;
-    min-height: 0;
-    min-width: 0;
+    min-height: 0; min-width: 0;
     position: relative;
   }
 
-  /* 左: 家具カタログ */
   .furniture-panel {
     background: rgba(255,255,255,0.95);
     border-right: 2px solid #EDE9FF;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    overflow: hidden;
+    display: flex; flex-direction: column;
+    min-height: 0; overflow: hidden;
   }
   .cat-tabs {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 3px;
-    padding: 6px;
-    background: #F4F0FF;
-    border-bottom: 2px solid #E4DDFF;
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px;
+    padding: 6px; background: #F4F0FF; border-bottom: 2px solid #E4DDFF;
   }
   .cat-btn {
-    background: #fff;
-    border: 2px solid transparent;
-    border-radius: 8px;
-    padding: 4px 2px;
-    cursor: pointer;
-    font-family: 'Baloo 2', sans-serif;
-    font-weight: 700;
-    font-size: 9px;
-    color: var(--ink);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    background: #fff; border: 2px solid transparent; border-radius: 8px;
+    padding: 4px 2px; cursor: pointer;
+    font-family: 'Baloo 2', sans-serif; font-weight: 700;
+    font-size: 9px; color: var(--ink);
+    display: flex; flex-direction: column; align-items: center;
     transition: transform .1s;
   }
   .cat-btn:active { transform: translateY(1px); }
   .cat-btn.active {
     background: linear-gradient(180deg, #DDEEFF, #C4E0FF);
-    border-color: var(--purple);
-    color: var(--purple);
+    border-color: var(--purple); color: var(--purple);
   }
   .cat-btn .cat-icon { font-size: 16px; line-height: 1.1; }
 
   .panel-body {
-    flex: 1;
-    overflow-y: auto;
+    flex: 1; overflow-y: auto;
     padding: 10px 10px calc(20px + env(safe-area-inset-bottom, 0));
   }
   .section-title {
-    font-family: 'Baloo 2', sans-serif;
-    font-weight: 800;
-    font-size: 11px;
-    color: var(--ink-soft);
-    letter-spacing: 0.5px;
-    margin: 8px 0 6px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 11px; color: var(--ink-soft);
+    letter-spacing: 0.5px; margin: 8px 0 6px;
     text-transform: uppercase;
   }
   .furniture-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    margin-bottom: 10px;
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 8px; margin-bottom: 10px;
   }
   .furniture-item {
-    aspect-ratio: 1;
-    background: #F8F5FF;
-    border: 2px solid transparent;
-    border-radius: 12px;
-    padding: 6px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    transition: transform .1s;
+    aspect-ratio: 1; background: #F8F5FF;
+    border: 2px solid transparent; border-radius: 12px;
+    padding: 6px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px; transition: transform .1s;
   }
   .furniture-item:active { transform: translateY(1px); }
   .furniture-item svg, .furniture-item img {
-    max-width: 100%;
-    max-height: 60px;
-    object-fit: contain;
+    max-width: 100%; max-height: 60px; object-fit: contain;
   }
   .furniture-item .fi-label {
-    font-family: 'Baloo 2', sans-serif;
-    font-weight: 700;
-    font-size: 10px;
-    color: var(--ink);
-    text-align: center;
-    line-height: 1.1;
+    font-family: 'Baloo 2', sans-serif; font-weight: 700;
+    font-size: 10px; color: var(--ink);
+    text-align: center; line-height: 1.1;
   }
 
-  /* キャンバス */
+  /* 3D キャンバス */
   .canvas-area {
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #E8F2FF;
-    padding: 12px;
-    min-width: 0;
-    min-height: 0;
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(180deg, #DDF0FF 0%, #F5EEFF 100%);
+    padding: 0; min-width: 0; min-height: 0;
   }
   .canvas-container {
     position: relative;
-    width: min(100%, 900px);
-    height: 100%;
-    max-height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 100%; height: 100%;
     touch-action: none;
   }
   #roomCanvas {
-    max-width: 100%;
-    max-height: 100%;
+    width: 100%; height: 100%;
     display: block;
-    background: transparent;
-    box-shadow: 0 10px 30px rgba(46,42,71,0.2);
-    border-radius: 14px;
     touch-action: none;
   }
+  .canvas-hint {
+    position: absolute; left: 50%; top: 10px; transform: translateX(-50%);
+    background: rgba(46,42,71,0.75); color: #fff;
+    padding: 5px 12px; border-radius: 999px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 700;
+    font-size: 11px; pointer-events: none;
+    opacity: 0; transition: opacity .3s;
+    z-index: 3;
+  }
+  .canvas-hint.show { opacity: 1; }
+  .cam-controls {
+    position: absolute; right: 10px; bottom: 10px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 3;
+  }
+  .cam-btn {
+    width: 40px; height: 40px; border-radius: 12px;
+    border: 2px solid #EDE9FF; background: rgba(255,255,255,0.95);
+    cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center; padding: 0;
+    box-shadow: 0 4px 10px rgba(46,42,71,0.15);
+  }
+  .cam-btn:active { transform: translateY(1px); }
+
+  .loading-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.85);
+    z-index: 5;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    color: var(--purple); font-size: 15px;
+    letter-spacing: 0.5px;
+  }
+  .loading-overlay.hidden { display: none; }
 
   /* 右: 選択中家具の調整 */
   .adjust-panel {
@@ -175,185 +164,105 @@
     border-left: 2px solid #EDE9FF;
     padding: 14px 14px calc(24px + env(safe-area-inset-bottom, 0));
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: flex; flex-direction: column; gap: 12px;
     min-width: 0;
   }
   .adjust-panel .empty-hint {
-    padding: 20px 10px;
-    text-align: center;
-    color: var(--ink-soft);
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 1.5;
-    background: #F4F1FF;
-    border-radius: 12px;
+    padding: 20px 10px; text-align: center;
+    color: var(--ink-soft); font-size: 12px;
+    font-weight: 700; line-height: 1.5;
+    background: #F4F1FF; border-radius: 12px;
     border: 2px dashed #DCD5FF;
   }
   .selected-preview {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 90px;
-    background: #F8F5FF;
-    border-radius: 14px;
-    padding: 10px;
+    display: flex; justify-content: center; align-items: center;
+    height: 90px; background: #F8F5FF;
+    border-radius: 14px; padding: 10px;
   }
-  .selected-preview svg, .selected-preview img {
-    max-width: 100%;
-    max-height: 100%;
-  }
+  .selected-preview svg, .selected-preview img { max-width: 100%; max-height: 100%; }
   .selected-title {
-    font-family: 'Baloo 2', sans-serif;
-    font-weight: 800;
-    font-size: 14px;
-    color: var(--ink);
-    text-align: center;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 14px; color: var(--ink); text-align: center;
   }
   .adjust-btns {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
   }
   .adjust-btn {
-    background: #F8F5FF;
-    border: 2px solid #EDE9FF;
-    border-radius: 12px;
-    padding: 8px 4px;
-    cursor: pointer;
-    font-family: 'Baloo 2', sans-serif;
-    font-weight: 700;
-    font-size: 12px;
-    color: var(--ink);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
+    background: #F8F5FF; border: 2px solid #EDE9FF; border-radius: 12px;
+    padding: 8px 4px; cursor: pointer;
+    font-family: 'Baloo 2', sans-serif; font-weight: 700;
+    font-size: 12px; color: var(--ink);
+    display: flex; align-items: center; justify-content: center; gap: 4px;
   }
-  .adjust-btn.danger {
-    background: #FFE8EC;
-    border-color: #FFB8C7;
-    color: #E14E7F;
-  }
+  .adjust-btn.danger { background: #FFE8EC; border-color: #FFB8C7; color: #E14E7F; }
 
-  /* 下部ドック */
   .draw-dock {
     flex: 0 0 auto;
-    background: #fff;
-    border-top: 2px solid #EDE9FF;
+    background: #fff; border-top: 2px solid #EDE9FF;
     padding: 8px 14px calc(8px + env(safe-area-inset-bottom, 0));
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    z-index: 5;
+    display: flex; align-items: center; gap: 12px;
+    flex-wrap: wrap; z-index: 5;
   }
-  .dock-swatch-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
+  .dock-swatch-row { display: flex; align-items: center; gap: 6px; }
   .dock-swatch-row label {
-    font-family: 'Baloo 2', sans-serif;
-    font-weight: 800;
-    font-size: 11px;
-    color: var(--ink-soft);
-    letter-spacing: 0.3px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 11px; color: var(--ink-soft); letter-spacing: 0.3px;
   }
-  .swatch-list {
-    display: flex;
-    gap: 3px;
-  }
+  .swatch-list { display: flex; gap: 3px; }
   .swatch-list button {
-    width: 26px;
-    height: 26px;
-    border-radius: 8px;
-    border: 2px solid #fff;
-    cursor: pointer;
-    padding: 0;
+    width: 26px; height: 26px; border-radius: 8px;
+    border: 2px solid #fff; cursor: pointer; padding: 0;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
   .swatch-list button.selected {
-    outline: 2px solid var(--purple);
-    outline-offset: 1px;
+    outline: 2px solid var(--purple); outline-offset: 1px;
   }
   .dock-btn {
-    width: 40px; height: 40px;
-    border-radius: 12px;
-    border: 2px solid #EDE9FF;
-    background: #F8F5FF;
-    cursor: pointer;
-    font-size: 18px;
-    display: flex; align-items: center; justify-content: center;
-    padding: 0;
+    width: 40px; height: 40px; border-radius: 12px;
+    border: 2px solid #EDE9FF; background: #F8F5FF;
+    cursor: pointer; font-size: 18px;
+    display: flex; align-items: center; justify-content: center; padding: 0;
   }
   .dock-btn:active { transform: translateY(1px); }
   .dock-spacer { flex: 1; }
 
-  /* モバイル */
   .panel-backdrop {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(46,42,71,0.35);
-    z-index: 90;
+    display: none; position: fixed; inset: 0;
+    background: rgba(46,42,71,0.35); z-index: 90;
   }
   .panel-backdrop.show { display: block; }
   .panel-close {
-    display: none;
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    border: 2px solid #EDE9FF;
-    background: #fff;
-    cursor: pointer;
-    font-size: 15px;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    z-index: 110;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+    display: none; position: absolute; top: 8px; right: 8px;
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 2px solid #EDE9FF; background: #fff;
+    cursor: pointer; font-size: 15px;
+    align-items: center; justify-content: center; padding: 0;
+    z-index: 110; box-shadow: 0 3px 8px rgba(0,0,0,0.12);
   }
   .panel-toggle {
-    width: 40px; height: 40px;
-    border-radius: 12px;
+    width: 40px; height: 40px; border-radius: 12px;
     background: linear-gradient(180deg, #DDEEFF, #C4E0FF);
     border: 2px solid var(--purple);
-    cursor: pointer;
-    font-size: 18px;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
+    cursor: pointer; font-size: 18px;
+    align-items: center; justify-content: center; padding: 0;
     display: none;
   }
-  .panel-toggle.active {
-    background: var(--purple);
-    color: #fff;
-  }
+  .panel-toggle.active { background: var(--purple); color: #fff; }
 
   @media (max-width: 900px) {
     .draw-main { grid-template-columns: 1fr; }
     .furniture-panel {
-      position: fixed;
-      left: 0; top: 60px; bottom: 0;
+      position: fixed; left: 0; top: 60px; bottom: 0;
       width: min(280px, 88vw);
-      transform: translateX(-100%);
-      transition: transform .25s;
-      z-index: 100;
-      box-shadow: 10px 0 30px rgba(0,0,0,0.15);
+      transform: translateX(-100%); transition: transform .25s;
+      z-index: 100; box-shadow: 10px 0 30px rgba(0,0,0,0.15);
     }
     .furniture-panel.open { transform: translateX(0); }
     .adjust-panel {
-      position: fixed;
-      right: 0; top: 60px; bottom: 0;
+      position: fixed; right: 0; top: 60px; bottom: 0;
       width: min(260px, 88vw);
-      transform: translateX(100%);
-      transition: transform .25s;
-      z-index: 100;
-      box-shadow: -10px 0 30px rgba(0,0,0,0.15);
+      transform: translateX(100%); transition: transform .25s;
+      z-index: 100; box-shadow: -10px 0 30px rgba(0,0,0,0.15);
     }
     .adjust-panel.open { transform: translateX(0); }
     .panel-toggle { display: flex; }
@@ -362,61 +271,52 @@
     .dock-btn { width: 36px; height: 36px; font-size: 15px; }
   }
 
-  /* 保存モーダル */
   .modal-backdrop {
-    position: fixed; inset: 0;
-    background: rgba(46,42,71,0.5);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 16px;
+    position: fixed; inset: 0; background: rgba(46,42,71,0.5);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000; padding: 16px;
   }
   .modal-backdrop.show { display: flex; }
   .modal-card {
-    background: #fff;
-    border-radius: 24px;
-    padding: 24px;
-    max-width: 420px;
-    width: 100%;
+    background: #fff; border-radius: 24px;
+    padding: 24px; max-width: 420px; width: 100%;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
   }
   .modal-card h3 {
-    font-family: 'Baloo 2', sans-serif;
-    color: var(--purple);
-    margin: 0 0 12px;
-    font-size: 20px;
+    font-family: 'Baloo 2', sans-serif; color: var(--purple);
+    margin: 0 0 12px; font-size: 20px;
   }
-  .save-options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
+  .save-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
   .save-option {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px;
-    background: #F8F5FF;
-    border: 2px solid #E4DDFF;
-    border-radius: 16px;
-    cursor: pointer;
-    font-family: 'Baloo 2', sans-serif;
-    font-weight: 700;
-    color: var(--ink);
-    text-align: left;
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px; background: #F8F5FF;
+    border: 2px solid #E4DDFF; border-radius: 16px;
+    cursor: pointer; font-family: 'Baloo 2', sans-serif;
+    font-weight: 700; color: var(--ink); text-align: left;
   }
   .save-option .icon { font-size: 28px; }
   .save-option .save-title { font-size: 15px; }
-  .save-option .save-desc { font-size: 11px; color: var(--ink-soft); font-weight: 600; margin-top: 2px; }
+  .save-option .save-desc {
+    font-size: 11px; color: var(--ink-soft);
+    font-weight: 600; margin-top: 2px;
+  }
 </style>
+
+<!-- Three.js を importmap で読み込む -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
 </head>
 <body class="app-fullscreen">
 
 <header class="draw-header">
   <a href="/index.html" class="back-link">← もどる</a>
-  <h1>🏠 おへや</h1>
+  <h1><span class="badge3d">3D</span>🏠 おへや</h1>
   <button class="panel-toggle" id="catToggle" title="家具">🪑</button>
   <button class="panel-toggle" id="adjustToggle" title="ちょうせい">⚙️</button>
   <button class="btn-primary" id="saveBtn">💾 ほぞん</button>
@@ -425,7 +325,6 @@
 <div class="draw-main">
   <div class="panel-backdrop" id="panelBackdrop"></div>
 
-  <!-- 左: 家具カタログ -->
   <aside class="furniture-panel" id="furniturePanel">
     <button class="panel-close" id="catClose">✕</button>
     <div class="cat-tabs" id="catTabs"></div>
@@ -441,14 +340,17 @@
     </div>
   </aside>
 
-  <!-- キャンバス -->
   <div class="canvas-area">
-    <div class="canvas-container">
-      <canvas id="roomCanvas" width="720" height="620"></canvas>
+    <div class="canvas-container" id="canvasContainer">
+      <canvas id="roomCanvas"></canvas>
+      <div class="canvas-hint" id="canvasHint">ゆびで まわせる よ / かぐを タップで えらぶ</div>
+      <div class="cam-controls">
+        <button class="cam-btn" id="camResetBtn" title="ビューを リセット">🎯</button>
+      </div>
+      <div class="loading-overlay" id="loadingOverlay">3D おへや を じゅんび中…</div>
     </div>
   </div>
 
-  <!-- 右: 選択中調整 -->
   <aside class="adjust-panel" id="adjustPanel">
     <button class="panel-close" id="adjustClose">✕</button>
     <div id="adjustBody">
@@ -459,7 +361,6 @@
   </aside>
 </div>
 
-<!-- 下部ドック -->
 <div class="draw-dock">
   <div class="dock-swatch-row">
     <label>🧱 かべ</label>
@@ -474,7 +375,6 @@
   <button class="dock-btn" id="clearBtn" title="ぜんぶ けす">💣</button>
 </div>
 
-<!-- 保存モーダル -->
 <div class="modal-backdrop" id="saveModal">
   <div class="modal-card">
     <h3>💾 どう ほぞん する？</h3>
@@ -499,46 +399,37 @@
 </div>
 
 <script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
 import { isConfigured, saveAvatar, updateAvatar, watchAvatars } from '/shared/firebase.js';
 import {
-  showToast, loadImage, svgToImage, tintSvg,
+  showToast, loadImage, svgToImage,
   FURNITURE_LIBRARY, FURNITURE_CATEGORIES,
   ROOM_WALL_COLORS, ROOM_FLOOR_COLORS
 } from '/shared/utils.js';
 
 // ============================================================
-// アイソメ座標系
+// 世界の座標系
 // ============================================================
-const CANVAS_W = 720;
-const CANVAS_H = 620;
-const TILE_W = 64;
-const TILE_H = 32;
-const ROOM_SIZE = 8;   // 8x8タイル
-const WALL_H = 190;    // 壁の高さ（ピクセル）
-const ROOM_CENTER_X = CANVAS_W / 2;
-const ROOM_CENTER_Y = 380; // 床の中心Y座標。適宜調整
-
-/** タイル座標(tx, ty)の中心の画面座標を返す。tzは床からの高さ(px, +で上) */
-function tileToScreen(tx, ty, tz = 0) {
-  const x = ROOM_CENTER_X + (tx - ty) * TILE_W / 2;
-  const y = ROOM_CENTER_Y + (tx + ty - (ROOM_SIZE - 1)) * TILE_H / 2 - tz;
-  return [x, y];
-}
-
-/** 画面座標を床タイル座標に逆算 */
-function screenToTile(sx, sy) {
-  const dx = sx - ROOM_CENTER_X;
-  const dy = sy - ROOM_CENTER_Y + (ROOM_SIZE - 1) * TILE_H / 2;
-  const tx = (dx / TILE_W + dy / TILE_H);
-  const ty = (dy / TILE_H - dx / TILE_W);
-  return [Math.floor(tx + 0.5), Math.floor(ty + 0.5)];
-}
+// 部屋は 8x8 タイル。1 タイル = 1 ワールド単位。
+// 床面の中央が原点。tileX, tileY は 0..7 の整数。
+// - tileX: X 軸方向（右）
+// - tileY: Z 軸方向（奥）
+// ワールドX = tileX + 0.5 - 4
+// ワールドZ = tileY + 0.5 - 4
+const ROOM_SIZE = 8;
+const WALL_HEIGHT = 4.5;
+// 元の 2.5D で「64px = 1 タイル」だったので、画像 px → ワールド単位は /64
+const PX_TO_WORLD = 1 / 64;
 
 // ============================================================
 // DOM
 // ============================================================
 const canvas = document.getElementById('roomCanvas');
-const ctx = canvas.getContext('2d');
+const canvasContainer = document.getElementById('canvasContainer');
+const canvasHint = document.getElementById('canvasHint');
+const loadingOverlay = document.getElementById('loadingOverlay');
 const catTabs = document.getElementById('catTabs');
 const presetGrid = document.getElementById('presetGrid');
 const customGrid = document.getElementById('customGrid');
@@ -558,6 +449,7 @@ const adjustClose = document.getElementById('adjustClose');
 const furniturePanel = document.getElementById('furniturePanel');
 const adjustPanel = document.getElementById('adjustPanel');
 const panelBackdrop = document.getElementById('panelBackdrop');
+const camResetBtn = document.getElementById('camResetBtn');
 
 // ============================================================
 // 状態
@@ -566,19 +458,424 @@ const state = {
   currentCategory: 'bed',
   wallColor: ROOM_WALL_COLORS[0],
   floorColor: ROOM_FLOOR_COLORS[0],
-  items: [],           // { id, kind:'preset'|'custom', category, variantIndex, customId, tileX, tileY, scale }
+  // items: { id, kind, category, variantIndex, customId, tileX, tileY, scale }
+  items: [],
   selectedId: null,
-  customFurniture: [], // Firestoreから取得したtype='furniture'
-  currentRoomId: null, // 編集中の部屋のFirestoreドキュメントID（新規なら null）
-  cachedImages: {},    // key -> Image
+  customFurniture: [],
+  currentRoomId: null,
   undoStack: []
 };
 
 let nextItemId = 1;
-let dragState = null;
 
 // ============================================================
-// カテゴリタブ
+// Three.js 準備
+// ============================================================
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xE8F2FF);
+
+const renderer = new THREE.WebGLRenderer({
+  canvas, antialias: true, alpha: true, preserveDrawingBuffer: true
+});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+// リアルシャドウは板ポリだと薄くて意味が薄いので、
+// 家具ごとの fake ellipse shadow で代用する。パフォーマンス優先。
+renderer.shadowMap.enabled = false;
+
+const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+// 3/4視点（元の2.5Dアングルに近い方角）
+const defaultCamPos = new THREE.Vector3(9, 9, 9);
+const defaultCamTarget = new THREE.Vector3(0, 1.2, 0);
+camera.position.copy(defaultCamPos);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.enablePan = false;
+controls.enableZoom = true;
+controls.zoomSpeed = 0.6;
+controls.minDistance = 8;
+controls.maxDistance = 22;
+controls.minPolarAngle = 0.35;
+controls.maxPolarAngle = Math.PI / 2 - 0.05; // 床下は覗けないように
+controls.target.copy(defaultCamTarget);
+controls.update();
+
+// ライト
+const ambient = new THREE.AmbientLight(0xffffff, 0.75);
+scene.add(ambient);
+const sun = new THREE.DirectionalLight(0xffffff, 0.85);
+sun.position.set(6, 12, 4);
+sun.castShadow = true;
+sun.shadow.mapSize.set(1024, 1024);
+sun.shadow.camera.left = -8;
+sun.shadow.camera.right = 8;
+sun.shadow.camera.top = 8;
+sun.shadow.camera.bottom = -8;
+sun.shadow.camera.near = 0.5;
+sun.shadow.camera.far = 30;
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0xB8DBFF, 0.35);
+fill.position.set(-6, 8, -4);
+scene.add(fill);
+
+// ============================================================
+// 部屋の構造（床・壁）
+// ============================================================
+const roomGroup = new THREE.Group();
+scene.add(roomGroup);
+
+let floorMesh, wallBackMesh, wallLeftMesh;
+
+function buildRoom() {
+  // 既存を削除
+  while (roomGroup.children.length) {
+    const c = roomGroup.children[0];
+    roomGroup.remove(c);
+    if (c.geometry) c.geometry.dispose();
+    if (c.material) {
+      if (c.material.map) c.material.map.dispose();
+      c.material.dispose();
+    }
+  }
+
+  // 床（チェッカー模様のCanvasTexture）
+  const floorTex = makeCheckerFloorTexture(state.floorColor);
+  const floorGeom = new THREE.PlaneGeometry(ROOM_SIZE, ROOM_SIZE);
+  const floorMat = new THREE.MeshStandardMaterial({
+    map: floorTex, roughness: 0.85, metalness: 0.02
+  });
+  floorMesh = new THREE.Mesh(floorGeom, floorMat);
+  floorMesh.rotation.x = -Math.PI / 2;
+  floorMesh.position.y = 0;
+  floorMesh.receiveShadow = true;
+  floorMesh.userData.isFloor = true;
+  roomGroup.add(floorMesh);
+
+  const wallColor = new THREE.Color(state.wallColor);
+  const wallColorDark = new THREE.Color(state.wallColor).multiplyScalar(0.92);
+  const wallThickness = 0.15;
+
+  // 奥の壁（Z軸マイナス方向）
+  const wallBackGeom = new THREE.BoxGeometry(ROOM_SIZE, WALL_HEIGHT, wallThickness);
+  const wallBackMat = new THREE.MeshStandardMaterial({ color: wallColor, roughness: 0.9 });
+  wallBackMesh = new THREE.Mesh(wallBackGeom, wallBackMat);
+  wallBackMesh.position.set(0, WALL_HEIGHT / 2, -ROOM_SIZE / 2);
+  wallBackMesh.receiveShadow = true;
+  wallBackMesh.userData.isWall = 'back';
+  roomGroup.add(wallBackMesh);
+
+  // 左の壁（X軸マイナス方向）
+  const wallLeftGeom = new THREE.BoxGeometry(wallThickness, WALL_HEIGHT, ROOM_SIZE);
+  const wallLeftMat = new THREE.MeshStandardMaterial({ color: wallColorDark, roughness: 0.9 });
+  wallLeftMesh = new THREE.Mesh(wallLeftGeom, wallLeftMat);
+  wallLeftMesh.position.set(-ROOM_SIZE / 2, WALL_HEIGHT / 2, 0);
+  wallLeftMesh.receiveShadow = true;
+  wallLeftMesh.userData.isWall = 'left';
+  roomGroup.add(wallLeftMesh);
+
+  // 壁の下に細い巾木
+  const skirtingMat = new THREE.MeshStandardMaterial({ color: wallColorDark.clone().multiplyScalar(0.75), roughness: 0.8 });
+  const skirtBack = new THREE.Mesh(new THREE.BoxGeometry(ROOM_SIZE, 0.18, 0.02), skirtingMat);
+  skirtBack.position.set(0, 0.09, -ROOM_SIZE / 2 + wallThickness / 2 + 0.01);
+  roomGroup.add(skirtBack);
+  const skirtLeft = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.18, ROOM_SIZE), skirtingMat);
+  skirtLeft.position.set(-ROOM_SIZE / 2 + wallThickness / 2 + 0.01, 0.09, 0);
+  roomGroup.add(skirtLeft);
+}
+
+function makeCheckerFloorTexture(baseColor) {
+  const c = document.createElement('canvas');
+  const S = 512;
+  c.width = S; c.height = S;
+  const ctx = c.getContext('2d');
+  const rgb = hexToRgb(baseColor);
+  const dark = adjustBrightness(baseColor, -14);
+  const light = baseColor;
+  const N = ROOM_SIZE; // タイル数
+  const step = S / N;
+  for (let y = 0; y < N; y++) {
+    for (let x = 0; x < N; x++) {
+      ctx.fillStyle = (x + y) % 2 === 0 ? light : dark;
+      ctx.fillRect(x * step, y * step, step, step);
+    }
+  }
+  // タイルの境界線
+  ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= N; i++) {
+    ctx.beginPath();
+    ctx.moveTo(i * step, 0); ctx.lineTo(i * step, S); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, i * step); ctx.lineTo(S, i * step); ctx.stroke();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return tex;
+}
+
+function hexToRgb(hex) {
+  const s = hex.replace('#', '');
+  const n = s.length === 3 ? s.split('').map(c => c + c).join('') : s;
+  const int = parseInt(n, 16);
+  return { r: (int >> 16) & 255, g: (int >> 8) & 255, b: int & 255 };
+}
+function adjustBrightness(hex, delta) {
+  const s = hex.replace('#', '');
+  const n = s.length === 3 ? s.split('').map(c => c + c).join('') : s;
+  const int = parseInt(n, 16);
+  const r = Math.max(0, Math.min(255, ((int >> 16) & 255) + delta));
+  const g = Math.max(0, Math.min(255, ((int >> 8) & 255) + delta));
+  const b = Math.max(0, Math.min(255, (int & 255) + delta));
+  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+// ============================================================
+// 家具（3Dオブジェクト）
+// ============================================================
+// 実装方針:
+//   既存の 2.5D 家具 SVG / 自作画像を、テクスチャつきの板ポリ（Plane）として立てる。
+//   flat（ラグ等）→ 床に水平に置く。 wall（窓・壁飾り）→ 壁面に貼り付ける。
+//   それ以外 → 床に垂直に立てる（正面はカメラ方向 -X,-Z）。
+//
+// 家具ごとに object3D をつくり、userData に itemId を持たせる。
+// 選択時はハイライトリング + わずかにY方向にはずむ。
+//
+// テクスチャは非同期ロードなので Promise キャッシュを持つ。
+
+const furnitureGroup = new THREE.Group();
+scene.add(furnitureGroup);
+
+// itemId → { object3D, def, textureKey }
+const itemObjects = new Map();
+// textureKey → Promise<THREE.Texture>
+const textureCache = new Map();
+
+/** 家具アイテムから「テクスチャ用の一意なキー」を返す */
+function textureKeyOf(item) {
+  return item.kind === 'preset'
+    ? `p:${item.category}:${item.variantIndex}`
+    : `c:${item.customId}`;
+}
+
+/** アイテムの静的定義を返す（サイズやアンカーなど） */
+function getFurnitureDef(item) {
+  if (item.kind === 'preset') {
+    return FURNITURE_LIBRARY[item.category][item.variantIndex];
+  }
+  // 自作家具: 画像実寸を約 tile 1 個分に fit させる
+  const cf = state.customFurniture.find(x => x.id === item.customId);
+  if (!cf || !cf._img) {
+    return { footprintW: 1, footprintD: 1, imgWidth: 100, imgHeight: 100,
+             anchorX: 50, anchorY: 90, wall: false, flat: false, label: 'マイ かぐ' };
+  }
+  const img = cf._img;
+  const targetSize = 100;
+  const scale = Math.min(targetSize / img.width, targetSize / img.height);
+  return {
+    footprintW: 1, footprintD: 1,
+    imgWidth: img.width * scale,
+    imgHeight: img.height * scale,
+    anchorX: (img.width * scale) / 2,
+    anchorY: img.height * scale - 5,
+    wall: false, flat: false, label: 'マイ かぐ'
+  };
+}
+
+/** SVG/画像 → THREE.Texture（キャッシュ） */
+async function getFurnitureTexture(item) {
+  const key = textureKeyOf(item);
+  if (textureCache.has(key)) return textureCache.get(key);
+  const promise = (async () => {
+    let img;
+    if (item.kind === 'preset') {
+      const def = FURNITURE_LIBRARY[item.category][item.variantIndex];
+      img = await svgToImage(def.svg);
+    } else {
+      const cf = state.customFurniture.find(x => x.id === item.customId);
+      if (!cf) throw new Error('custom furniture missing');
+      img = cf._img || await loadImage(cf.imageData);
+      cf._img = img;
+    }
+    // Textureはcanvas経由で作る（SVG→Image→canvas→Texture）
+    const c = document.createElement('canvas');
+    c.width = img.width; c.height = img.height;
+    c.getContext('2d').drawImage(img, 0, 0);
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    tex.magFilter = THREE.LinearFilter;
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
+    tex.needsUpdate = true;
+    return tex;
+  })();
+  textureCache.set(key, promise);
+  return promise;
+}
+
+/** アイテムの3Dオブジェクトを作成/更新 */
+async function ensureItemObject(item) {
+  const def = getFurnitureDef(item);
+  const tex = await getFurnitureTexture(item);
+
+  let obj = itemObjects.get(item.id);
+  if (!obj) {
+    // 板ポリ本体（imgWidth×imgHeight を ワールド単位に換算）
+    const wW = def.imgWidth * PX_TO_WORLD;
+    const wH = def.imgHeight * PX_TO_WORLD;
+    const geom = new THREE.PlaneGeometry(wW, wH);
+    const mat = new THREE.MeshStandardMaterial({
+      map: tex, transparent: true, alphaTest: 0.02,
+      side: THREE.DoubleSide, roughness: 0.9, metalness: 0
+    });
+    const mesh = new THREE.Mesh(geom, mat);
+    mesh.castShadow = !def.flat && !def.wall;
+
+    // 影用の薄い影楕円（床家具のみ）
+    let shadow = null;
+    if (!def.flat && !def.wall) {
+      const shadowCanvas = document.createElement('canvas');
+      shadowCanvas.width = 128; shadowCanvas.height = 64;
+      const sctx = shadowCanvas.getContext('2d');
+      const grad = sctx.createRadialGradient(64, 32, 4, 64, 32, 60);
+      grad.addColorStop(0, 'rgba(0,0,0,0.35)');
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      sctx.fillStyle = grad;
+      sctx.fillRect(0, 0, 128, 64);
+      const shTex = new THREE.CanvasTexture(shadowCanvas);
+      const shGeom = new THREE.PlaneGeometry(wW * 0.9, wW * 0.45);
+      const shMat = new THREE.MeshBasicMaterial({
+        map: shTex, transparent: true, depthWrite: false
+      });
+      shadow = new THREE.Mesh(shGeom, shMat);
+      shadow.rotation.x = -Math.PI / 2;
+      shadow.position.y = 0.005;
+    }
+
+    // 選択リング
+    const ringGeom = new THREE.RingGeometry(wW * 0.55, wW * 0.65, 32);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0x7C6FF2, transparent: true, opacity: 0.9,
+      side: THREE.DoubleSide, depthWrite: false
+    });
+    const ring = new THREE.Mesh(ringGeom, ringMat);
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = 0.02;
+    ring.visible = false;
+
+    const group = new THREE.Group();
+    group.add(mesh);
+    if (shadow) group.add(shadow);
+    group.add(ring);
+    group.userData.itemId = item.id;
+    group.userData.mesh = mesh;
+    group.userData.ring = ring;
+    group.userData.def = def;
+    group.userData.shadow = shadow;
+    furnitureGroup.add(group);
+    obj = group;
+    itemObjects.set(item.id, obj);
+  }
+
+  updateItemTransform(item, obj);
+  return obj;
+}
+
+/** tileX/tileY/scale から3Dオブジェクトの位置を更新 */
+function updateItemTransform(item, obj) {
+  const def = obj.userData.def;
+  const scale = item.scale || 1;
+  const wW = def.imgWidth * PX_TO_WORLD * scale;
+  const wH = def.imgHeight * PX_TO_WORLD * scale;
+
+  const mesh = obj.userData.mesh;
+  const ring = obj.userData.ring;
+  const shadow = obj.userData.shadow;
+
+  // メッシュ本体のスケール
+  mesh.scale.set(scale, scale, scale);
+  if (shadow) shadow.scale.set(scale, scale, scale);
+  ring.scale.set(scale, scale, scale);
+
+  const wx = item.tileX + 0.5 - ROOM_SIZE / 2;
+  const wz = item.tileY + 0.5 - ROOM_SIZE / 2;
+
+  if (def.flat) {
+    // ラグなど: 床に水平
+    obj.position.set(wx, 0.01, wz);
+    mesh.rotation.set(-Math.PI / 2, 0, 0);
+    mesh.position.set(0, 0, 0);
+    if (shadow) shadow.visible = false;
+  } else if (def.wall) {
+    // 壁飾り: どちらか近い壁に貼る
+    const distBack = item.tileY;                    // 奥壁までのタイル距離
+    const distLeft = item.tileX;                    // 左壁までのタイル距離
+    if (distLeft <= distBack) {
+      // 左壁に貼る
+      obj.position.set(-ROOM_SIZE / 2 + 0.09, WALL_HEIGHT * 0.55, wz);
+      mesh.rotation.set(0, Math.PI / 2, 0);
+      mesh.position.set(0, 0, 0);
+    } else {
+      // 奥壁に貼る
+      obj.position.set(wx, WALL_HEIGHT * 0.55, -ROOM_SIZE / 2 + 0.09);
+      mesh.rotation.set(0, 0, 0);
+      mesh.position.set(0, 0, 0);
+    }
+    if (shadow) shadow.visible = false;
+    ring.visible = false; // 壁物は選択リング非表示（当たり判定は残す）
+  } else {
+    // 床置き: 垂直に立てる。底が床に接するように高さを上げる
+    obj.position.set(wx, 0, wz);
+    mesh.rotation.set(0, 0, 0);
+    // 板ポリの中心は 高さ wH/2 が地面
+    mesh.position.set(0, wH / 2, 0);
+    // Y軸のみ回転はanimate loopのビルボード処理で毎フレーム調整
+    obj.rotation.y = 0;
+    if (shadow) { shadow.visible = true; shadow.position.set(0, 0.005, 0); }
+  }
+}
+
+function removeItemObject(itemId) {
+  const obj = itemObjects.get(itemId);
+  if (!obj) return;
+  furnitureGroup.remove(obj);
+  obj.traverse(o => {
+    if (o.geometry) o.geometry.dispose();
+    if (o.material) {
+      if (Array.isArray(o.material)) o.material.forEach(m => m.dispose());
+      else o.material.dispose();
+    }
+  });
+  itemObjects.delete(itemId);
+}
+
+/** 全アイテムを state から再構築 */
+async function rebuildAllItems() {
+  // 削除
+  for (const id of Array.from(itemObjects.keys())) {
+    if (!state.items.find(i => i.id === id)) removeItemObject(id);
+  }
+  // 生成/更新
+  for (const it of state.items) {
+    await ensureItemObject(it);
+  }
+  updateSelectionVisual();
+}
+
+function updateSelectionVisual() {
+  for (const [id, obj] of itemObjects) {
+    const isSel = id === state.selectedId;
+    if (obj.userData.ring && !obj.userData.def.wall) {
+      obj.userData.ring.visible = isSel;
+    }
+    // 選択中はほんの少しふわっと持ち上げるアニメ用フラグ
+    obj.userData.selected = isSel;
+  }
+}
+
+// ============================================================
+// カテゴリタブ / 家具グリッド
 // ============================================================
 function buildCategoryTabs() {
   catTabs.innerHTML = '';
@@ -596,9 +893,6 @@ function buildCategoryTabs() {
   });
 }
 
-// ============================================================
-// プリセット家具グリッド
-// ============================================================
 function buildPresetGrid() {
   presetGrid.innerHTML = '';
   const items = FURNITURE_LIBRARY[state.currentCategory] || [];
@@ -614,9 +908,6 @@ function buildPresetGrid() {
   });
 }
 
-// ============================================================
-// 自作家具グリッド
-// ============================================================
 function buildCustomGrid() {
   customGrid.innerHTML = '';
   if (state.customFurniture.length === 0) {
@@ -655,7 +946,7 @@ function buildSwatches() {
     b.addEventListener('click', () => {
       state.wallColor = c;
       buildSwatches();
-      render();
+      buildRoom();
     });
     wallSwatches.appendChild(b);
   });
@@ -667,190 +958,10 @@ function buildSwatches() {
     b.addEventListener('click', () => {
       state.floorColor = c;
       buildSwatches();
-      render();
+      buildRoom();
     });
     floorSwatches.appendChild(b);
   });
-}
-
-// ============================================================
-// 家具画像の取得（キャッシュあり）
-// ============================================================
-async function getFurnitureImage(item) {
-  const key = item.kind === 'preset'
-    ? `p:${item.category}:${item.variantIndex}`
-    : `c:${item.customId}`;
-  if (state.cachedImages[key]) return state.cachedImages[key];
-  let img;
-  if (item.kind === 'preset') {
-    const def = FURNITURE_LIBRARY[item.category][item.variantIndex];
-    img = await svgToImage(def.svg);
-  } else {
-    // 自作家具
-    const cf = state.customFurniture.find(x => x.id === item.customId);
-    if (!cf) return null;
-    img = await loadImage(cf.imageData);
-  }
-  state.cachedImages[key] = img;
-  return img;
-}
-
-/** 家具の定義（imgWidth, anchorY 等）を返す */
-function getFurnitureDef(item) {
-  if (item.kind === 'preset') {
-    return FURNITURE_LIBRARY[item.category][item.variantIndex];
-  }
-  // 自作家具は画像サイズをそのまま使う。anchorは中央下
-  const cf = state.customFurniture.find(x => x.id === item.customId);
-  const img = state.cachedImages[`c:${item.customId}`];
-  const w = img ? img.width : 100;
-  const h = img ? img.height : 100;
-  // 自作家具のサイズをタイル1個分に合わせる（fit）
-  const targetSize = 100;
-  const scale = Math.min(targetSize / w, targetSize / h);
-  return {
-    footprintW: 1, footprintD: 1,
-    imgWidth: w * scale,
-    imgHeight: h * scale,
-    anchorX: (w * scale) / 2,
-    anchorY: h * scale - 5,
-    wall: false,
-    flat: false,
-    label: 'マイ かぐ'
-  };
-}
-
-// ============================================================
-// 描画
-// ============================================================
-async function render() {
-  ctx.save();
-  // 背景
-  ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
-  ctx.fillStyle = '#EAE6FF';
-  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-
-  // 壁（左＝奥左、右＝奥右）を先に描く
-  drawWalls();
-  // 床タイル
-  drawFloor();
-
-  // 家具を y+x でソートして奥から手前へ描画
-  // 壁飾りは壁面（Y位置基準）で先に。床家具は tileY 順。
-  const sorted = [...state.items].sort((a, b) => {
-    // 壁飾りは常に一番奥
-    const defA = getFurnitureDef(a);
-    const defB = getFurnitureDef(b);
-    if (defA.wall && !defB.wall) return -1;
-    if (!defA.wall && defB.wall) return 1;
-    // ラグ（flat）は床家具より先（下に敷く）
-    if (defA.flat && !defB.flat) return -1;
-    if (!defA.flat && defB.flat) return 1;
-    return (a.tileX + a.tileY) - (b.tileX + b.tileY);
-  });
-
-  for (const item of sorted) {
-    await drawItem(item);
-  }
-
-  // 選択枠は最後に上に描く
-  const sel = state.items.find(i => i.id === state.selectedId);
-  if (sel) {
-    drawSelectionBox(sel);
-  }
-  ctx.restore();
-}
-
-function drawFloor() {
-  for (let ty = 0; ty < ROOM_SIZE; ty++) {
-    for (let tx = 0; tx < ROOM_SIZE; tx++) {
-      const [cx, cy] = tileToScreen(tx, ty);
-      ctx.beginPath();
-      ctx.moveTo(cx, cy - TILE_H/2);
-      ctx.lineTo(cx + TILE_W/2, cy);
-      ctx.lineTo(cx, cy + TILE_H/2);
-      ctx.lineTo(cx - TILE_W/2, cy);
-      ctx.closePath();
-      // チェッカーパターンでほんのり色差
-      const isAlt = (tx + ty) % 2 === 0;
-      ctx.fillStyle = isAlt ? state.floorColor : adjustBrightness(state.floorColor, -8);
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(0,0,0,0.08)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
-  }
-}
-
-function drawWalls() {
-  // 左壁: ty=0 の裏面（tx=0..ROOM_SIZE-1, 奥方向）
-  const [x0, y0] = tileToScreen(0, 0);
-  const [xE, yE] = tileToScreen(ROOM_SIZE, 0);
-  // 左壁ポリゴン
-  ctx.beginPath();
-  ctx.moveTo(x0, y0 - TILE_H/2);
-  ctx.lineTo(xE, yE - TILE_H/2);
-  ctx.lineTo(xE, yE - TILE_H/2 - WALL_H);
-  ctx.lineTo(x0, y0 - TILE_H/2 - WALL_H);
-  ctx.closePath();
-  ctx.fillStyle = state.wallColor;
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-  ctx.stroke();
-
-  // 右壁: tx=0 の裏面
-  const [x1, y1] = tileToScreen(0, 0);
-  const [x1E, y1E] = tileToScreen(0, ROOM_SIZE);
-  ctx.beginPath();
-  ctx.moveTo(x1, y1 - TILE_H/2);
-  ctx.lineTo(x1E, y1E - TILE_H/2);
-  ctx.lineTo(x1E, y1E - TILE_H/2 - WALL_H);
-  ctx.lineTo(x1, y1 - TILE_H/2 - WALL_H);
-  ctx.closePath();
-  ctx.fillStyle = adjustBrightness(state.wallColor, -8);
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-  ctx.stroke();
-}
-
-async function drawItem(item) {
-  const img = await getFurnitureImage(item);
-  if (!img) return;
-  const def = getFurnitureDef(item);
-  const scale = item.scale || 1;
-  const w = def.imgWidth * scale;
-  const h = def.imgHeight * scale;
-  const [sx, sy] = tileToScreen(item.tileX, item.tileY);
-  const drawX = sx - def.anchorX * scale;
-  const drawY = sy - def.anchorY * scale;
-  ctx.drawImage(img, drawX, drawY, w, h);
-}
-
-function drawSelectionBox(item) {
-  const def = getFurnitureDef(item);
-  const scale = item.scale || 1;
-  const w = def.imgWidth * scale;
-  const h = def.imgHeight * scale;
-  const [sx, sy] = tileToScreen(item.tileX, item.tileY);
-  const drawX = sx - def.anchorX * scale;
-  const drawY = sy - def.anchorY * scale;
-  ctx.save();
-  ctx.strokeStyle = 'rgba(124,111,242,0.95)';
-  ctx.lineWidth = 3;
-  ctx.setLineDash([8, 6]);
-  ctx.strokeRect(drawX - 3, drawY - 3, w + 6, h + 6);
-  ctx.setLineDash([]);
-  ctx.restore();
-}
-
-function adjustBrightness(hex, delta) {
-  const s = hex.replace('#', '');
-  const n = s.length === 3 ? s.split('').map(c => c + c).join('') : s;
-  const int = parseInt(n, 16);
-  const r = Math.max(0, Math.min(255, ((int >> 16) & 255) + delta));
-  const g = Math.max(0, Math.min(255, ((int >> 8) & 255) + delta));
-  const b = Math.max(0, Math.min(255, (int & 255) + delta));
-  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
 }
 
 // ============================================================
@@ -859,40 +970,31 @@ function adjustBrightness(hex, delta) {
 async function addPresetFurniture(category, variantIndex) {
   pushUndo();
   const item = {
-    id: nextItemId++,
-    kind: 'preset',
-    category,
-    variantIndex,
-    tileX: 3,
-    tileY: 3,
-    scale: 1
+    id: nextItemId++, kind: 'preset',
+    category, variantIndex,
+    tileX: 3, tileY: 3, scale: 1
   };
   state.items.push(item);
-  await getFurnitureImage(item);
+  await ensureItemObject(item);
   state.selectedId = item.id;
-  render();
+  updateSelectionVisual();
   renderAdjust();
   showToast(`「${FURNITURE_LIBRARY[category][variantIndex].label}」を おいたよ！`);
 }
 
 async function addCustomFurniture(cf) {
   pushUndo();
-  // 事前に画像をロード
-  const key = `c:${cf.id}`;
-  if (!state.cachedImages[key]) {
-    state.cachedImages[key] = await loadImage(cf.imageData);
-  }
+  // 画像を先にロードしておく
+  if (!cf._img) cf._img = await loadImage(cf.imageData);
   const item = {
-    id: nextItemId++,
-    kind: 'custom',
+    id: nextItemId++, kind: 'custom',
     customId: cf.id,
-    tileX: 3,
-    tileY: 3,
-    scale: 1
+    tileX: 3, tileY: 3, scale: 1
   };
   state.items.push(item);
+  await ensureItemObject(item);
   state.selectedId = item.id;
-  render();
+  updateSelectionVisual();
   renderAdjust();
   showToast('マイ かぐ を おいたよ！');
 }
@@ -903,7 +1005,9 @@ async function addCustomFurniture(cf) {
 function snapshot() {
   return {
     items: state.items.map(i => ({ ...i })),
-    selectedId: state.selectedId
+    selectedId: state.selectedId,
+    wallColor: state.wallColor,
+    floorColor: state.floorColor
   };
 }
 function pushUndo() {
@@ -911,118 +1015,126 @@ function pushUndo() {
   if (state.undoStack.length > 20) state.undoStack.shift();
   undoBtn.disabled = false;
 }
-function undo() {
+async function undo() {
   if (state.undoStack.length === 0) return;
   const prev = state.undoStack.pop();
   state.items = prev.items;
   state.selectedId = prev.selectedId;
-  render();
+  const rebuildRoom = prev.wallColor !== state.wallColor || prev.floorColor !== state.floorColor;
+  state.wallColor = prev.wallColor;
+  state.floorColor = prev.floorColor;
+  if (rebuildRoom) { buildSwatches(); buildRoom(); }
+  await rebuildAllItems();
   renderAdjust();
   if (state.undoStack.length === 0) undoBtn.disabled = true;
 }
 undoBtn.addEventListener('click', undo);
 
-clearBtn.addEventListener('click', () => {
+clearBtn.addEventListener('click', async () => {
   if (state.items.length === 0) return;
   if (!confirm('かぐを ぜんぶ けす？（かべ と ゆか の いろ は のこる よ）')) return;
   pushUndo();
   state.items = [];
   state.selectedId = null;
-  render();
+  await rebuildAllItems();
   renderAdjust();
 });
 
 // ============================================================
-// 選択・ドラッグ
+// レイキャスト（選択・ドラッグ）
 // ============================================================
-function getCoord(e) {
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+
+function setPointer(e) {
   const rect = canvas.getBoundingClientRect();
-  const x = (e.clientX - rect.left) * (CANVAS_W / rect.width);
-  const y = (e.clientY - rect.top) * (CANVAS_H / rect.height);
-  return [x, y];
+  pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 }
 
-function isInItemRect(x, y, item) {
-  const img = state.cachedImages[
-    item.kind === 'preset' ? `p:${item.category}:${item.variantIndex}` : `c:${item.customId}`
-  ];
-  if (!img) return false;
-  const def = getFurnitureDef(item);
-  const scale = item.scale || 1;
-  const [sx, sy] = tileToScreen(item.tileX, item.tileY);
-  const w = def.imgWidth * scale;
-  const h = def.imgHeight * scale;
-  const drawX = sx - def.anchorX * scale;
-  const drawY = sy - def.anchorY * scale;
-  return x >= drawX && x <= drawX + w && y >= drawY && y <= drawY + h;
-}
-
-function hitTest(x, y) {
-  // 描画順の逆から
-  for (let i = state.items.length - 1; i >= 0; i--) {
-    if (isInItemRect(x, y, state.items[i])) return state.items[i];
+/** 家具の当たり判定（グループ→中の mesh を対象に） */
+function pickItem() {
+  raycaster.setFromCamera(pointer, camera);
+  const meshes = [];
+  for (const [, obj] of itemObjects) {
+    if (obj.userData.mesh) meshes.push(obj.userData.mesh);
   }
-  return null;
+  const hits = raycaster.intersectObjects(meshes, false);
+  if (hits.length === 0) return null;
+  // 一番前面のヒット → その親グループ の itemId
+  let m = hits[0].object;
+  while (m && !m.userData.itemId) m = m.parent;
+  return m ? m.userData.itemId : null;
 }
+
+/** 床平面との交点を取得 */
+function pickFloorPoint() {
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObject(floorMesh, false);
+  return hits[0] ? hits[0].point : null;
+}
+
+let dragState = null; // { itemId, startPointerX/Y, origTileX/Y, moved }
 
 canvas.addEventListener('pointerdown', e => {
   if (e.pointerType === 'mouse' && e.button !== 0) return;
   canvas.setPointerCapture(e.pointerId);
-  const [x, y] = getCoord(e);
-  const hit = hitTest(x, y);
-  if (hit) {
-    state.selectedId = hit.id;
+  setPointer(e);
+  const hitId = pickItem();
+  if (hitId != null) {
+    // 家具を掴んだ → 選択 + ドラッグ準備
+    state.selectedId = hitId;
+    updateSelectionVisual();
+    renderAdjust();
+    const item = state.items.find(i => i.id === hitId);
     dragState = {
-      itemId: hit.id,
-      startX: x, startY: y,
-      origTileX: hit.tileX,
-      origTileY: hit.tileY,
-      dragged: false
+      itemId: hitId,
+      origTileX: item.tileX,
+      origTileY: item.tileY,
+      moved: false
     };
-    render();
-    renderAdjust();
+    // OrbitControls を一時的に止める
+    controls.enabled = false;
   } else {
-    // 何もない場所をタップ → 選択解除
-    state.selectedId = null;
-    render();
-    renderAdjust();
+    // 何もない場所 → 選択解除。OrbitControls はそのまま（カメラ回転）
+    if (state.selectedId != null) {
+      state.selectedId = null;
+      updateSelectionVisual();
+      renderAdjust();
+    }
   }
 });
 
 canvas.addEventListener('pointermove', e => {
   if (!dragState) return;
-  const [x, y] = getCoord(e);
-  const dx = x - dragState.startX;
-  const dy = y - dragState.startY;
-  if (Math.hypot(dx, dy) < 4 && !dragState.dragged) return; // 小さすぎる動きは無視
-  dragState.dragged = true;
+  setPointer(e);
+  const p = pickFloorPoint();
+  if (!p) return;
+  // ワールド座標 → タイル
+  const tx = Math.floor(p.x + ROOM_SIZE / 2);
+  const ty = Math.floor(p.z + ROOM_SIZE / 2);
+  const cx = Math.max(0, Math.min(ROOM_SIZE - 1, tx));
+  const cy = Math.max(0, Math.min(ROOM_SIZE - 1, ty));
   const item = state.items.find(i => i.id === dragState.itemId);
   if (!item) return;
-  // 現在のスクリーン位置 = 元の位置 + delta
-  const [origSx, origSy] = tileToScreen(dragState.origTileX, dragState.origTileY);
-  const newSx = origSx + dx;
-  const newSy = origSy + dy;
-  const [ntx, nty] = screenToTile(newSx, newSy);
-  const cx = Math.max(0, Math.min(ROOM_SIZE - 1, ntx));
-  const cy = Math.max(0, Math.min(ROOM_SIZE - 1, nty));
   if (item.tileX !== cx || item.tileY !== cy) {
     item.tileX = cx;
     item.tileY = cy;
-    render();
+    const obj = itemObjects.get(item.id);
+    if (obj) updateItemTransform(item, obj);
+    dragState.moved = true;
   }
 });
 
-canvas.addEventListener('pointerup', () => {
-  if (dragState && dragState.dragged) {
-    // ドラッグ操作をUndo対象に（開始時のスナップショットは選択時に取ってない）
-    // シンプルにするため、ここでは記録済みとしない
-  }
+function endDrag() {
   dragState = null;
-});
-canvas.addEventListener('pointercancel', () => { dragState = null; });
+  controls.enabled = true;
+}
+canvas.addEventListener('pointerup', endDrag);
+canvas.addEventListener('pointercancel', endDrag);
 
 // ============================================================
-// 選択中家具の調整パネル
+// 調整パネル
 // ============================================================
 function renderAdjust() {
   const item = state.items.find(i => i.id === state.selectedId);
@@ -1038,7 +1150,7 @@ function renderAdjust() {
     <div class="selected-preview">${previewHtml}</div>
     <div class="selected-title">${def.label || 'マイ かぐ'}</div>
     <div style="font-size:11px;color:var(--ink-soft);text-align:center;font-weight:700;">
-      いち: (${item.tileX}, ${item.tileY})<br>ドラッグで うごかせる よ
+      いち: (${item.tileX}, ${item.tileY})<br>ドラッグ で うごかせるよ
     </div>
     <div>
       <div class="section-title">おおきさ</div>
@@ -1050,16 +1162,14 @@ function renderAdjust() {
       <button class="adjust-btn" data-move="down">⬇️ てまえ</button>
       <button class="adjust-btn" data-move="left">⬅️ ひだり</button>
       <button class="adjust-btn" data-move="right">➡️ みぎ</button>
-      <button class="adjust-btn" data-action="front">⏫ さいぜんめん</button>
-      <button class="adjust-btn" data-action="back">⏬ おくへ</button>
     </div>
     <button class="adjust-btn danger" data-action="delete" style="grid-column:1/-1;">🗑️ この かぐを けす</button>
   `;
 
   adjustBody.querySelector('#scaleSlider').addEventListener('input', e => {
     item.scale = +e.target.value / 100;
-    render();
-    // 表示更新
+    const obj = itemObjects.get(item.id);
+    if (obj) updateItemTransform(item, obj);
     renderAdjust();
   });
 
@@ -1067,40 +1177,31 @@ function renderAdjust() {
     b.addEventListener('click', () => {
       pushUndo();
       const dir = b.dataset.move;
-      // アイソメでの「奥/手前/左/右」を tileX/Y に対応させる
-      // 画面上「奥」= tileY を減らす（と同時に tileX も減らす方が「まっすぐ奥」だが、
-      //   本来のアイソメでは奥=tileY-1（左壁に沿って奥）と考える）
-      if (dir === 'up')    { item.tileY = Math.max(0, item.tileY - 1); }
-      if (dir === 'down')  { item.tileY = Math.min(ROOM_SIZE - 1, item.tileY + 1); }
-      if (dir === 'left')  { item.tileX = Math.max(0, item.tileX - 1); }
-      if (dir === 'right') { item.tileX = Math.min(ROOM_SIZE - 1, item.tileX + 1); }
-      render();
+      if (dir === 'up')    item.tileY = Math.max(0, item.tileY - 1);
+      if (dir === 'down')  item.tileY = Math.min(ROOM_SIZE - 1, item.tileY + 1);
+      if (dir === 'left')  item.tileX = Math.max(0, item.tileX - 1);
+      if (dir === 'right') item.tileX = Math.min(ROOM_SIZE - 1, item.tileX + 1);
+      const obj = itemObjects.get(item.id);
+      if (obj) updateItemTransform(item, obj);
       renderAdjust();
     });
   });
 
   adjustBody.querySelectorAll('[data-action]').forEach(b => {
-    b.addEventListener('click', () => {
-      const act = b.dataset.action;
-      if (act === 'delete') {
+    b.addEventListener('click', async () => {
+      if (b.dataset.action === 'delete') {
         pushUndo();
         state.items = state.items.filter(i => i.id !== item.id);
+        removeItemObject(item.id);
         state.selectedId = null;
-        render();
         renderAdjust();
-      } else if (act === 'front' || act === 'back') {
-        pushUndo();
-        const idx = state.items.findIndex(i => i.id === item.id);
-        state.items.splice(idx, 1);
-        if (act === 'front') state.items.push(item); else state.items.unshift(item);
-        render();
       }
     });
   });
 }
 
 // ============================================================
-// パネル開閉（モバイル）
+// パネル開閉
 // ============================================================
 function updatePanelState() {
   const anyOpen = furniturePanel.classList.contains('open') || adjustPanel.classList.contains('open');
@@ -1129,6 +1230,54 @@ panelBackdrop.addEventListener('click', closeAllPanels);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllPanels(); });
 
 // ============================================================
+// カメラリセット
+// ============================================================
+camResetBtn.addEventListener('click', () => {
+  camera.position.copy(defaultCamPos);
+  controls.target.copy(defaultCamTarget);
+  controls.update();
+});
+
+// ============================================================
+// リサイズ
+// ============================================================
+function resize() {
+  const w = canvasContainer.clientWidth;
+  const h = canvasContainer.clientHeight;
+  if (w === 0 || h === 0) return;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ============================================================
+// 描画ループ
+// ============================================================
+const clock = new THREE.Clock();
+function animate() {
+  const t = clock.getElapsedTime();
+  for (const [, obj] of itemObjects) {
+    const def = obj.userData.def;
+    if (def.flat || def.wall) continue;
+    // 床置き家具は Y軸ビルボード（水平方向はカメラを向く）
+    const dx = camera.position.x - obj.position.x;
+    const dz = camera.position.z - obj.position.z;
+    obj.userData.mesh.rotation.y = Math.atan2(dx, dz);
+    // 選択中はふわっと上下に
+    if (obj.userData.selected) {
+      obj.position.y = 0.05 + Math.sin(t * 3) * 0.03;
+    } else {
+      obj.position.y = 0;
+    }
+  }
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+
+// ============================================================
 // 保存
 // ============================================================
 saveBtn.addEventListener('click', () => {
@@ -1142,27 +1291,30 @@ saveModal.addEventListener('click', e => { if (e.target === saveModal) saveModal
 document.querySelectorAll('[data-savetype]').forEach(btn => {
   btn.addEventListener('click', async () => {
     saveModal.classList.remove('show');
-    // 選択枠なしで再描画
+    // 選択リングを消してからスクショ
     const prevSelected = state.selectedId;
     state.selectedId = null;
-    await render();
-    const imageData = canvas.toDataURL('image/png');
+    updateSelectionVisual();
+    // 1フレーム待って確実に反映してから toDataURL
+    renderer.render(scene, camera);
+    // アスペクトを 720x620 に近い形で書き出したいが、preserveDrawingBuffer を使って
+    // 現在の描画結果をそのまま保存する（拡大縮小はサムネ側で対応）
+    const imageData = renderer.domElement.toDataURL('image/png');
     state.selectedId = prevSelected;
-    await render();
+    updateSelectionVisual();
 
     const roomData = {
       wallColor: state.wallColor,
       floorColor: state.floorColor,
-      items: state.items.map(i => ({ ...i }))
+      items: state.items.map(i => ({ ...i })),
+      renderer3d: true // 3D版で保存したことのフラグ
     };
 
     try {
       showToast('ほぞん ちゅう...');
       if (btn.dataset.savetype === 'new' || !state.currentRoomId) {
         const docRef = await saveAvatar({
-          imageData,
-          type: 'room',
-          extra: { roomData }
+          imageData, type: 'room', extra: { roomData }
         });
         state.currentRoomId = docRef.id;
         showToast('🆕 おへや を ほぞん したよ！');
@@ -1178,15 +1330,30 @@ document.querySelectorAll('[data-savetype]').forEach(btn => {
 });
 
 // ============================================================
-// 起動：カスタム家具＋部屋のロード
+// 起動
 // ============================================================
+buildCategoryTabs();
+buildPresetGrid();
+buildCustomGrid();
+buildSwatches();
+buildRoom();
+renderAdjust();
+undoBtn.disabled = true;
+animate();
+
+// ヒントを数秒だけ表示
+canvasHint.classList.add('show');
+setTimeout(() => canvasHint.classList.remove('show'), 4500);
+
+// ローディング表示を消す
+setTimeout(() => loadingOverlay.classList.add('hidden'), 300);
+
 if (isConfigured) {
   watchAvatars(async (all) => {
-    // 自作家具（type='furniture'）
     state.customFurniture = all.filter(x => x.type === 'furniture');
     buildCustomGrid();
 
-    // 部屋の初回読み込み（一番新しいものを開く）
+    // 部屋の初回読み込み（一番新しい）
     if (state.currentRoomId === null) {
       const rooms = all.filter(x => x.type === 'room').sort((a, b) => {
         const ta = a.createdAt?.seconds || 0;
@@ -1200,14 +1367,19 @@ if (isConfigured) {
           state.wallColor = r.roomData.wallColor || state.wallColor;
           state.floorColor = r.roomData.floorColor || state.floorColor;
           state.items = (r.roomData.items || []).map(i => ({ ...i }));
-          // IDが衝突しないようにnextItemIdを更新
           for (const it of state.items) {
             if (it.id >= nextItemId) nextItemId = it.id + 1;
           }
           buildSwatches();
-          // 家具画像を事前ロード
-          for (const it of state.items) { await getFurnitureImage(it); }
-          render();
+          buildRoom();
+          // 自作家具の画像を先にロード
+          for (const it of state.items) {
+            if (it.kind === 'custom') {
+              const cf = state.customFurniture.find(x => x.id === it.customId);
+              if (cf && !cf._img) cf._img = await loadImage(cf.imageData);
+            }
+          }
+          await rebuildAllItems();
           showToast(`ほぞんずみの おへや を ひらいたよ`);
         }
       }
@@ -1216,17 +1388,6 @@ if (isConfigured) {
 } else {
   showToast('Firebase の せってい が まだ です', 3000);
 }
-
-// ============================================================
-// 初期化
-// ============================================================
-buildCategoryTabs();
-buildPresetGrid();
-buildCustomGrid();
-buildSwatches();
-render();
-renderAdjust();
-undoBtn.disabled = true;
 </script>
 
 </body>
