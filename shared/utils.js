@@ -105,6 +105,50 @@ export function svgToImage(svgString) {
 }
 
 /**
+ * canvas の「紙色に近いピクセル」を透明にした dataURL を返す（切り抜きなし・サイズ維持）。
+ * extractOpaqueImageDataURL と違って外接矩形での crop はしないので、
+ * アバターの全身レイアウトを保ったまま背景だけ透過できる。
+ */
+export function stripPaperToTransparent(sourceCanvas, opts = {}) {
+  const paper = opts.paper || '#FFFDF7';
+  const tolerance = opts.tolerance ?? 22;
+  const w = sourceCanvas.width, h = sourceCanvas.height;
+  const src = sourceCanvas.getContext('2d').getImageData(0, 0, w, h);
+  const d = src.data;
+  const p = hexToRgb(paper);
+  const t2 = tolerance * tolerance * 3;
+  for (let i = 0; i < d.length; i += 4) {
+    const dr = d[i] - p.r, dg = d[i + 1] - p.g, db = d[i + 2] - p.b;
+    if ((dr * dr + dg * dg + db * db) < t2) d[i + 3] = 0;
+  }
+  const out = document.createElement('canvas');
+  out.width = w; out.height = h;
+  out.getContext('2d').putImageData(src, 0, 0);
+  return out.toDataURL('image/png');
+}
+
+/**
+ * loadImage の背景透過版。既存アバター（紙色ベタ塗り背景付き）を読み込むときに使う。
+ * 既に透過されているPNG（左上ピクセルalpha=0）はそのまま返す。
+ */
+export async function loadImageTransparent(src, opts = {}) {
+  const img = await loadImage(src);
+  // 早期リターン: 既に透過なら加工しない
+  const probe = document.createElement('canvas');
+  probe.width = 1; probe.height = 1;
+  const pctx = probe.getContext('2d');
+  pctx.drawImage(img, 0, 0, 1, 1);
+  const pd = pctx.getImageData(0, 0, 1, 1).data;
+  if (pd[3] === 0) return img;
+
+  const c = document.createElement('canvas');
+  c.width = img.width; c.height = img.height;
+  c.getContext('2d').drawImage(img, 0, 0);
+  const dataURL = stripPaperToTransparent(c, opts);
+  return await loadImage(dataURL);
+}
+
+/**
  * 顔パーツのSVGライブラリ（お絵かき画面のスタンプ用）
  */
 export const PART_LIBRARY = {
