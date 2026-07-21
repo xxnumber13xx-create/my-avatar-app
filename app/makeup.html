@@ -135,7 +135,10 @@
     box-shadow: 0 10px 30px rgba(46,42,71,0.15);
     border-radius: 14px;
     overflow: hidden;
-    background: var(--paper);
+    /* アバターの背景を透過表示。淡いピンク〜クリーム */
+    background:
+      radial-gradient(circle at 50% 100%, #FFDCEA 0%, transparent 60%),
+      linear-gradient(180deg, #FFF8FB 0%, #FFEEF5 100%);
     touch-action: none;
   }
   .canvas-container canvas {
@@ -619,7 +622,7 @@
 <script type="module">
 import { isConfigured, saveAvatar, updateAvatar, watchAvatars } from '/shared/firebase.js';
 import {
-  showToast, loadImage, tintSvg, svgToImage,
+  showToast, loadImage, loadImageTransparent, tintSvg, svgToImage,
   MAKEUP_LIBRARY, MAKEUP_CATEGORIES, MAKEUP_COLORS
 } from '/shared/utils.js';
 
@@ -796,7 +799,8 @@ function renderAvatarList() {
 async function selectAvatar(a) {
   state.avatar = a;
   try {
-    state.avatarImg = await loadImage(a.imageData);
+    // アバターは背景透過で読み込む（紙色ベタ塗り背景を透明化）
+    state.avatarImg = await loadImageTransparent(a.imageData);
   } catch (e) {
     console.error(e);
     showToast('アバター画像の よみこみ に しっぱい');
@@ -824,9 +828,8 @@ async function selectAvatar(a) {
 // ============================================================
 function render() {
   ctx.save();
+  // 背景は透明（お化粧の色乗せを見やすくするため、CSS側で淡い背景を敷く）
   ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
-  ctx.fillStyle = PAPER;
-  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
   if (state.avatarImg) {
     const img = state.avatarImg;
