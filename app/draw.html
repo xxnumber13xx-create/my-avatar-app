@@ -880,7 +880,7 @@
 <script type="module">
 import { isConfigured, saveAvatar } from '/shared/firebase.js';
 import {
-  extractOpaqueImageDataURL, hexToRgb, rgbToHex, showToast,
+  extractOpaqueImageDataURL, stripPaperToTransparent, hexToRgb, rgbToHex, showToast,
   PART_LIBRARY, MAKEUP_LIBRARY, MAKEUP_CATEGORIES, CLOTHING_LIBRARY, CLOTHING_CATEGORIES, svgToImage, tintSvg
 } from '/shared/utils.js';
 
@@ -1922,14 +1922,15 @@ document.querySelectorAll('[data-savetype]').forEach(btn => {
     let savedType;
     try {
       if (type === 'avatar-body') {
-        imageData = compositeCanvas.toDataURL('image/png');
+        // 紙色→透明化してから保存（他の画面で背景無しで表示できるように）
+        imageData = stripPaperToTransparent(compositeCanvas, { paper: PAPER, tolerance: 22 });
         savedType = 'avatar';
       } else if (type === 'avatar-face') {
-        // 上半分（480x480）を切り出す
+        // 上半分（480x480）を切り出してから透明化
         const faceC = document.createElement('canvas');
         faceC.width = CANVAS_W; faceC.height = CANVAS_W;
         faceC.getContext('2d').drawImage(compositeCanvas, 0, 0, CANVAS_W, CANVAS_W, 0, 0, CANVAS_W, CANVAS_W);
-        imageData = faceC.toDataURL('image/png');
+        imageData = stripPaperToTransparent(faceC, { paper: PAPER, tolerance: 22 });
         savedType = 'avatar';
       } else if (type === 'item') {
         imageData = extractOpaqueImageDataURL(compositeCanvas, { paper: PAPER, tolerance: 22, padding: 6 });
