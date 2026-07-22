@@ -24,6 +24,11 @@
   --shadow-card: 0 14px 0 rgba(124,111,242,0.10), 0 20px 40px rgba(46,42,71,0.08);
   --shadow-btn: 0 4px 0 rgba(46,42,71,0.15);
 
+  /* 端末下部のジェスチャーバー / Home Indicator を避けるための最低クリアランス。
+     safe-area-inset-bottom を尊重しつつ、Androidなど env が 0px の端末でも
+     最低 20px は下端に何も配置しない。*/
+  --sab: max(20px, env(safe-area-inset-bottom, 0px));
+
   font-size: 16px;
 }
 
