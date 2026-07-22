@@ -1067,3 +1067,251 @@ export function getMood(stats) {
   if (avg >= 25) return { key: 'sad',     icon: '😢', msg: 'さみしい…' };
   return          { key: 'sleepy',  icon: '😪', msg: 'しょんぼり…' };
 }
+
+// ============================================================
+// フェーズ5: Gold 経済 - UI ヘルパー
+// ============================================================
+
+/**
+ * 全画面共通の Gold バッジをヘッダーに設置し、Firestore 監視で残高更新する。
+ * ピッカー未選択時はピッカーを開き、選択後にバッジを有効化する。
+ * 自動的に「連続ログインボーナス」も判定する。
+ *
+ * @param {object} deps - firebase.js のヘルパー群を注入
+ *   { isAllowanceConfigured, getStoredChildKey, setStoredChildKey,
+ *     watchAllowance, listAllowanceChildren, earnGold, updateAllowanceChild }
+ * @param {HTMLElement} headerEl - バッジを追加する場所（通常 <header>）
+ * @param {HTMLElement} insertBefore - このボタンの前に挿入（省略なら末尾）
+ * @returns {object} { getGold, getChildKey, openChildPicker, awardSaveBonus }
+ */
+export function setupGoldBadge(deps, headerEl, insertBefore = null) {
+  const {
+    isAllowanceConfigured, getStoredChildKey, setStoredChildKey,
+    watchAllowance, listAllowanceChildren,
+    earnGold, updateAllowanceChild
+  } = deps;
+
+  // バッジ本体
+  const badge = document.createElement('button');
+  badge.className = 'gold-badge';
+  badge.type = 'button';
+  badge.title = 'ゴールド残高';
+  badge.innerHTML = `<span class="gold-icon">💰</span><span class="gold-amount">--</span><span>G</span>`;
+  if (insertBefore && insertBefore.parentNode === headerEl) {
+    headerEl.insertBefore(badge, insertBefore);
+  } else {
+    headerEl.appendChild(badge);
+  }
+
+  let currentGold = 0;
+  let currentChildKey = getStoredChildKey();
+  let unsubscribe = null;
+  let streakChecked = false;
+  const amountEl = badge.querySelector('.gold-amount');
+
+  if (!isAllowanceConfigured) {
+    return {
+      getGold: () => 0,
+      getChildKey: () => null,
+      openChildPicker: () => Promise.resolve(null),
+      awardSaveBonus: async () => 0
+    };
+  }
+
+  function updateBadge(gold) {
+    currentGold = gold;
+    amountEl.textContent = gold;
+    badge.classList.add('show');
+  }
+
+  /** YYYY-MM-DD 文字列 */
+  function ymd(t) {
+    const d = new Date(t);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+  /** 昨日の YYYY-MM-DD */
+  function yesterdayYmd() {
+    return ymd(Date.now() - 24*60*60*1000);
+  }
+
+  /** 連続ログインボーナス判定 */
+  async function checkLoginStreak(childData) {
+    if (streakChecked || !earnGold || !updateAllowanceChild) return;
+    streakChecked = true;
+    const today = ymd(Date.now());
+    const lastYmd = childData.avatarAppLastLoginYmd || null;
+    if (lastYmd === today) return; // 今日はもう貰った
+    let streak = childData.avatarAppLoginStreak || 0;
+    if (lastYmd === yesterdayYmd()) {
+      streak += 1; // 連続維持
+    } else {
+      streak = 1; // リセット
+    }
+    let bonus = 2; // 通常 +2G
+    let msg = 'まいにち ログイン ボーナス';
+    if (streak === 7) {
+      bonus = 12; // 7日目は 2 + 10 の 12G
+      msg = '7れんぞく！ すごい！ +10G ボーナス';
+    } else if (streak > 7 && streak % 7 === 0) {
+      // 14日、21日... も同じサプライズ
+      bonus = 12;
+      msg = `${streak}れんぞく！ 大きなボーナス！`;
+    }
+    try {
+      await earnGold(currentChildKey, bonus, msg);
+      await updateAllowanceChild(currentChildKey, {
+        avatarAppLastLoginYmd: today,
+        avatarAppLoginStreak: streak
+      });
+      showGoldFly(bonus);
+      showToast(`🌟 ${msg} +${bonus}G！`, 2400);
+    } catch (err) {
+      console.warn('ログインボーナス失敗', err);
+    }
+  }
+
+  function watchForChild(key) {
+    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+    if (!key) { badge.classList.remove('show'); return; }
+    unsubscribe = watchAllowance(data => {
+      if (!data) return;
+      const child = (data.children || {})[key];
+      if (!child) {
+        setStoredChildKey(null);
+        currentChildKey = null;
+        badge.classList.remove('show');
+        openChildPicker();
+        return;
+      }
+      updateBadge(child.gold || 0);
+      // 初回スナップで連続ログイン判定
+      checkLoginStreak(child);
+    });
+  }
+
+  // ==== ピッカーモーダル ====
+  function ensurePickerModal() {
+    let modal = document.getElementById('childPickerBackdrop');
+    if (modal) return modal;
+    modal = document.createElement('div');
+    modal.className = 'child-picker-backdrop';
+    modal.id = 'childPickerBackdrop';
+    modal.innerHTML = `
+      <div class="child-picker-card">
+        <h3>👋 あなたは だれ？</h3>
+        <p class="sub">おこづかいの きろく と つなげるよ。<br>したから えらんでね</p>
+        <div class="child-picker-grid" id="childPickerGrid"></div>
+        <button class="skip-btn" id="childPickerSkip">きょうは スキップ</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.querySelector('#childPickerSkip').addEventListener('click', () => {
+      modal.classList.remove('show');
+    });
+    return modal;
+  }
+
+  async function openChildPicker() {
+    const modal = ensurePickerModal();
+    const grid = modal.querySelector('#childPickerGrid');
+    grid.innerHTML = '<p class="empty">よみこみ ちゅう...</p>';
+    modal.classList.add('show');
+    let list = [];
+    try {
+      list = await listAllowanceChildren();
+    } catch (e) {
+      console.warn('children 取得失敗', e);
+      grid.innerHTML = '<p class="empty">おこづかいアプリと つながらなかったよ 😢</p>';
+      return null;
+    }
+    if (list.length === 0) {
+      grid.innerHTML = '<p class="empty">おこづかいアプリ に あなたの データがないよ<br>おうちのひとに たのんでね</p>';
+      return null;
+    }
+    grid.innerHTML = '';
+    return new Promise(resolve => {
+      list.forEach(c => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'child-picker-item';
+        item.innerHTML = `
+          <div class="avatar-emoji">${c.avatar || '🧒'}</div>
+          <div class="name">${c.name}</div>
+          <div class="gold-info">💰 ${c.gold} G</div>
+        `;
+        item.addEventListener('click', () => {
+          setStoredChildKey(c.key);
+          currentChildKey = c.key;
+          streakChecked = false;
+          modal.classList.remove('show');
+          watchForChild(c.key);
+          resolve(c.key);
+        });
+        grid.appendChild(item);
+      });
+    });
+  }
+
+  /**
+   * 「保存で +1G」ボーナス。1日に最大 3 回まで。
+   * @param {string} what - 何を保存したか（履歴に残る）
+   * @returns {Promise<number>} 支払われた G。既に上限なら 0
+   */
+  async function awardSaveBonus(what = 'あたらしい え') {
+    if (!currentChildKey || !earnGold) return 0;
+    const LS_KEY = 'avatarApp_saveBonus_' + ymd(Date.now());
+    let count = 0;
+    try { count = Number(localStorage.getItem(LS_KEY) || 0); } catch (e) {}
+    if (count >= 3) return 0;
+    try {
+      await earnGold(currentChildKey, 1, `${what} を ほぞん`);
+      localStorage.setItem(LS_KEY, String(count + 1));
+      showGoldFly(1);
+      return 1;
+    } catch (err) {
+      console.warn('保存ボーナス失敗', err);
+      return 0;
+    }
+  }
+
+  // バッジタップでピッカーを開く（お子さん切替）
+  badge.addEventListener('click', () => openChildPicker());
+
+  // 初期化: childKey があれば即監視、無ければピッカー
+  if (currentChildKey) {
+    watchForChild(currentChildKey);
+  } else {
+    setTimeout(() => openChildPicker(), 800);
+  }
+
+  return {
+    getGold: () => currentGold,
+    getChildKey: () => currentChildKey,
+    openChildPicker,
+    awardSaveBonus,
+    refreshBadge: () => amountEl && (amountEl.textContent = currentGold)
+  };
+}
+
+/**
+ * 「+2G」等が浮かんで消えるエフェクト。
+ * @param {number} amount - 正なら earn 演出、負なら spend
+ * @param {number} x - 画面 X 座標（省略時は中央）
+ * @param {number} y - 画面 Y 座標（省略時は中央上）
+ */
+export function showGoldFly(amount, x = null, y = null) {
+  const el = document.createElement('div');
+  el.className = 'gold-fly ' + (amount >= 0 ? 'earn' : 'spend');
+  el.textContent = (amount >= 0 ? '+' : '') + amount + 'G';
+  el.style.left = (x ?? window.innerWidth / 2) + 'px';
+  el.style.top  = (y ?? window.innerHeight / 3) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1500);
+  // バッジも軽くパルス
+  const badge = document.querySelector('.gold-badge.show');
+  if (badge) {
+    badge.classList.remove('pulse');
+    void badge.offsetWidth;
+    badge.classList.add('pulse');
+  }
+}
