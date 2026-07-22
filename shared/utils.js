@@ -89,6 +89,77 @@ export function loadImage(src) {
   });
 }
 
+/**
+ * 画像を読み込み、紙色（既定は #FFFDF7 近辺）を透明化した Image オブジェクトを返す。
+ * 保存済み PNG は draw 時点で透明化されているため大半のピクセルはスキップされるが、
+ * 半透明の紙色残りや、透明化されていない古いデータへの保険。
+ */
+export async function loadImageTransparent(src, opts = {}) {
+  const img = await loadImage(src);
+  const paper = opts.paper || '#FFFDF7';
+  const tolerance = opts.tolerance ?? 22;
+  const paperRgb = hexToRgb(paper);
+  const t2 = tolerance * tolerance * 3;
+
+  const c = document.createElement('canvas');
+  c.width = img.naturalWidth || img.width;
+  c.height = img.naturalHeight || img.height;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+  const data = ctx.getImageData(0, 0, c.width, c.height);
+  const d = data.data;
+  let changed = false;
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i + 3] === 0) continue;
+    const dr = d[i]     - paperRgb.r;
+    const dg = d[i + 1] - paperRgb.g;
+    const db = d[i + 2] - paperRgb.b;
+    if ((dr * dr + dg * dg + db * db) < t2) {
+      d[i + 3] = 0;
+      changed = true;
+    }
+  }
+  if (!changed) return img; // 変化なしなら元の Image をそのまま返す
+  ctx.putImageData(data, 0, 0);
+  return new Promise((resolve, reject) => {
+    const out = new Image();
+    out.onload = () => resolve(out);
+    out.onerror = reject;
+    out.src = c.toDataURL('image/png');
+  });
+}
+
+/**
+ * 紙色に近いピクセルを透明化して、同じサイズの dataURL を返す。
+ * extractOpaqueImageDataURL の「切り抜き無し版」。draw の avatar-body / avatar-face 保存で使用。
+ */
+export function stripPaperToTransparent(sourceCanvas, opts = {}) {
+  const paper = opts.paper || '#FFFDF7';
+  const tolerance = opts.tolerance ?? 22;
+  const w = sourceCanvas.width;
+  const h = sourceCanvas.height;
+  const paperRgb = hexToRgb(paper);
+  const t2 = tolerance * tolerance * 3;
+
+  const out = document.createElement('canvas');
+  out.width = w; out.height = h;
+  const outCtx = out.getContext('2d');
+  outCtx.drawImage(sourceCanvas, 0, 0);
+  const img = outCtx.getImageData(0, 0, w, h);
+  const d = img.data;
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i + 3] === 0) continue;
+    const dr = d[i]     - paperRgb.r;
+    const dg = d[i + 1] - paperRgb.g;
+    const db = d[i + 2] - paperRgb.b;
+    if ((dr * dr + dg * dg + db * db) < t2) {
+      d[i + 3] = 0;
+    }
+  }
+  outCtx.putImageData(img, 0, 0);
+  return out.toDataURL('image/png');
+}
+
 /** SVG文字列内の currentColor を指定色に置換して新しいSVG文字列を返す */
 export function tintSvg(svgString, color) {
   return svgString.replace(/currentColor/g, color);
