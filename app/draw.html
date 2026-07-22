@@ -2048,6 +2048,13 @@ document.querySelectorAll('[data-savetype]').forEach(btn => {
                 : savedType === 'furniture' ? '🪑 かぐ を ほぞん したよ！おへや で つかえるよ'
                 : '👧 あばたー を ほぞん したよ！';
       showToast(msg);
+      // フェーズ5: +1G ボーナス（1日 3 回まで）
+      if (window.avatarAppGold?.awardSaveBonus) {
+        const what = savedType === 'item' ? 'あたらしい ふく'
+                   : savedType === 'furniture' ? 'あたらしい かぐ'
+                   : 'あたらしい あばたー';
+        window.avatarAppGold.awardSaveBonus(what).catch(e => console.warn(e));
+      }
     } catch (err) {
       console.error(err);
       showToast('ほぞん に しっぱい しました');
@@ -2207,5 +2214,23 @@ document.addEventListener('click', e => {
 buildPoseOptions();
 </script>
 
+
+<script type="module">
+// フェーズ5: Gold バッジ + ログインストリーク + 保存ボーナス公開
+import { isAllowanceConfigured, getStoredChildKey, setStoredChildKey,
+  watchAllowance, listAllowanceChildren, earnGold, updateAllowanceChild } from '/shared/firebase.js';
+import { setupGoldBadge } from '/shared/utils.js';
+const header = document.querySelector('header');
+if (header) {
+  const insertBefore = header.querySelector('#saveBtn, .btn-primary, .save-btn') || null;
+  const api = setupGoldBadge(
+    { isAllowanceConfigured, getStoredChildKey, setStoredChildKey,
+      watchAllowance, listAllowanceChildren, earnGold, updateAllowanceChild },
+    header, insertBefore
+  );
+  // メイン スクリプトから使えるようグローバルに公開
+  window.avatarAppGold = api;
+}
+</script>
 </body>
 </html>
