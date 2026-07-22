@@ -1266,6 +1266,10 @@ document.querySelectorAll('[data-savetype]').forEach(btn => {
           extra: { baseAvatarId: state.avatar.id }
         });
         showToast('🆕 あたらしい アバター として ほぞん したよ！');
+        // フェーズ5: +1G ボーナス（新規保存のみ）
+        if (window.avatarAppGold?.awardSaveBonus) {
+          window.avatarAppGold.awardSaveBonus('あたらしい おけしょう').catch(e => console.warn(e));
+        }
       } else {
         await updateAvatar(state.avatar.id, { imageData });
         showToast('🔄 もとの アバター を うわがき したよ！');
@@ -1300,5 +1304,23 @@ render();
 updateUndoBtn();
 </script>
 
+
+<script type="module">
+// フェーズ5: Gold バッジ + ログインストリーク + 保存ボーナス公開
+import { isAllowanceConfigured, getStoredChildKey, setStoredChildKey,
+  watchAllowance, listAllowanceChildren, earnGold, updateAllowanceChild } from '/shared/firebase.js';
+import { setupGoldBadge } from '/shared/utils.js';
+const header = document.querySelector('header');
+if (header) {
+  const insertBefore = header.querySelector('#saveBtn, .btn-primary, .save-btn') || null;
+  const api = setupGoldBadge(
+    { isAllowanceConfigured, getStoredChildKey, setStoredChildKey,
+      watchAllowance, listAllowanceChildren, earnGold, updateAllowanceChild },
+    header, insertBefore
+  );
+  // メイン スクリプトから使えるようグローバルに公開
+  window.avatarAppGold = api;
+}
+</script>
 </body>
 </html>
