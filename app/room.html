@@ -332,6 +332,39 @@
   }
   .header-location-btn:active { transform: translateY(1px); }
 
+  /* ==== ヘッダーの おせわ ショートカットボタン ==== */
+  .header-care-btn {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: linear-gradient(180deg, #FFDCEA, #FF9EBF);
+    border: 2px solid #E14E7F;
+    cursor: pointer; font-size: 18px;
+    display: none; align-items: center; justify-content: center; padding: 0;
+    position: relative;
+    transition: transform .1s;
+    box-shadow: 0 3px 0 #C63A6A;
+  }
+  .header-care-btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #C63A6A; }
+  .header-care-btn.show { display: flex; }
+  /* 未お世話タスクがあるときの ぷるぷる 演出 */
+  .header-care-btn.needs-care {
+    animation: careBounce 1.6s ease-in-out infinite;
+  }
+  .header-care-btn.needs-care::after {
+    content: '';
+    position: absolute;
+    top: -3px; right: -3px;
+    width: 12px; height: 12px;
+    background: #FF3355;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px #FF3355;
+  }
+  @keyframes careBounce {
+    0%, 90%, 100% { transform: translateY(0); }
+    45% { transform: translateY(-3px) rotate(-4deg); }
+    55% { transform: translateY(-3px) rotate(4deg); }
+  }
+
   /* ==== ばしょピッカーのグリッド ==== */
   .location-grid {
     display: grid;
@@ -763,6 +796,7 @@
   <button class="panel-toggle" id="catToggle" title="家具">🪑</button>
   <button class="panel-toggle" id="adjustToggle" title="ちょうせい">⚙️</button>
   <button class="header-avatar-btn" id="pickAvatarBtn" title="あばたー を えらぶ">👧</button>
+  <button class="header-care-btn" id="careShortcutBtn" title="おせわする">💗</button>
   <button class="header-location-btn" id="pickLocationBtn" title="どこ に いく？">🌍</button>
   <button class="btn-primary" id="saveBtn">💾 ほぞん</button>
 </header>
@@ -997,6 +1031,7 @@ const locationGrid = document.getElementById('locationGrid');
 const closeLocationBtn = document.getElementById('closeLocationBtn');
 const adjustModeTabs = document.getElementById('adjustModeTabs');
 const careTabBtn = document.getElementById('careTabBtn');
+const careShortcutBtn = document.getElementById('careShortcutBtn');
 const levelUpToast = document.getElementById('levelUpToast');
 const lvupLevel = document.getElementById('lvupLevel');
 
@@ -2466,15 +2501,34 @@ function updateModeTabsUI() {
   });
 }
 
-/** アバターがいなければお世話タブは無効化。いれば有効化。 */
+/** アバターがいなければお世話タブは無効化。いれば有効化。ヘッダーの💗ショートカットも同期。 */
 function updateCareTabAvailable() {
   const has = !!state.avatar;
   careTabBtn.disabled = !has;
+  careShortcutBtn.classList.toggle('show', has);
+  if (has) {
+    // どれかステータスが 40 未満なら needs-care 状態にして目立たせる
+    const s = state.avatar.stats;
+    const anyLow = s && (s.onaka < 40 || s.kiyoraka < 40 || s.genki < 40 || s.heart < 40);
+    careShortcutBtn.classList.toggle('needs-care', !!anyLow);
+  } else {
+    careShortcutBtn.classList.remove('needs-care');
+  }
   if (!has && state.adjustTab === 'care') {
     state.adjustTab = 'settings';
   }
   updateModeTabsUI();
 }
+
+/** ヘッダーの💗ボタン: 右パネルを開いてお世話タブに切り替え */
+careShortcutBtn.addEventListener('click', () => {
+  if (!state.avatar) return;
+  state.adjustTab = 'care';
+  // モバイルではパネルが overlay なので open クラスが必要（デスクトップでは常に見えている）
+  adjustPanel.classList.add('open');
+  updatePanelState();
+  renderAdjust();
+});
 
 /** モードタブのクリックハンドラ登録 */
 adjustModeTabs.querySelectorAll('.mode-tab-btn').forEach(b => {
@@ -2624,6 +2678,7 @@ async function doCareAction(actionKey) {
 
   // 再描画
   renderAdjust();
+  updateCareTabAvailable(); // needs-care バッジも更新
 }
 
 /** クールダウン中はカウントダウンを 1 秒ごとに再描画 */
