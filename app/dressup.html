@@ -44,7 +44,7 @@
   .side-panel {
     background: rgba(255,255,255,0.95);
     border-right: 2px solid #EDE9FF;
-    padding: 12px 12px calc(24px + env(safe-area-inset-bottom, 0));
+    padding: 12px 12px calc(24px + var(--sab));
     overflow-y: auto;
     display: flex; flex-direction: column; gap: 10px;
     min-height: 0;
@@ -172,7 +172,7 @@
   .draw-dock {
     flex: 0 0 auto;
     background: #fff; border-top: 2px solid #EDE9FF;
-    padding: 8px 14px calc(8px + env(safe-area-inset-bottom, 0));
+    padding: 8px 14px calc(8px + var(--sab));
     display: flex; align-items: center; gap: 8px;
     flex-wrap: wrap; z-index: 5;
     justify-content: center;
@@ -234,7 +234,7 @@
     .side-panel.open { transform: translateX(0); }
     .panel-toggle { display: flex; }
     .panel-close { display: flex; }
-    .draw-dock { padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0)); gap: 6px; }
+    .draw-dock { padding: 6px 8px calc(6px + var(--sab)); gap: 6px; }
     .dock-btn { padding: 6px 10px; font-size: 12px; }
   }
 </style>
