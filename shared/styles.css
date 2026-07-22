@@ -191,3 +191,127 @@ body.app-fullscreen {
 .app-scroll-safe {
   padding-bottom: calc(16px + env(safe-area-inset-bottom, 0)) !important;
 }
+
+/* ============================================================
+   フェーズ5: Gold 経済 - 共通UIコンポーネント
+   ============================================================ */
+
+/* ヘッダーのゴールドバッジ（残高表示） */
+.gold-badge {
+  display: none; /* isAllowanceConfigured && childKey が決まったら .show を付与 */
+  align-items: center; gap: 4px;
+  height: 40px; padding: 0 12px;
+  background: linear-gradient(180deg, #FFF3C9, #FFD966);
+  border: 2px solid #E8A200;
+  border-radius: 12px;
+  font-family: 'Baloo 2', sans-serif; font-weight: 800;
+  font-size: 14px; color: #7A5200;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(232,162,0,0.5), inset 0 -1px 0 rgba(255,255,255,0.4);
+  transition: transform .08s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.gold-badge:active { transform: translateY(1px); box-shadow: 0 1px 0 rgba(232,162,0,0.5); }
+.gold-badge.show { display: inline-flex; }
+.gold-badge .gold-icon { font-size: 16px; line-height: 1; }
+.gold-badge .gold-amount { font-family: 'Nunito', sans-serif; font-weight: 800; }
+.gold-badge.pulse {
+  animation: goldPulse 0.6s ease;
+}
+@keyframes goldPulse {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.18); box-shadow: 0 3px 0 rgba(232,162,0,0.5), 0 0 20px rgba(255,193,7,0.6); }
+}
+
+/* 飛んでいく +XG / -XG のふわふわ */
+.gold-fly {
+  position: fixed;
+  z-index: 900;
+  font-family: 'Baloo 2', sans-serif; font-weight: 800;
+  font-size: 22px;
+  padding: 6px 14px; border-radius: 999px;
+  pointer-events: none;
+  animation: goldFly 1.4s cubic-bezier(.34,1.56,.64,1) forwards;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.15);
+}
+.gold-fly.earn {
+  background: linear-gradient(180deg, #FFF3C9, #FFD966);
+  color: #7A5200;
+  border: 2px solid #E8A200;
+}
+.gold-fly.spend {
+  background: linear-gradient(180deg, #FFE0E5, #FFB0BE);
+  color: #C63A6A;
+  border: 2px solid #E14E7F;
+}
+@keyframes goldFly {
+  0% { opacity: 0; transform: translate(-50%, 20px) scale(0.7); }
+  20% { opacity: 1; transform: translate(-50%, 0) scale(1.15); }
+  80% { opacity: 1; transform: translate(-50%, -80px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -120px) scale(0.9); }
+}
+
+/* 「だれ？」ピッカーモーダル */
+.child-picker-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(46,42,71,0.6);
+  display: none; align-items: center; justify-content: center;
+  z-index: 2000; padding: 20px;
+}
+.child-picker-backdrop.show { display: flex; }
+.child-picker-card {
+  background: #fff; border-radius: 24px;
+  padding: 24px 20px 20px;
+  max-width: 420px; width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  max-height: 90vh; overflow-y: auto;
+}
+.child-picker-card h3 {
+  margin: 0 0 6px; text-align: center;
+  font-family: 'Baloo 2', sans-serif; font-weight: 800;
+  font-size: 22px; color: var(--ink);
+}
+.child-picker-card .sub {
+  text-align: center; font-size: 12px; font-weight: 700;
+  color: var(--ink-soft); margin: 0 0 18px; line-height: 1.5;
+}
+.child-picker-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.child-picker-item {
+  background: linear-gradient(180deg, #FFF8E5, #FFEEB5);
+  border: 3px solid #E8A200;
+  border-radius: 18px;
+  padding: 16px 8px 12px;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px;
+  transition: transform .1s;
+  box-shadow: 0 4px 0 rgba(232,162,0,0.35);
+}
+.child-picker-item:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(232,162,0,0.35); }
+.child-picker-item .avatar-emoji {
+  font-size: 44px; line-height: 1;
+}
+.child-picker-item .name {
+  font-family: 'Baloo 2', sans-serif; font-weight: 800;
+  font-size: 14px; color: var(--ink);
+  text-align: center;
+}
+.child-picker-item .gold-info {
+  font-size: 11px; font-weight: 700;
+  color: #7A5200;
+}
+.child-picker-card .empty {
+  text-align: center; padding: 24px 8px;
+  color: var(--ink-soft); font-size: 12px; font-weight: 700; line-height: 1.6;
+}
+.child-picker-card .skip-btn {
+  display: block; width: 100%;
+  margin-top: 14px; padding: 10px;
+  background: transparent; border: none;
+  color: var(--ink-soft); font-size: 12px; font-weight: 700;
+  cursor: pointer; text-decoration: underline;
+}
