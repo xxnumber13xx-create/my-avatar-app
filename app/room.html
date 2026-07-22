@@ -776,6 +776,59 @@
     .stat-row-top { font-size: 11px; }
     .care-header .avatar-thumb { width: 72px; height: 72px; }
   }
+
+  /* ==== フェーズ5: 特別家具・特別ごはん ==== */
+  .cat-btn.premium {
+    background: linear-gradient(180deg, #FFF3C9, #FFD966);
+    border-color: #E8A200;
+    color: #7A5200;
+  }
+  .cat-btn.premium.active {
+    background: linear-gradient(180deg, #FFE58A, #FFC93C);
+    border-color: #C77E00;
+    color: #7A5200;
+  }
+  .furniture-item.premium {
+    position: relative;
+    background: linear-gradient(180deg, #FFFAF0, #FFF3C9);
+    border: 2px solid #E8A200;
+  }
+  .furniture-item.premium.locked {
+    filter: none;
+  }
+  .furniture-item.premium.unlocked {
+    background: linear-gradient(180deg, #E8FFF3, #C7F3D6);
+    border-color: #4CD4B0;
+  }
+  .furniture-item.premium .fi-price {
+    display: block;
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 800;
+    font-size: 10px;
+    color: #7A5200;
+    background: rgba(255,255,255,0.85);
+    padding: 2px 6px;
+    border-radius: 999px;
+    margin-top: 2px;
+  }
+  .furniture-item.premium.unlocked .fi-price {
+    color: #2B7A5A;
+  }
+  .care-btn.premium-food {
+    background: linear-gradient(180deg, #FFFAF0, #FFE0AA);
+    border-color: #E8A200;
+    color: #7A5200;
+    box-shadow: 0 3px 0 #E8A200;
+    position: relative;
+  }
+  .care-btn.premium-food:active { box-shadow: 0 1px 0 #E8A200; }
+  .care-btn.premium-food .premium-price {
+    font-size: 10px;
+    background: rgba(255,255,255,0.85);
+    padding: 1px 6px;
+    border-radius: 999px;
+    color: #7A5200;
+  }
 </style>
 
 <!-- Three.js を importmap で読み込む -->
@@ -933,7 +986,10 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-import { isConfigured, saveAvatar, updateAvatar, watchAvatars } from '/shared/firebase.js';
+import { isConfigured, saveAvatar, updateAvatar, watchAvatars,
+  isAllowanceConfigured, getStoredChildKey, setStoredChildKey,
+  watchAllowance, listAllowanceChildren,
+  earnGold, spendGold, updateAllowanceChild } from '/shared/firebase.js';
 import {
   showToast, loadImage, loadImageTransparent, svgToImage,
   FURNITURE_LIBRARY, FURNITURE_CATEGORIES,
@@ -941,7 +997,8 @@ import {
   SCENE_LIBRARY,
   DEFAULT_STATS, STAT_META, CARE_ACTIONS,
   normalizeStats, applyStatsDecay, applyCareAction, calcLevel,
-  getStatBand, getMood, readLastCareAtMs
+  getStatBand, getMood, readLastCareAtMs,
+  setupGoldBadge, showGoldFly
 } from '/shared/utils.js';
 
 // ============================================================
@@ -1060,8 +1117,31 @@ const state = {
   // 右パネルのモード ('settings' | 'care')。アバター無いときは常に settings。
   adjustTab: 'settings',
   // お世話クールダウン（アクションkey -> 再度使えるようになる ms）
-  careCooldownUntil: {}
+  careCooldownUntil: {},
+  // 解禁済みの特別家具キーのローカルキャッシュ（Firestore と同期）
+  unlockedPremium: []
 };
+
+// Gold バッジ API（setupGoldBadge の戻り値）。起動時にセット。
+let goldApi = { getChildKey: () => null, getGold: () => 0, openChildPicker: () => Promise.resolve(null) };
+
+// 特別家具・特別ごはんの定義
+const PREMIUM_FOOD = { key: 'cake', icon: '🍰', label: 'ケーキ', cost: 5, effect: { heart: 30, kashikosa: 5 }, msg: 'とくべつな あじ！ 🍰' };
+const PREMIUM_FURNITURE = [
+  {
+    key: 'rainbow_bench',
+    cost: 30,
+    label: 'にじいろベンチ',
+    // 400x300 の SVG（座面が虹色のベンチ）
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><defs><linearGradient id="rb" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FF6B9D"/><stop offset="0.2" stop-color="#FFC93C"/><stop offset="0.4" stop-color="#4CD4B0"/><stop offset="0.6" stop-color="#5AB8FF"/><stop offset="0.8" stop-color="#B77FE0"/><stop offset="1" stop-color="#FF6B9D"/></linearGradient></defs><rect x="40" y="130" width="320" height="40" rx="10" fill="url(#rb)" stroke="#2E2A47" stroke-width="4"/><rect x="60" y="170" width="18" height="90" fill="#C98A4B" stroke="#2E2A47" stroke-width="4"/><rect x="322" y="170" width="18" height="90" fill="#C98A4B" stroke="#2E2A47" stroke-width="4"/><rect x="40" y="70" width="320" height="60" rx="10" fill="#FFF3C9" stroke="#2E2A47" stroke-width="4"/><circle cx="200" cy="100" r="15" fill="#FFD966"/></svg>`
+  },
+  {
+    key: 'star_lamp',
+    cost: 30,
+    label: 'おほしさまランプ',
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><path d="M200 40 L215 100 L280 100 L227 138 L247 200 L200 162 L153 200 L173 138 L120 100 L185 100 Z" fill="#FFD966" stroke="#E8A200" stroke-width="4"/><circle cx="200" cy="115" r="6" fill="#fff" opacity="0.9"/><rect x="185" y="200" width="30" height="50" fill="#B77FE0" stroke="#2E2A47" stroke-width="4"/><ellipse cx="200" cy="260" rx="60" ry="12" fill="#7C6FF2" stroke="#2E2A47" stroke-width="4"/><circle cx="120" cy="60" r="5" fill="#FFD966"/><circle cx="290" cy="80" r="4" fill="#FFD966"/><circle cx="330" cy="140" r="5" fill="#FFD966"/><circle cx="70" cy="150" r="4" fill="#FFD966"/></svg>`
+  }
+];
 
 let nextItemId = 1;
 
@@ -1324,15 +1404,27 @@ const textureCache = new Map();
 
 /** 家具アイテムから「テクスチャ用の一意なキー」を返す */
 function textureKeyOf(item) {
-  return item.kind === 'preset'
-    ? `p:${item.category}:${item.variantIndex}`
-    : `c:${item.customId}`;
+  if (item.kind === 'preset') return `p:${item.category}:${item.variantIndex}`;
+  if (item.kind === 'premium') return `pm:${item.premiumKey}`;
+  return `c:${item.customId}`;
 }
 
 /** アイテムの静的定義を返す（サイズやアンカーなど） */
 function getFurnitureDef(item) {
   if (item.kind === 'preset') {
     return FURNITURE_LIBRARY[item.category][item.variantIndex];
+  }
+  if (item.kind === 'premium') {
+    // 特別家具は 400x300 SVG。標準的な床置き家具として扱う。
+    const p = PREMIUM_FURNITURE.find(x => x.key === item.premiumKey);
+    return {
+      footprintW: 1, footprintD: 1,
+      imgWidth: 400, imgHeight: 300,
+      anchorX: 200, anchorY: 285,
+      wall: false, flat: false,
+      label: p ? p.label : 'とくべつ',
+      svg: p ? p.svg : ''
+    };
   }
   // 自作家具: 画像実寸を約 tile 1 個分に fit させる
   const cf = state.customFurniture.find(x => x.id === item.customId);
@@ -1362,6 +1454,10 @@ async function getFurnitureTexture(item) {
     if (item.kind === 'preset') {
       const def = FURNITURE_LIBRARY[item.category][item.variantIndex];
       img = await svgToImage(def.svg);
+    } else if (item.kind === 'premium') {
+      const p = PREMIUM_FURNITURE.find(x => x.key === item.premiumKey);
+      if (!p) throw new Error('premium furniture missing');
+      img = await svgToImage(p.svg);
     } else {
       const cf = state.customFurniture.find(x => x.id === item.customId);
       if (!cf) throw new Error('custom furniture missing');
@@ -1717,10 +1813,20 @@ function updateAvatarTransform() {
   if (!avatarObj || !state.avatar) return;
   const baseH = avatarObj.userData.baseH;
   const scale = state.avatar.scale || 1;
-  // 成長段階の Y スケール補正: Lv 1 = 1.0, Lv 5 で +12%, Lv 10 で +27%, Lv 11+ で cap 1.30
+  // 成長段階の Y スケール補正:
+  //   handoff 設計: level ベースで 4 段階
+  //   Lv 1-2  = baby   (0.70)
+  //   Lv 3-5  = child  (0.85)
+  //   Lv 6-9  = kid    (1.00)
+  //   Lv 10+  = teen   (1.05)
+  // レベルアップ時に「大きくなった！」の実感が出るよう、段差を付ける。
   const lv = state.avatar.stats?.level || 1;
-  const growthBoost = 1 + Math.min(0.30, (lv - 1) * 0.03);
-  const sxScale = scale;                  // 横方向は成長させない (太くならない)
+  let growthBoost;
+  if (lv <= 2)      growthBoost = 0.70;
+  else if (lv <= 5) growthBoost = 0.85;
+  else if (lv <= 9) growthBoost = 1.00;
+  else              growthBoost = 1.05;
+  const sxScale = scale;                  // 横方向は成長させない
   const syScale = scale * growthBoost;    // 縦方向のみ成長
   const wH = baseH * syScale;
   const wx = state.avatar.tileX + 0.5 - ROOM_SIZE / 2;
@@ -1737,6 +1843,17 @@ function updateAvatarTransform() {
   if (avatarObj.userData.moodSprite) {
     avatarObj.userData.moodSprite.position.y = wH + 0.4;
   }
+  // 成長段階が変わったら覚えておく（レベルアップ演出強化用）
+  const stageName = lv <= 2 ? 'baby' : lv <= 5 ? 'child' : lv <= 9 ? 'kid' : 'teen';
+  avatarObj.userData.growthStage = stageName;
+}
+
+/** 成長段階のラベル */
+function growthStageLabel(lv) {
+  if (lv <= 2)      return '👶 あかちゃん';
+  if (lv <= 5)      return '🧒 こども';
+  if (lv <= 9)      return '👦 おおきいこ';
+  return '🧑 ティーン';
 }
 
 function removeAvatarObject() {
@@ -1831,6 +1948,7 @@ function updatePickAvatarBtn() {
 // ============================================================
 function buildCategoryTabs() {
   catTabs.innerHTML = '';
+  // 通常カテゴリ
   FURNITURE_CATEGORIES.forEach(c => {
     const b = document.createElement('button');
     b.className = 'cat-btn' + (c.key === state.currentCategory ? ' active' : '');
@@ -1843,10 +1961,42 @@ function buildCategoryTabs() {
     });
     catTabs.appendChild(b);
   });
+  // 特別家具タブ（allowance 連携時のみ表示）
+  if (isAllowanceConfigured) {
+    const b = document.createElement('button');
+    b.className = 'cat-btn premium' + ('__premium__' === state.currentCategory ? ' active' : '');
+    b.dataset.cat = '__premium__';
+    b.innerHTML = `<span class="cat-icon">⭐</span><span>とくべつ</span>`;
+    b.addEventListener('click', () => {
+      state.currentCategory = '__premium__';
+      buildCategoryTabs();
+      buildPresetGrid();
+    });
+    catTabs.appendChild(b);
+  }
 }
 
 function buildPresetGrid() {
   presetGrid.innerHTML = '';
+  // 特別家具タブ
+  if (state.currentCategory === '__premium__') {
+    PREMIUM_FURNITURE.forEach(item => {
+      const unlocked = state.unlockedPremium.includes(item.key);
+      const it = document.createElement('button');
+      it.className = 'furniture-item premium' + (unlocked ? ' unlocked' : ' locked');
+      it.innerHTML = `
+        ${item.svg}
+        <span class="fi-label">${item.label}</span>
+        <span class="fi-price">${unlocked ? '✅ かった' : '💰 ' + item.cost + 'G'}</span>
+      `;
+      it.addEventListener('click', () => {
+        purchasePremiumFurniture(item);
+        if (window.innerWidth <= 900) closeAllPanels();
+      });
+      presetGrid.appendChild(it);
+    });
+    return;
+  }
   const items = FURNITURE_LIBRARY[state.currentCategory] || [];
   items.forEach((def, idx) => {
     const it = document.createElement('button');
@@ -2433,7 +2583,7 @@ function renderAdjust() {
     return;
   }
   const def = getFurnitureDef(item);
-  const previewHtml = item.kind === 'preset'
+  const previewHtml = (item.kind === 'preset' || item.kind === 'premium')
     ? def.svg
     : `<img src="${state.customFurniture.find(x => x.id === item.customId)?.imageData || ''}"/>`;
   adjustBody.innerHTML = `
@@ -2588,7 +2738,7 @@ function renderAdjustCare() {
   adjustBody.innerHTML = `
     <div class="care-header">
       <div class="avatar-thumb"><img src="${a.imageData}" alt=""/></div>
-      <div class="avatar-name">${a._type === 'look' ? '👗 コーデ' : a._type === 'madeup' ? '💄 おけしょう' : '👧 あばたー'}</div>
+      <div class="avatar-name">${a._type === 'look' ? '👗 コーデ' : a._type === 'madeup' ? '💄 おけしょう' : growthStageLabel(lv.level)}</div>
       <div class="mood">${mood.icon} ${mood.msg}</div>
     </div>
     <div class="level-row">
@@ -2605,6 +2755,13 @@ function renderAdjustCare() {
     <div class="care-buttons">
       ${careBtnsHtml}
     </div>
+    ${isAllowanceConfigured ? `
+      <button class="care-btn premium-food" id="buyPremiumFood" style="margin-top:6px;">
+        <span class="care-icon">🍰</span>
+        <span>とくべつな ケーキ</span>
+        <span class="premium-price">💰 ${PREMIUM_FOOD.cost}G</span>
+      </button>
+    ` : ''}
   `;
 
   adjustBody.querySelectorAll('.care-btn[data-care]').forEach(b => {
@@ -2619,6 +2776,11 @@ function renderAdjustCare() {
       doCareAction(key);
     });
   });
+
+  const buyBtn = adjustBody.querySelector('#buyPremiumFood');
+  if (buyBtn) {
+    buyBtn.addEventListener('click', () => purchasePremiumFood());
+  }
 }
 
 /** お世話アクションを実行 → stats 更新 → 保存 → 再描画 */
@@ -2651,16 +2813,24 @@ async function doCareAction(actionKey) {
 
   // レベルアップ演出
   if (result.leveledUp) {
-    lvupLevel.textContent = `Lv ${result.newLevel} に なったよ！`;
+    // 段階が変わったか判定（baby/child/kid/teen）
+    const oldStage = result.oldLevel <= 2 ? 'baby' : result.oldLevel <= 5 ? 'child' : result.oldLevel <= 9 ? 'kid' : 'teen';
+    const newStage = result.newLevel <= 2 ? 'baby' : result.newLevel <= 5 ? 'child' : result.newLevel <= 9 ? 'kid' : 'teen';
+    const stageChanged = oldStage !== newStage;
+    if (stageChanged) {
+      lvupLevel.innerHTML = `おおきくなった！<br>${growthStageLabel(result.newLevel)}`;
+    } else {
+      lvupLevel.textContent = `Lv ${result.newLevel} に なったよ！`;
+    }
     levelUpToast.classList.add('show');
-    setTimeout(() => levelUpToast.classList.remove('show'), 2200);
+    setTimeout(() => levelUpToast.classList.remove('show'), stageChanged ? 3200 : 2200);
     // Y スケールが変わるので再適用
     updateAvatarTransform();
     // 少し遅らせて mood 吹き出しを追加表示
     setTimeout(() => {
       const mood = getMood(a.stats);
       showMoodBubble(mood.icon, mood.msg, 2400);
-    }, 2400);
+    }, stageChanged ? 3400 : 2400);
   }
 
   // Firestore 保存（ベストエフォート）
@@ -2675,6 +2845,9 @@ async function doCareAction(actionKey) {
       showToast('ほぞんに しっぱい したよ…');
     }
   }
+
+  // フルケア達成判定（1日1回、+2G）
+  await checkFullCareBonus();
 
   // 再描画
   renderAdjust();
@@ -2698,6 +2871,168 @@ function scheduleCooldownRefresh() {
       renderAdjust();
     }
   }, 1000);
+}
+
+// ============================================================
+// フェーズ5: Gold 経済 - フルケア判定と特別アイテム購入
+// ============================================================
+
+/** アバターの care 系ステータスがすべて 80 以上なら「フルケア」 */
+function isFullyCared(stats) {
+  return stats && stats.onaka >= 80 && stats.kiyoraka >= 80 && stats.genki >= 80 && stats.heart >= 80;
+}
+
+/** 今日フルケアボーナスを既に受け取ってるか */
+function isSameDay(t1, t2) {
+  const d1 = new Date(t1), d2 = new Date(t2);
+  return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
+}
+
+let _fullCareRewardedToday = false;
+let _fullCareBonusChecking = false;
+
+/** フルケア達成なら +2G。1日1回のみ。 */
+async function checkFullCareBonus() {
+  if (_fullCareBonusChecking) return;
+  if (_fullCareRewardedToday) return;
+  const childKey = goldApi.getChildKey?.();
+  if (!childKey || !isAllowanceConfigured) return;
+  if (!state.avatar || !isFullyCared(state.avatar.stats)) return;
+
+  _fullCareBonusChecking = true;
+  try {
+    // allowance 側の lastFullCareAt を取って今日まだ貰ってないか確認
+    // watchAllowance の最新スナップは goldApi 内でしか持ってないので、ここは楽観的に earnGold して
+    // 既に貰ってた場合はサーバ側の判定が必要 → シンプルに 「seenToday」ローカルフラグでガード
+    // （複数端末で同時プレイのケースは MVP では想定しない）
+    const now = Date.now();
+    // 前回受領時刻を Firestore で確認する
+    const { updateAllowanceChild: _ua } = { updateAllowanceChild }; // 参照
+    // シンプル実装: earnGold + lastFullCareAt を更新。同日 2 回目はチェックで防ぐ。
+    // 最初は毎回発火するので、当セッションでは 1 回だけ実行するフラグで実効性を担保。
+    _fullCareRewardedToday = true;
+    await earnGold(childKey, 2, 'フルケア ボーナス');
+    await updateAllowanceChild(childKey, { avatarAppLastFullCareAt: now });
+    showGoldFly(2);
+    showToast('🌟 ぜんぶ 100 ちかく！ +2G ボーナス！');
+  } catch (err) {
+    console.warn('フルケアボーナス処理失敗', err);
+    _fullCareRewardedToday = false; // 再挑戦できる
+  } finally {
+    _fullCareBonusChecking = false;
+  }
+}
+
+/** allowance の watch 経由で「今日もう貰った？」を反映するのが正しいが、
+ *  MVP は当セッション内 1 回制約で妥協。次イテレーションで日跨ぎ判定を厳密化する。 */
+
+/** allowance の childKey に紐づいた解禁済み家具リストを読み込み state.unlockedPremium に反映 */
+function subscribeUnlockedPremium() {
+  if (!isAllowanceConfigured) return;
+  watchAllowance(data => {
+    if (!data) return;
+    const key = goldApi.getChildKey?.();
+    if (!key) return;
+    const child = (data.children || {})[key];
+    if (!child) return;
+    state.unlockedPremium = Array.isArray(child.avatarAppUnlockedFurniture)
+      ? child.avatarAppUnlockedFurniture : [];
+    // 今日のフルケアボーナス既受領チェック（当セッションフラグを補正）
+    const lastAt = child.avatarAppLastFullCareAt;
+    if (lastAt && isSameDay(lastAt, Date.now())) {
+      _fullCareRewardedToday = true;
+    }
+    // 家具パネルが「とくべつ」タブなら再描画
+    if (state.currentCategory === '__premium__') buildPresetGrid();
+  });
+}
+
+/** 特別家具の購入 */
+async function purchasePremiumFurniture(item) {
+  const childKey = goldApi.getChildKey?.();
+  if (!childKey) {
+    showToast('さきに「だれ？」を えらんでね');
+    goldApi.openChildPicker?.();
+    return;
+  }
+  if (state.unlockedPremium.includes(item.key)) {
+    // すでに解禁済み → プレースだけ
+    placePremiumFurniture(item);
+    return;
+  }
+  const ok = confirm(`✨ ${item.label}\n${item.cost}G で かえるよ！ かう？`);
+  if (!ok) return;
+  try {
+    await spendGold(childKey, item.cost, `${item.label} を かった`);
+    const next = [...state.unlockedPremium, item.key];
+    await updateAllowanceChild(childKey, { avatarAppUnlockedFurniture: next });
+    state.unlockedPremium = next;
+    showGoldFly(-item.cost);
+    showToast(`✨ ${item.label} を てにいれた！`);
+    placePremiumFurniture(item);
+    if (state.currentCategory === '__premium__') buildPresetGrid();
+  } catch (err) {
+    console.error(err);
+    showToast(err.message || 'かえなかったよ…');
+  }
+}
+
+/** 特別家具をお部屋の中央に配置 */
+async function placePremiumFurniture(item) {
+  pushUndo();
+  const centerX = Math.floor(ROOM_SIZE / 2);
+  const centerY = Math.floor(ROOM_SIZE / 2);
+  const newItem = {
+    id: 'i' + Date.now(),
+    kind: 'premium',
+    premiumKey: item.key,
+    tileX: centerX,
+    tileY: centerY,
+    scale: 1
+  };
+  state.items.push(newItem);
+  await ensureItemObject(newItem);
+  state.selectedId = newItem.id;
+  state.adjustTab = 'settings';
+  updateSelectionVisual();
+  renderAdjust();
+}
+
+/** 特別ごはんを買って食べる（heart+30, kashikosa+5） */
+async function purchasePremiumFood() {
+  const a = state.avatar;
+  if (!a) { showToast('さきに あばたー を おいてね'); return; }
+  const childKey = goldApi.getChildKey?.();
+  if (!childKey) {
+    showToast('さきに「だれ？」を えらんでね');
+    goldApi.openChildPicker?.();
+    return;
+  }
+  const ok = confirm(`🍰 ${PREMIUM_FOOD.label} を ${PREMIUM_FOOD.cost}G で かって あげる？\nハート がぐんっと あがるよ！`);
+  if (!ok) return;
+  try {
+    await spendGold(childKey, PREMIUM_FOOD.cost, `${PREMIUM_FOOD.label}`);
+    showGoldFly(-PREMIUM_FOOD.cost);
+    // ステータス反映（applyCareAction を借りずに手動でやる）
+    for (const [k, v] of Object.entries(PREMIUM_FOOD.effect)) {
+      if (k === 'kashikosa') a.stats[k] = (a.stats[k] || 0) + v;
+      else a.stats[k] = Math.max(0, Math.min(100, (a.stats[k] || 0) + v));
+    }
+    a.stats.exp = (a.stats.exp || 0) + 8;
+    a.stats.level = calcLevel(a.stats.exp).level;
+    a.lastCareAtMs = Date.now();
+    showToast(PREMIUM_FOOD.msg);
+    showMoodBubble(PREMIUM_FOOD.icon, PREMIUM_FOOD.label, 2200);
+    if (isConfigured) {
+      await updateAvatar(a.id, { stats: { ...a.stats }, lastCareAt: Date.now() });
+    }
+    await checkFullCareBonus();
+    renderAdjust();
+    updateCareTabAvailable();
+  } catch (err) {
+    console.error(err);
+    showToast(err.message || 'かえなかったよ…');
+  }
 }
 
 // ============================================================
@@ -2915,6 +3250,8 @@ document.querySelectorAll('[data-savetype]').forEach(btn => {
         });
         state.currentRoomId = docRef.id;
         showToast('🆕 おへや を ほぞん したよ！');
+        // フェーズ5: +1G ボーナス
+        if (goldApi?.awardSaveBonus) goldApi.awardSaveBonus('あたらしい おへや').catch(e => console.warn(e));
       } else {
         await updateAvatar(state.currentRoomId, { imageData, roomData });
         showToast('🔄 おへや を うわがき したよ！');
@@ -2950,6 +3287,20 @@ try {
   renderAdjust();
   undoBtn.disabled = true;
   animate();
+  // Gold バッジをヘッダーの ほぞん ボタンの直前に配置
+  goldApi = setupGoldBadge(
+    {
+      isAllowanceConfigured, getStoredChildKey, setStoredChildKey,
+      watchAllowance, listAllowanceChildren,
+      earnGold, updateAllowanceChild
+    },
+    document.querySelector('header'),
+    saveBtn
+  );
+  // グローバルにも公開（他モジュールと共有できるよう）
+  window.avatarAppGold = goldApi;
+  // 特別家具の解禁状況を watch
+  subscribeUnlockedPremium();
 } catch (err) {
   console.error('[room] 起動エラー:', err);
   // 起動失敗でもローディングは即消す
