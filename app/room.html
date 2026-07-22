@@ -77,7 +77,7 @@
 
   .panel-body {
     flex: 1; overflow-y: auto;
-    padding: 10px 10px calc(20px + env(safe-area-inset-bottom, 0));
+    padding: 10px 10px calc(20px + var(--sab));
   }
   .section-title {
     font-family: 'Baloo 2', sans-serif; font-weight: 800;
@@ -169,7 +169,7 @@
   .adjust-panel #adjustBody {
     flex: 1;
     overflow-y: auto;
-    padding: 14px 14px calc(24px + env(safe-area-inset-bottom, 0));
+    padding: 14px 14px calc(24px + var(--sab));
     display: flex; flex-direction: column; gap: 12px;
   }
   .adjust-panel .empty-hint {
@@ -204,7 +204,7 @@
   .draw-dock {
     flex: 0 0 auto;
     background: #fff; border-top: 2px solid #EDE9FF;
-    padding: 8px 14px calc(8px + env(safe-area-inset-bottom, 0));
+    padding: 8px 14px calc(8px + var(--sab));
     display: flex; align-items: center; gap: 12px;
     flex-wrap: wrap; z-index: 5;
   }
@@ -272,7 +272,7 @@
     .adjust-panel.open { transform: translateX(0); }
     .panel-toggle { display: flex; }
     .panel-close { display: flex; }
-    .draw-dock { padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0)); gap: 8px; }
+    .draw-dock { padding: 6px 8px calc(6px + var(--sab)); gap: 8px; }
     .dock-btn { width: 36px; height: 36px; font-size: 15px; }
   }
 
@@ -1591,6 +1591,10 @@ async function ensureAvatarObject() {
   group.add(mesh);
   group.add(shadow);
   group.add(ring);
+  // 気分の吹き出し Sprite（頭上に表示。表示中のみ visible=true）
+  const moodSprite = createMoodSprite();
+  moodSprite.visible = false;
+  group.add(moodSprite);
   group.userData.isAvatar = true;
   group.userData.mesh = mesh;
   group.userData.shadow = shadow;
@@ -1598,26 +1602,106 @@ async function ensureAvatarObject() {
   group.userData.baseH = baseH;
   group.userData.baseW = baseW;
   group.userData.imgSrc = state.avatar.imageData;
+  group.userData.moodSprite = moodSprite;
   scene.add(group);
   avatarObj = group;
   updateAvatarTransform();
+}
+
+/** 吹き出し Sprite を作る。テクスチャは後で updateMoodSpriteContent で書き換える。 */
+function createMoodSprite() {
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 256;
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.magFilter = THREE.LinearFilter;
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(1.4, 0.7, 1);
+  sprite.renderOrder = 999; // 前面
+  sprite.userData.canvas = c;
+  sprite.userData.texture = tex;
+  return sprite;
+}
+
+/** 吹き出しのテキストと絵文字をキャンバスに描画する。 */
+function drawMoodBubble(canvas, icon, text) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  // 吹き出し本体（角丸長方形＋しっぽ）
+  const bubbleW = W - 40;
+  const bubbleH = H - 70;
+  const bx = (W - bubbleW) / 2;
+  const by = 10;
+  const r = 40;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.strokeStyle = '#2E2A47';
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.moveTo(bx + r, by);
+  ctx.lineTo(bx + bubbleW - r, by);
+  ctx.quadraticCurveTo(bx + bubbleW, by, bx + bubbleW, by + r);
+  ctx.lineTo(bx + bubbleW, by + bubbleH - r);
+  ctx.quadraticCurveTo(bx + bubbleW, by + bubbleH, bx + bubbleW - r, by + bubbleH);
+  // しっぽ (中央下)
+  ctx.lineTo(W / 2 + 20, by + bubbleH);
+  ctx.lineTo(W / 2, by + bubbleH + 40);
+  ctx.lineTo(W / 2 - 20, by + bubbleH);
+  ctx.lineTo(bx + r, by + bubbleH);
+  ctx.quadraticCurveTo(bx, by + bubbleH, bx, by + bubbleH - r);
+  ctx.lineTo(bx, by + r);
+  ctx.quadraticCurveTo(bx, by, bx + r, by);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  // アイコン + テキスト
+  ctx.fillStyle = '#2E2A47';
+  ctx.font = 'bold 68px "Baloo 2", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(`${icon} ${text}`, W / 2, by + bubbleH / 2);
+}
+
+/** アバターの頭上に吹き出しを表示。durationMs 後に自動で消える。 */
+function showMoodBubble(icon, text, durationMs = 2600) {
+  if (!avatarObj || !avatarObj.userData.moodSprite) return;
+  const sp = avatarObj.userData.moodSprite;
+  drawMoodBubble(sp.userData.canvas, icon, text);
+  sp.userData.texture.needsUpdate = true;
+  sp.visible = true;
+  // 前回のタイマークリア
+  if (sp.userData.timer) clearTimeout(sp.userData.timer);
+  sp.userData.timer = setTimeout(() => {
+    sp.visible = false;
+    sp.userData.timer = null;
+  }, durationMs);
 }
 
 function updateAvatarTransform() {
   if (!avatarObj || !state.avatar) return;
   const baseH = avatarObj.userData.baseH;
   const scale = state.avatar.scale || 1;
-  const wH = baseH * scale;
+  // 成長段階の Y スケール補正: Lv 1 = 1.0, Lv 5 で +12%, Lv 10 で +27%, Lv 11+ で cap 1.30
+  const lv = state.avatar.stats?.level || 1;
+  const growthBoost = 1 + Math.min(0.30, (lv - 1) * 0.03);
+  const sxScale = scale;                  // 横方向は成長させない (太くならない)
+  const syScale = scale * growthBoost;    // 縦方向のみ成長
+  const wH = baseH * syScale;
   const wx = state.avatar.tileX + 0.5 - ROOM_SIZE / 2;
   const wz = state.avatar.tileY + 0.5 - ROOM_SIZE / 2;
   avatarObj.position.set(wx, 0, wz);
   const mesh = avatarObj.userData.mesh;
   // flip は mesh.scale.x を負にして 実現
-  const sx = scale * (state.avatar.flipped ? -1 : 1);
-  mesh.scale.set(sx, scale, scale);
+  const sx = sxScale * (state.avatar.flipped ? -1 : 1);
+  mesh.scale.set(sx, syScale, scale);
   mesh.position.set(0, wH / 2, 0);
   avatarObj.userData.shadow.scale.set(scale, scale, scale);
   avatarObj.userData.ring.scale.set(scale, scale, scale);
+  // 吹き出し Sprite の高さも成長に合わせる
+  if (avatarObj.userData.moodSprite) {
+    avatarObj.userData.moodSprite.position.y = wH + 0.4;
+  }
 }
 
 function removeAvatarObject() {
@@ -1665,6 +1749,9 @@ async function placeAvatar(avDoc, opts = {}) {
   updateSelectionVisual();
   updateCareTabAvailable();
   renderAdjust();
+  // 配置直後に気分の吹き出しを表示
+  const mood = getMood(state.avatar.stats);
+  setTimeout(() => showMoodBubble(mood.icon, mood.msg, 2600), 400);
 }
 
 /** アバターをおへやから消す */
@@ -2505,11 +2592,21 @@ async function doCareAction(actionKey) {
   // トースト
   showToast(meta.msg + (result.expGained > 0 ? ` +${result.expGained}exp` : ''));
 
+  // アバターの頭上に お世話メッセージ吹き出し
+  showMoodBubble(meta.icon, meta.msg.replace(/[🍎🫧💤♪！〜…]/g, '').trim() || meta.label, 2200);
+
   // レベルアップ演出
   if (result.leveledUp) {
     lvupLevel.textContent = `Lv ${result.newLevel} に なったよ！`;
     levelUpToast.classList.add('show');
     setTimeout(() => levelUpToast.classList.remove('show'), 2200);
+    // Y スケールが変わるので再適用
+    updateAvatarTransform();
+    // 少し遅らせて mood 吹き出しを追加表示
+    setTimeout(() => {
+      const mood = getMood(a.stats);
+      showMoodBubble(mood.icon, mood.msg, 2400);
+    }, 2400);
   }
 
   // Firestore 保存（ベストエフォート）
@@ -2740,14 +2837,17 @@ document.querySelectorAll('[data-savetype]').forEach(btn => {
       floorColor: state.floorColor,
       locationKey: state.locationKey,
       items: state.items.map(i => ({ ...i })),
-      // アバター配置情報（あれば）。imageDataは重複を避けて id 参照のみ
+      // アバター配置情報（あれば）。imageDataは重複を避けて id 参照のみ。
+      // stats はこの部屋を開いた時点のスナップショット（真実はアバタードキュメント側）
       avatar: state.avatar ? {
         id: state.avatar.id,
         tileX: state.avatar.tileX,
         tileY: state.avatar.tileY,
         scale: state.avatar.scale,
         action: state.avatar.action,
-        flipped: !!state.avatar.flipped
+        flipped: !!state.avatar.flipped,
+        statsSnapshot: state.avatar.stats ? { ...state.avatar.stats } : null,
+        lastCareAtMsSnapshot: state.avatar.lastCareAtMs || null
       } : null,
       renderer3d: true // 3D版で保存したことのフラグ
     };
@@ -2774,25 +2874,36 @@ document.querySelectorAll('[data-savetype]').forEach(btn => {
 // ============================================================
 // 起動
 // ============================================================
-buildCategoryTabs();
-buildPresetGrid();
-buildCustomGrid();
-buildSwatches();
-updateSwatchesEnabled();
-buildRoom();
-updateCareTabAvailable();
-renderAdjust();
-undoBtn.disabled = true;
-animate();
+// 【重要】ローディング表示 hide を最優先で予約。以降の起動処理で例外が
+// 出ても、ローディング画面のまま固まらないようにする。
+setTimeout(() => loadingOverlay.classList.add('hidden'), 300);
+// 保険: 3秒経ってもまだ hidden じゃなければ強制で消す
+setTimeout(() => {
+  if (!loadingOverlay.classList.contains('hidden')) {
+    loadingOverlay.classList.add('hidden');
+  }
+}, 3000);
 
-
+try {
+  buildCategoryTabs();
+  buildPresetGrid();
+  buildCustomGrid();
+  buildSwatches();
+  updateSwatchesEnabled();
+  buildRoom();
+  updateCareTabAvailable();
+  renderAdjust();
+  undoBtn.disabled = true;
+  animate();
+} catch (err) {
+  console.error('[room] 起動エラー:', err);
+  // 起動失敗でもローディングは即消す
+  loadingOverlay.classList.add('hidden');
+}
 
 // ヒントを数秒だけ表示
 canvasHint.classList.add('show');
 setTimeout(() => canvasHint.classList.remove('show'), 4500);
-
-// ローディング表示を消す
-setTimeout(() => loadingOverlay.classList.add('hidden'), 300);
 
 if (isConfigured) {
   watchAvatars(async (all) => {
