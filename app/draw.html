@@ -275,6 +275,129 @@
   }
   .pose-off-btn.active { background: #FFE8EC; border-color: #FFB8C7; color: #E14E7F; }
 
+  /* ==== フェーズ5: 特別ポーズ 20G 解禁 ==== */
+  .pose-option.premium {
+    background: linear-gradient(180deg, #FFFAF0, #FFF3C9);
+    border-color: #E8A200;
+    position: relative;
+  }
+  .pose-option.premium.locked svg {
+    opacity: 0.4;
+    filter: blur(1px);
+  }
+  .pose-option.premium.locked::after {
+    content: '🔒';
+    position: absolute;
+    top: 6px; right: 6px;
+    font-size: 12px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 999px;
+    padding: 1px 4px;
+  }
+  .pose-option.premium.unlocked {
+    background: linear-gradient(180deg, #E8FFF3, #C7F3D6);
+    border-color: #4CD4B0;
+  }
+  .pose-option .pose-price {
+    display: block;
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 800;
+    font-size: 9px;
+    color: #7A5200;
+    background: rgba(255,255,255,0.85);
+    padding: 1px 5px;
+    border-radius: 999px;
+    margin-top: 2px;
+  }
+  .pose-option.premium.unlocked .pose-price {
+    color: #2B7A5A;
+  }
+
+  /* ==== フェーズ7: おえかきレシピ ==== */
+  .recipe-picker-btn {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: linear-gradient(180deg, #E8FFF3, #A8E4C4);
+    border: 2px solid #4CD4B0;
+    cursor: pointer; font-size: 18px;
+    display: flex; align-items: center; justify-content: center; padding: 0;
+    transition: transform .1s;
+  }
+  .recipe-picker-btn:active { transform: translateY(1px); }
+  .recipe-picker-btn.active { background: linear-gradient(180deg, #C7F3D6, #7DE0B0); }
+
+  .recipe-modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(46,42,71,0.6);
+    display: none; align-items: center; justify-content: center;
+    z-index: 2000; padding: 12px;
+  }
+  .recipe-modal-backdrop.show { display: flex; }
+  .recipe-modal {
+    background: #fff; border-radius: 22px;
+    padding: 16px;
+    max-width: 480px; width: 100%;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  }
+  .recipe-modal h3 {
+    margin: 0 0 6px; text-align: center;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 18px; color: var(--ink);
+  }
+  .recipe-modal .close-x {
+    float: right; background: none; border: none;
+    font-size: 20px; cursor: pointer; color: var(--ink-soft);
+    padding: 0 6px;
+  }
+  .recipe-tabs {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 6px; margin: 10px 0;
+  }
+  .recipe-tab-btn {
+    background: #F4F1FF; border: 2px solid #DCD5FF;
+    color: var(--purple); font-family: 'Baloo 2', sans-serif;
+    font-weight: 800; border-radius: 10px;
+    padding: 8px 4px; cursor: pointer;
+    font-size: 11px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .recipe-tab-btn .icon { font-size: 20px; }
+  .recipe-tab-btn.active {
+    background: linear-gradient(180deg, #E4DAF5, #C9B4F0);
+    border-color: #7C6FF2; color: #5D51CC;
+  }
+  .recipe-steps {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .recipe-step {
+    background: #FAF8FF; border: 2px solid #DCD5FF;
+    border-radius: 12px; padding: 8px;
+    text-align: center;
+  }
+  .recipe-step .step-num {
+    display: inline-block;
+    background: linear-gradient(180deg, #FFDCEA, #FFB6D0);
+    color: #C63A6A;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 12px;
+    padding: 2px 8px; border-radius: 999px;
+    margin-bottom: 4px;
+  }
+  .recipe-step svg {
+    width: 100%; max-height: 120px;
+  }
+  .recipe-step .step-label {
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 11px; color: var(--ink);
+    margin-top: 4px;
+  }
+  .recipe-note {
+    text-align: center; margin-top: 10px;
+    font-size: 11px; color: var(--ink-soft); font-weight: 700;
+    padding: 8px; background: #FFF8E5; border-radius: 8px;
+  }
+
   /* =========================================================
      右パネル（PC）
      ========================================================= */
@@ -763,6 +886,7 @@
   <a href="/index.html" class="back-link">← もどる</a>
   <h1>🎨 おえかき</h1>
   <button class="pose-picker-btn" id="posePickerBtn" title="ポーズガイド">🎭</button>
+  <button class="recipe-picker-btn" id="recipePickerBtn" title="おえかきレシピ">🍰</button>
   <button class="panel-toggle" id="panelToggle" title="いろ・レイヤー・パーツ">🎨</button>
   <button class="btn-primary" id="saveBtn">💾 ほぞん</button>
 </header>
@@ -771,6 +895,16 @@
   <h4>🎭 ポーズガイド（うすく でるよ）</h4>
   <div class="pose-options" id="poseOptions"></div>
   <button class="pose-off-btn" id="poseOffBtn">👁️‍🗨️ ガイドを けす</button>
+</div>
+
+<div class="recipe-modal-backdrop" id="recipeModal">
+  <div class="recipe-modal">
+    <button class="close-x" id="recipeCloseBtn">✕</button>
+    <h3>🍰 おえかき レシピ</h3>
+    <div class="recipe-tabs" id="recipeTabs"></div>
+    <div class="recipe-steps" id="recipeSteps"></div>
+    <div class="recipe-note">👀 みて まねして かいてね！ したえは のこら ないよ</div>
+  </div>
 </div>
 
 <div class="draw-main">
@@ -2163,15 +2297,82 @@ const POSE_LIBRARY = [
   }
 ];
 
+// フェーズ5: 特別ポーズ 20G で解禁（allowance childKey ごとに保存）
+const PREMIUM_POSES = [
+  {
+    key: 'dance', label: 'ダンス', cost: 20, premium: true,
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 720" preserveAspectRatio="xMidYMid meet">
+      <g fill="#5D51CC" stroke="#5D51CC" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="220" cy="130" r="60"/>
+        <path d="M 185 195 Q 180 245 190 300 L 260 300 Q 270 245 260 195 Z" fill-opacity="0.4"/>
+        <rect x="195" y="290" width="70" height="180" rx="16" fill-opacity="0.35" transform="rotate(-8 230 380)"/>
+        <path d="M 190 220 Q 100 240 60 130 L 100 110 Q 130 210 210 240 Z" fill-opacity="0.35"/>
+        <path d="M 260 220 Q 350 200 420 300 L 380 320 Q 320 250 250 240 Z" fill-opacity="0.35"/>
+        <path d="M 205 465 Q 140 590 100 660 L 155 680 Q 200 570 240 490 Z" fill-opacity="0.35"/>
+        <path d="M 265 465 Q 330 550 370 590 L 315 620 Q 265 550 240 490 Z" fill-opacity="0.35"/>
+      </g>
+    </svg>`
+  },
+  {
+    key: 'superhero', label: 'ヒーロー', cost: 20, premium: true,
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 720" preserveAspectRatio="xMidYMid meet">
+      <g fill="#5D51CC" stroke="#5D51CC" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="240" cy="140" r="60"/>
+        <path d="M 205 205 Q 200 250 210 320 L 270 320 Q 280 250 275 205 Z" fill-opacity="0.4"/>
+        <rect x="195" y="315" width="90" height="180" rx="18" fill-opacity="0.35"/>
+        <path d="M 210 220 Q 240 140 320 90 L 340 115 Q 275 175 245 260 Z" fill-opacity="0.35"/>
+        <path d="M 275 220 Q 245 300 205 380 L 235 400 Q 285 320 305 250 Z" fill-opacity="0.35"/>
+        <path d="M 205 490 L 195 690 L 235 690 L 245 490 Z" fill-opacity="0.35"/>
+        <path d="M 275 490 L 285 690 L 245 690 L 235 490 Z" fill-opacity="0.35"/>
+      </g>
+    </svg>`
+  },
+  {
+    key: 'yoga', label: 'ヨガ', cost: 20, premium: true,
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 720" preserveAspectRatio="xMidYMid meet">
+      <g fill="#5D51CC" stroke="#5D51CC" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="240" cy="200" r="55"/>
+        <path d="M 210 260 Q 205 300 210 360 L 270 360 Q 275 300 270 260 Z" fill-opacity="0.4"/>
+        <path d="M 210 280 Q 130 300 90 260 L 90 235 Q 150 260 220 260 Z" fill-opacity="0.35"/>
+        <path d="M 270 280 Q 350 300 390 260 L 390 235 Q 330 260 260 260 Z" fill-opacity="0.35"/>
+        <rect x="210" y="350" width="60" height="120" rx="15" fill-opacity="0.35"/>
+        <path d="M 220 470 Q 130 500 60 620 L 130 640 Q 210 550 235 480 Z" fill-opacity="0.35"/>
+        <path d="M 260 470 Q 350 500 420 620 L 350 640 Q 270 550 245 480 Z" fill-opacity="0.35"/>
+      </g>
+    </svg>`
+  }
+];
+
 const posePickerBtn = document.getElementById('posePickerBtn');
 const posePickerPopup = document.getElementById('posePickerPopup');
 const poseOptionsEl = document.getElementById('poseOptions');
 const poseOffBtn = document.getElementById('poseOffBtn');
 const poseGuide = document.getElementById('poseGuide');
 let currentPose = null;
+// フェーズ5: 解禁済み特別ポーズのローカルキャッシュ。allowance と同期。
+let unlockedPremiumPoses = [];
+
+// allowance の watch 経由で解禁状況を反映
+async function refreshPremiumPosesSubscription() {
+  try {
+    const { watchAllowance } = await import('/shared/firebase.js');
+    watchAllowance(data => {
+      if (!data) return;
+      const key = window.avatarAppGold?.getChildKey?.();
+      if (!key) return;
+      const child = (data.children || {})[key];
+      if (!child) return;
+      unlockedPremiumPoses = Array.isArray(child.avatarAppUnlockedPoses)
+        ? child.avatarAppUnlockedPoses : [];
+      if (posePickerPopup.classList.contains('show')) buildPoseOptions();
+    });
+  } catch (e) { console.warn(e); }
+}
+refreshPremiumPosesSubscription();
 
 function buildPoseOptions() {
   poseOptionsEl.innerHTML = '';
+  // 通常ポーズ
   POSE_LIBRARY.forEach(p => {
     const b = document.createElement('button');
     b.className = 'pose-option' + (currentPose === p.key ? ' selected' : '');
@@ -2180,10 +2381,55 @@ function buildPoseOptions() {
     b.addEventListener('click', () => setPose(p.key));
     poseOptionsEl.appendChild(b);
   });
+  // 特別ポーズ（allowance 連携時のみ）
+  const goldReady = !!window.avatarAppGold && !!window.avatarAppGold.getChildKey?.();
+  PREMIUM_POSES.forEach(p => {
+    const unlocked = unlockedPremiumPoses.includes(p.key);
+    const b = document.createElement('button');
+    b.className = 'pose-option premium ' + (unlocked ? 'unlocked' : 'locked')
+      + (currentPose === p.key ? ' selected' : '');
+    b.dataset.pose = p.key;
+    b.innerHTML = p.svg
+      + `<span class="pose-label">${p.label}</span>`
+      + `<span class="pose-price">${unlocked ? '✅' : '💰 ' + p.cost + 'G'}</span>`;
+    b.addEventListener('click', () => {
+      if (unlocked) setPose(p.key);
+      else if (goldReady) purchasePremiumPose(p);
+      else showToast('おこづかい と つながって ないよ');
+    });
+    poseOptionsEl.appendChild(b);
+  });
+}
+
+async function purchasePremiumPose(p) {
+  const key = window.avatarAppGold?.getChildKey?.();
+  if (!key) { showToast('さきに「だれ？」を えらんでね'); window.avatarAppGold?.openChildPicker?.(); return; }
+  const cur = window.avatarAppGold?.getGold?.() || 0;
+  if (cur < p.cost) {
+    showToast(`${p.cost}G ひつよう だよ (いま ${cur}G)`);
+    return;
+  }
+  const ok = confirm(`✨ ${p.label} ポーズ を ${p.cost}G で かう？\nつぎからは いつでも つかえるよ！`);
+  if (!ok) return;
+  try {
+    const { spendGold, updateAllowanceChild } = await import('/shared/firebase.js');
+    const { showGoldFly } = await import('/shared/utils.js');
+    await spendGold(key, p.cost, `${p.label} ポーズ を かった`);
+    const next = [...unlockedPremiumPoses, p.key];
+    await updateAllowanceChild(key, { avatarAppUnlockedPoses: next });
+    unlockedPremiumPoses = next;
+    showGoldFly(-p.cost);
+    showToast(`✨ ${p.label} ポーズ を てにいれた！`);
+    setPose(p.key);
+    buildPoseOptions();
+  } catch (err) {
+    console.error(err);
+    showToast(err.message || 'かえなかったよ…');
+  }
 }
 function setPose(key) {
   currentPose = key;
-  const p = POSE_LIBRARY.find(x => x.key === key);
+  const p = POSE_LIBRARY.find(x => x.key === key) || PREMIUM_POSES.find(x => x.key === key);
   if (p) {
     poseGuide.innerHTML = p.svg;
     canvasContainer.classList.add('pose-active');
@@ -2212,6 +2458,96 @@ document.addEventListener('click', e => {
   posePickerPopup.classList.remove('show');
 });
 buildPoseOptions();
+
+// ============================================================
+// フェーズ7: おえかき レシピ (Gemini 不要、ローカル SVG)
+// ============================================================
+const RECIPE_LIBRARY = [
+  {
+    key: 'cat', label: 'ねこ', icon: '🐱',
+    steps: [
+      { label: 'まる を かく', svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle cx="100" cy="110" r="60" fill="none" stroke="#5D51CC" stroke-width="4"/></svg>` },
+      { label: 'みみ 2つ', svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle cx="100" cy="110" r="60" fill="none" stroke="#5D51CC" stroke-width="4" opacity="0.35"/><path d="M60 68 L55 30 L90 60 Z" fill="none" stroke="#E14E7F" stroke-width="4"/><path d="M140 68 L145 30 L110 60 Z" fill="none" stroke="#E14E7F" stroke-width="4"/></svg>` },
+      { label: 'め と はな', svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle cx="100" cy="110" r="60" fill="none" stroke="#5D51CC" stroke-width="4" opacity="0.35"/><path d="M60 68 L55 30 L90 60 Z" fill="none" stroke="#E14E7F" stroke-width="4" opacity="0.35"/><path d="M140 68 L145 30 L110 60 Z" fill="none" stroke="#E14E7F" stroke-width="4" opacity="0.35"/><ellipse cx="80" cy="100" rx="5" ry="8" fill="#4CD4B0"/><ellipse cx="120" cy="100" rx="5" ry="8" fill="#4CD4B0"/><path d="M95 125 Q100 130 105 125 L100 132 Z" fill="#FF6B9D"/></svg>` },
+      { label: 'ひげ と くち', svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle cx="100" cy="110" r="60" fill="none" stroke="#5D51CC" stroke-width="4" opacity="0.35"/><path d="M60 68 L55 30 L90 60 Z" fill="none" stroke="#E14E7F" stroke-width="4" opacity="0.35"/><path d="M140 68 L145 30 L110 60 Z" fill="none" stroke="#E14E7F" stroke-width="4" opacity="0.35"/><ellipse cx="80" cy="100" rx="5" ry="8" fill="#4CD4B0" opacity="0.35"/><ellipse cx="120" cy="100" rx="5" ry="8" fill="#4CD4B0" opacity="0.35"/><path d="M95 125 Q100 130 105 125 L100 132 Z" fill="#FF6B9D" opacity="0.35"/><path d="M100 132 Q90 145 80 140 M100 132 Q110 145 120 140" fill="none" stroke="#5D51CC" stroke-width="3"/><path d="M50 118 L30 115 M50 128 L30 132 M150 118 L170 115 M150 128 L170 132" stroke="#7C6FF2" stroke-width="2"/></svg>` }
+    ]
+  },
+  {
+    key: 'flower', label: 'はな', icon: '🌸',
+    steps: [
+      { label: 'まん中に まる', svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle cx="100" cy="100" r="18" fill="#FFD966" stroke="#E8A200" stroke-width="3"/></svg>` },
+      { label: 'はなびら 5まい', svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><g stroke="#E14E7F" stroke-width="3" fill="#FFDCEA"><ellipse cx="100" cy="55" rx="18" ry="28"/><ellipse cx="145" cy="85" rx="18" ry="28" transform="rotate(72 145 85)"/><ellipse cx="128" cy="140" rx="18" ry="28" transform="rotate(144 128 140)"/><ellipse cx="72" cy="140" rx="18" ry="28" transform="rotate(216 72 140)"/><ellipse cx="55" cy="85" rx="18" ry="28" transform="rotate(288 55 85)"/></g><circle cx="100" cy="100" r="18" fill="#FFD966" stroke="#E8A200" stroke-width="3"/></svg>` },
+      { label: 'くき を のばす', svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><g stroke="#E14E7F" stroke-width="3" fill="#FFDCEA" opacity="0.4"><ellipse cx="100" cy="55" rx="18" ry="28"/><ellipse cx="145" cy="85" rx="18" ry="28" transform="rotate(72 145 85)"/><ellipse cx="128" cy="140" rx="18" ry="28" transform="rotate(144 128 140)"/><ellipse cx="72" cy="140" rx="18" ry="28" transform="rotate(216 72 140)"/><ellipse cx="55" cy="85" rx="18" ry="28" transform="rotate(288 55 85)"/></g><circle cx="100" cy="100" r="18" fill="#FFD966" stroke="#E8A200" stroke-width="3" opacity="0.4"/><path d="M100 155 Q95 175 100 195" stroke="#4CD4B0" stroke-width="5" fill="none"/></svg>` },
+      { label: 'はっぱ を 1まい', svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><g stroke="#E14E7F" stroke-width="3" fill="#FFDCEA" opacity="0.4"><ellipse cx="100" cy="55" rx="18" ry="28"/><ellipse cx="145" cy="85" rx="18" ry="28" transform="rotate(72 145 85)"/><ellipse cx="128" cy="140" rx="18" ry="28" transform="rotate(144 128 140)"/><ellipse cx="72" cy="140" rx="18" ry="28" transform="rotate(216 72 140)"/><ellipse cx="55" cy="85" rx="18" ry="28" transform="rotate(288 55 85)"/></g><circle cx="100" cy="100" r="18" fill="#FFD966" stroke="#E8A200" stroke-width="3" opacity="0.4"/><path d="M100 155 Q95 175 100 195" stroke="#4CD4B0" stroke-width="5" fill="none" opacity="0.4"/><path d="M98 170 Q80 165 75 180 Q85 178 100 178 Z" fill="#4CD4B0" stroke="#2B7A5A" stroke-width="2"/></svg>` }
+    ]
+  },
+  {
+    key: 'apple', label: 'りんご', icon: '🍎',
+    steps: [
+      { label: 'ハート っぽく', svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><path d="M100 65 Q70 40 55 75 Q45 110 100 165 Q155 110 145 75 Q130 40 100 65 Z" fill="none" stroke="#5D51CC" stroke-width="4"/></svg>` },
+      { label: 'あかく ぬる', svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><path d="M100 65 Q70 40 55 75 Q45 110 100 165 Q155 110 145 75 Q130 40 100 65 Z" fill="#FF6B6B" stroke="#5D51CC" stroke-width="4"/></svg>` },
+      { label: 'くき と はっぱ', svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><path d="M100 65 Q70 40 55 75 Q45 110 100 165 Q155 110 145 75 Q130 40 100 65 Z" fill="#FF6B6B" stroke="#5D51CC" stroke-width="4" opacity="0.6"/><path d="M100 65 Q102 45 108 30" stroke="#6B4423" stroke-width="4" fill="none"/><path d="M108 32 Q135 30 130 55 Q115 55 108 45 Z" fill="#4CD4B0" stroke="#2B7A5A" stroke-width="2"/></svg>` },
+      { label: 'ハイライトで キラっ', svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><path d="M100 65 Q70 40 55 75 Q45 110 100 165 Q155 110 145 75 Q130 40 100 65 Z" fill="#FF6B6B" stroke="#5D51CC" stroke-width="4" opacity="0.6"/><path d="M100 65 Q102 45 108 30" stroke="#6B4423" stroke-width="4" fill="none" opacity="0.6"/><path d="M108 32 Q135 30 130 55 Q115 55 108 45 Z" fill="#4CD4B0" stroke="#2B7A5A" stroke-width="2" opacity="0.6"/><ellipse cx="80" cy="90" rx="12" ry="18" fill="#FFF" opacity="0.7"/></svg>` }
+    ]
+  },
+  {
+    key: 'star', label: 'おほしさま', icon: '⭐',
+    steps: [
+      { label: 'まる を うすく', svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle cx="100" cy="100" r="65" fill="none" stroke="#DCD5FF" stroke-width="2" stroke-dasharray="4 4"/></svg>` },
+      { label: '5つの てっぺん を きめる', svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle cx="100" cy="100" r="65" fill="none" stroke="#DCD5FF" stroke-width="2" stroke-dasharray="4 4"/><g fill="#E14E7F"><circle cx="100" cy="35" r="4"/><circle cx="162" cy="80" r="4"/><circle cx="138" cy="152" r="4"/><circle cx="62" cy="152" r="4"/><circle cx="38" cy="80" r="4"/></g></svg>` },
+      { label: 'せんで つなぐ', svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><path d="M100 35 L162 80 L62 152 L138 152 L38 80 Z" fill="none" stroke="#5D51CC" stroke-width="4"/></svg>` },
+      { label: 'きいろく ぬる ✨', svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><path d="M100 35 L162 80 L62 152 L138 152 L38 80 Z" fill="#FFD966" stroke="#E8A200" stroke-width="4"/></svg>` }
+    ]
+  }
+];
+
+const recipePickerBtn = document.getElementById('recipePickerBtn');
+const recipeModal = document.getElementById('recipeModal');
+const recipeCloseBtn = document.getElementById('recipeCloseBtn');
+const recipeTabsEl = document.getElementById('recipeTabs');
+const recipeStepsEl = document.getElementById('recipeSteps');
+let currentRecipe = RECIPE_LIBRARY[0].key;
+
+function buildRecipeTabs() {
+  recipeTabsEl.innerHTML = '';
+  RECIPE_LIBRARY.forEach(r => {
+    const b = document.createElement('button');
+    b.className = 'recipe-tab-btn' + (currentRecipe === r.key ? ' active' : '');
+    b.innerHTML = `<span class="icon">${r.icon}</span><span>${r.label}</span>`;
+    b.addEventListener('click', () => {
+      currentRecipe = r.key;
+      buildRecipeTabs();
+      buildRecipeSteps();
+    });
+    recipeTabsEl.appendChild(b);
+  });
+}
+function buildRecipeSteps() {
+  const r = RECIPE_LIBRARY.find(x => x.key === currentRecipe);
+  if (!r) return;
+  recipeStepsEl.innerHTML = '';
+  r.steps.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'recipe-step';
+    div.innerHTML = `
+      <span class="step-num">${i + 1}</span>
+      ${s.svg}
+      <div class="step-label">${s.label}</div>
+    `;
+    recipeStepsEl.appendChild(div);
+  });
+}
+recipePickerBtn.addEventListener('click', () => {
+  buildRecipeTabs();
+  buildRecipeSteps();
+  recipeModal.classList.add('show');
+});
+recipeCloseBtn.addEventListener('click', () => {
+  recipeModal.classList.remove('show');
+});
+recipeModal.addEventListener('click', e => {
+  if (e.target === recipeModal) recipeModal.classList.remove('show');
+});
 </script>
 
 
