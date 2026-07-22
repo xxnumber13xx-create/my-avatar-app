@@ -527,6 +527,28 @@ async function generateRealistic(id, imageData, btn) {
     showToast('Firebase の せってい が まだ です');
     return;
   }
+  // フェーズ5: 15G の支払いが必要
+  const REAL_COST = 15;
+  const goldApi = window.avatarAppGold;
+  if (goldApi && goldApi.getChildKey && goldApi.getChildKey()) {
+    const childKey = goldApi.getChildKey();
+    if (goldApi.getGold() < REAL_COST) {
+      showToast(`${REAL_COST}G ひつよう だよ (いま ${goldApi.getGold()}G)`);
+      return;
+    }
+    const ok = confirm(`✨ この え を リアルに へんかん するよ！\n${REAL_COST}G つかう。かってに いいの？`);
+    if (!ok) return;
+    try {
+      const { spendGold } = await import('/shared/firebase.js');
+      const { showGoldFly } = await import('/shared/utils.js');
+      await spendGold(childKey, REAL_COST, 'リアル へんかん');
+      showGoldFly(-REAL_COST);
+    } catch (err) {
+      showToast(err.message || 'かえなかった…');
+      return;
+    }
+  }
+  // childKey が無ければ従来通り無料（allowance 未連携ケース）
   btn.disabled = true;
   const origText = btn.textContent;
   btn.textContent = '⏳';
@@ -730,6 +752,10 @@ saveLookBtn.addEventListener('click', async () => {
       extra: { baseAvatarId: stageAvatar.id }
     });
     showToast('コーデ を たな に ほぞん したよ！ 💕');
+    // フェーズ5: +1G ボーナス（1日 3 回まで）
+    if (window.avatarAppGold?.awardSaveBonus) {
+      window.avatarAppGold.awardSaveBonus('あたらしい コーデ').catch(e => console.warn(e));
+    }
   } catch (err) {
     console.error(err);
     showToast('ほぞん に しっぱい');
@@ -791,5 +817,23 @@ if (isConfigured) {
 }
 </script>
 
+
+<script type="module">
+// フェーズ5: Gold バッジ + ログインストリーク + 保存ボーナス公開
+import { isAllowanceConfigured, getStoredChildKey, setStoredChildKey,
+  watchAllowance, listAllowanceChildren, earnGold, updateAllowanceChild } from '/shared/firebase.js';
+import { setupGoldBadge } from '/shared/utils.js';
+const header = document.querySelector('header');
+if (header) {
+  const insertBefore = header.querySelector('#saveBtn, .btn-primary, .save-btn') || null;
+  const api = setupGoldBadge(
+    { isAllowanceConfigured, getStoredChildKey, setStoredChildKey,
+      watchAllowance, listAllowanceChildren, earnGold, updateAllowanceChild },
+    header, insertBefore
+  );
+  // メイン スクリプトから使えるようグローバルに公開
+  window.avatarAppGold = api;
+}
+</script>
 </body>
 </html>
