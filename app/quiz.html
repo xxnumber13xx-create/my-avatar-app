@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#EAF6FF">
+<title>🔢 さんすう クイズ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared/styles.css">
+<style>
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    display: flex; flex-direction: column;
+    background:
+      radial-gradient(circle at 10% 10%, #DDF4E4, transparent 40%),
+      radial-gradient(circle at 90% 0%, #FFE9C7, transparent 35%),
+      var(--bg);
+  }
+  .draw-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; background: #fff;
+    border-bottom: 2px solid #EDE9FF;
+    flex: 0 0 auto;
+  }
+  .draw-header h1 {
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    margin: 0; font-size: 18px; color: var(--purple);
+    flex: 1; line-height: 1.1;
+  }
+  .back-btn {
+    background: #F4F1FF; border: 2px solid #DCD5FF; color: var(--purple);
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    border-radius: 12px; padding: 8px 12px; cursor: pointer; font-size: 14px;
+  }
+  .main-scroll {
+    flex: 1; overflow-y: auto;
+    padding: 20px 14px calc(24px + var(--sab));
+    display: flex; flex-direction: column;
+    gap: 14px;
+    max-width: 540px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+
+  /* ==== 学年ピッカー ==== */
+  .grade-card {
+    background: #fff; border: 3px solid #DCD5FF;
+    border-radius: 20px; padding: 18px;
+    box-shadow: 0 6px 0 rgba(124,111,242,0.14);
+  }
+  .grade-card h2 {
+    margin: 0 0 8px; text-align: center;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 20px; color: var(--ink);
+  }
+  .grade-card .sub {
+    text-align: center; margin: 0 0 14px;
+    font-size: 12px; font-weight: 700; color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .grade-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .grade-btn {
+    background: linear-gradient(180deg, #DDF4E4, #A8E4C4);
+    border: 3px solid #4CD4B0; border-radius: 14px;
+    padding: 14px 4px; cursor: pointer;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    color: #1F5A40; font-size: 13px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    box-shadow: 0 4px 0 #4CD4B0;
+    transition: transform .08s, box-shadow .08s;
+  }
+  .grade-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #4CD4B0; }
+  .grade-btn .icon { font-size: 22px; }
+  .grade-btn .label { font-size: 11px; opacity: 0.8; font-weight: 700; }
+
+  /* ==== 問題カード ==== */
+  .quiz-card {
+    background: #fff; border-radius: 22px;
+    border: 3px solid #4CD4B0;
+    padding: 22px 18px;
+    box-shadow: 0 6px 0 rgba(76,212,176,0.28);
+    text-align: center;
+    position: relative;
+  }
+  .quiz-progress {
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 12px; color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+  .quiz-progress .grade-tag {
+    background: linear-gradient(180deg, #DDF4E4, #A8E4C4);
+    border: 2px solid #4CD4B0; color: #1F5A40;
+    padding: 3px 10px; border-radius: 999px; font-size: 11px;
+  }
+  .quiz-progress .count {
+    color: var(--purple);
+  }
+  .quiz-question {
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: clamp(28px, 8vw, 44px);
+    color: var(--ink);
+    letter-spacing: 2px;
+    margin: 18px 0 22px;
+    line-height: 1.3;
+  }
+  .quiz-question .op { color: #C63A6A; margin: 0 6px; }
+  .quiz-question .eq { color: var(--purple); margin: 0 6px; }
+  .quiz-answer-row {
+    display: flex; gap: 8px; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+  }
+  .quiz-answer-input {
+    width: 130px; height: 60px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 32px; text-align: center;
+    border: 3px solid #DCD5FF; border-radius: 14px;
+    background: #FAF8FF;
+    color: var(--ink); outline: none;
+    -moz-appearance: textfield;
+  }
+  .quiz-answer-input::-webkit-outer-spin-button,
+  .quiz-answer-input::-webkit-inner-spin-button {
+    -webkit-appearance: none; margin: 0;
+  }
+  .quiz-answer-input:focus { border-color: var(--purple); background: #fff; }
+  .quiz-submit {
+    padding: 14px 24px;
+    background: linear-gradient(180deg, #FFDCEA, #FFB6D0);
+    border: 3px solid #E14E7F; border-radius: 14px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    color: #C63A6A; font-size: 15px;
+    cursor: pointer; box-shadow: 0 4px 0 #C63A6A;
+    transition: transform .08s, box-shadow .08s;
+  }
+  .quiz-submit:active { transform: translateY(2px); box-shadow: 0 2px 0 #C63A6A; }
+  .quiz-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .quiz-feedback {
+    margin: 12px 0 0;
+    padding: 14px 16px;
+    border-radius: 14px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 15px;
+    display: none;
+  }
+  .quiz-feedback.show { display: block; animation: fbPop .35s ease; }
+  @keyframes fbPop {
+    0% { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .quiz-feedback.correct {
+    background: linear-gradient(180deg, #E8FFF3, #C7F3D6);
+    border: 3px solid #4CD4B0;
+    color: #1F5A40;
+  }
+  .quiz-feedback.wrong {
+    background: linear-gradient(180deg, #FFE8EC, #FFB8C7);
+    border: 3px solid #E14E7F;
+    color: #C63A6A;
+  }
+  .quiz-feedback .earned {
+    display: inline-block; margin-left: 8px;
+    background: linear-gradient(180deg, #FFF3C9, #FFD966);
+    color: #7A5200; border: 2px solid #E8A200;
+    padding: 2px 10px; border-radius: 999px; font-size: 13px;
+  }
+  .quiz-nav {
+    display: flex; gap: 10px; margin-top: 12px;
+  }
+  .quiz-nav button {
+    flex: 1; padding: 12px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    border-radius: 12px; cursor: pointer;
+    font-size: 14px;
+    transition: transform .08s, box-shadow .08s;
+  }
+  .quiz-nav button:active { transform: translateY(2px); }
+  .quiz-nav .btn-next {
+    background: linear-gradient(180deg, #E4DAF5, #C9B4F0);
+    border: 3px solid #7C6FF2; color: #5D51CC;
+    box-shadow: 0 4px 0 #7C6FF2;
+  }
+  .quiz-nav .btn-next:active { box-shadow: 0 2px 0 #7C6FF2; }
+  .quiz-nav .btn-back {
+    background: #F4F1FF; border: 2px solid #DCD5FF; color: var(--purple);
+  }
+
+  /* ==== 集計カード (10問完走時) ==== */
+  .result-card {
+    background: #fff; border: 3px solid #FFD966;
+    border-radius: 22px; padding: 22px 18px;
+    box-shadow: 0 6px 0 rgba(232,162,0,0.35);
+    text-align: center;
+  }
+  .result-card h2 {
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    color: #7A5200; margin: 0 0 6px; font-size: 22px;
+  }
+  .result-score {
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 40px; color: var(--purple); margin: 12px 0;
+  }
+  .result-earned {
+    background: linear-gradient(180deg, #FFF3C9, #FFD966);
+    border: 3px solid #E8A200; color: #7A5200;
+    padding: 10px 18px; border-radius: 14px;
+    display: inline-block; margin-top: 8px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 18px;
+  }
+  .result-actions {
+    display: flex; gap: 10px; margin-top: 16px;
+  }
+  .result-actions button {
+    flex: 1; padding: 12px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    border-radius: 12px; cursor: pointer;
+    font-size: 13px;
+  }
+  .result-actions .btn-again {
+    background: linear-gradient(180deg, #DDF4E4, #A8E4C4);
+    border: 3px solid #4CD4B0; color: #1F5A40;
+    box-shadow: 0 4px 0 #4CD4B0;
+  }
+  .result-actions .btn-again:active { transform: translateY(2px); box-shadow: 0 2px 0 #4CD4B0; }
+  .result-actions .btn-home {
+    background: #F4F1FF; border: 2px solid #DCD5FF; color: var(--purple);
+  }
+  .cap-note {
+    background: #FFF8E5; border: 2px solid #FFD966;
+    color: #7A5200; padding: 10px 14px; border-radius: 12px;
+    font-size: 12px; font-weight: 700; text-align: center;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+<header class="draw-header">
+  <button class="back-btn" onclick="window.location.href='/'">← もどる</button>
+  <h1>🔢 さんすう クイズ</h1>
+</header>
+
+<main class="main-scroll" id="mainScroll">
+  <div id="gradePickerArea">
+    <div class="grade-card">
+      <h2>🎓 なんねん の もんだいに する？</h2>
+      <p class="sub">10もん セット。まちがえても だいじょうぶ！<br>せいかい 1もん あたり +2G ✨</p>
+      <div class="grade-grid" id="gradeGrid">
+        <button class="grade-btn" data-grade="1"><span class="icon">1️⃣</span><span>1ねん</span><span class="label">たしざん</span></button>
+        <button class="grade-btn" data-grade="2"><span class="icon">2️⃣</span><span>2ねん</span><span class="label">ひきざん</span></button>
+        <button class="grade-btn" data-grade="3"><span class="icon">3️⃣</span><span>3ねん</span><span class="label">かけざん</span></button>
+        <button class="grade-btn" data-grade="4"><span class="icon">4️⃣</span><span>4ねん</span><span class="label">わりざん</span></button>
+        <button class="grade-btn" data-grade="5"><span class="icon">5️⃣</span><span>5ねん</span><span class="label">こんごう</span></button>
+        <button class="grade-btn" data-grade="6"><span class="icon">6️⃣</span><span>6ねん</span><span class="label">むずかしい</span></button>
+      </div>
+    </div>
+    <div class="cap-note" id="capNote"></div>
+  </div>
+
+  <div id="quizArea" style="display:none"></div>
+  <div id="resultArea" style="display:none"></div>
+</main>
+
+<script type="module">
+import { isAllowanceConfigured, getStoredChildKey, setStoredChildKey,
+  watchAllowance, listAllowanceChildren, earnGold, updateAllowanceChild } from '/shared/firebase.js';
+import { setupGoldBadge, showToast, showGoldFly } from '/shared/utils.js';
+
+const header = document.querySelector('header');
+const api = setupGoldBadge(
+  { isAllowanceConfigured, getStoredChildKey, setStoredChildKey,
+    watchAllowance, listAllowanceChildren, earnGold, updateAllowanceChild },
+  header, null
+);
+window.avatarAppGold = api;
+
+// ============================================================
+// クイズ 生成: ローカル アルゴリズム（Gemini 呼ばない）
+// ============================================================
+// 学年別問題タイプ
+//   1年: たしざん 1-20
+//   2年: ひきざん 20 まで, 2桁+1桁 の たしざん
+//   3年: かけざん (九九)
+//   4年: わりざん (九九 の 逆)
+//   5年: こんごう (かっこ 含む)
+//   6年: 分数計算入門 or 大きな数
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function generateProblem(grade) {
+  if (grade === 1) {
+    const a = randInt(1, 9);
+    const b = randInt(1, 9);
+    return { display: `${a} + ${b}`, answer: a + b };
+  }
+  if (grade === 2) {
+    // 半々でひきざん or 2桁たしざん
+    if (Math.random() < 0.6) {
+      let a = randInt(5, 20), b = randInt(1, a);
+      return { display: `${a} - ${b}`, answer: a - b };
+    } else {
+      const a = randInt(10, 30), b = randInt(1, 9);
+      return { display: `${a} + ${b}`, answer: a + b };
+    }
+  }
+  if (grade === 3) {
+    const a = randInt(2, 9), b = randInt(2, 9);
+    return { display: `${a} × ${b}`, answer: a * b };
+  }
+  if (grade === 4) {
+    // 割り切れる わりざん
+    const b = randInt(2, 9);
+    const q = randInt(2, 9);
+    const a = b * q;
+    return { display: `${a} ÷ ${b}`, answer: q };
+  }
+  if (grade === 5) {
+    // 混合演算 or カッコ
+    const t = Math.random();
+    if (t < 0.4) {
+      const a = randInt(2, 12), b = randInt(2, 9), c = randInt(1, 9);
+      return { display: `${a} × ${b} + ${c}`, answer: a * b + c };
+    } else if (t < 0.75) {
+      const a = randInt(3, 20), b = randInt(1, 9), c = randInt(1, 9);
+      return { display: `${a} - ${b} + ${c}`, answer: a - b + c };
+    } else {
+      const b = randInt(2, 9), q = randInt(2, 9);
+      const a = b * q;
+      const c = randInt(1, 9);
+      return { display: `${a} ÷ ${b} + ${c}`, answer: q + c };
+    }
+  }
+  // grade 6
+  const t = Math.random();
+  if (t < 0.35) {
+    // カッコあり
+    const a = randInt(2, 15), b = randInt(2, 15), c = randInt(2, 9);
+    return { display: `( ${a} + ${b} ) × ${c}`, answer: (a + b) * c };
+  } else if (t < 0.7) {
+    // 大きな数の掛け算
+    const a = randInt(10, 30), b = randInt(2, 12);
+    return { display: `${a} × ${b}`, answer: a * b };
+  } else {
+    // 大きな数の割り算
+    const b = randInt(3, 12), q = randInt(10, 20);
+    const a = b * q;
+    return { display: `${a} ÷ ${b}`, answer: q };
+  }
+}
+
+// ============================================================
+// 1日ボーナス上限管理
+// ============================================================
+const DAILY_QUIZ_GOLD_CAP = 20; // 1日で貰える上限
+const CORRECT_REWARD = 2;
+
+function ymd() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getDailyEarned() {
+  try { return Number(localStorage.getItem('avatarApp_quizGold_' + ymd()) || 0); } catch (e) { return 0; }
+}
+function addDailyEarned(n) {
+  try {
+    const cur = getDailyEarned();
+    localStorage.setItem('avatarApp_quizGold_' + ymd(), String(cur + n));
+    return cur + n;
+  } catch (e) { return 0; }
+}
+function refreshCapNote() {
+  const earned = getDailyEarned();
+  const left = Math.max(0, DAILY_QUIZ_GOLD_CAP - earned);
+  const note = document.getElementById('capNote');
+  if (left <= 0) {
+    note.innerHTML = `🌟 きょうは もう ${DAILY_QUIZ_GOLD_CAP}G ぜんぶ もらったよ！ あそぶだけ でも OK ♪`;
+  } else {
+    note.innerHTML = `きょう もらえる のこり: <b>${left}G</b> / ${DAILY_QUIZ_GOLD_CAP}G`;
+  }
+}
+refreshCapNote();
+
+// ============================================================
+// セッション
+// ============================================================
+const session = {
+  grade: null,
+  problems: [],
+  index: 0,
+  correct: 0,
+  goldEarned: 0,
+  currentAnswered: false
+};
+
+document.querySelectorAll('.grade-btn').forEach(b => {
+  b.addEventListener('click', () => startQuiz(Number(b.dataset.grade)));
+});
+
+function startQuiz(grade) {
+  session.grade = grade;
+  session.problems = Array.from({ length: 10 }, () => generateProblem(grade));
+  session.index = 0;
+  session.correct = 0;
+  session.goldEarned = 0;
+  session.currentAnswered = false;
+  document.getElementById('gradePickerArea').style.display = 'none';
+  document.getElementById('resultArea').style.display = 'none';
+  document.getElementById('quizArea').style.display = '';
+  renderProblem();
+}
+
+function renderProblem() {
+  const q = session.problems[session.index];
+  const wrap = document.getElementById('quizArea');
+  const [op, expr] = tokenize(q.display);
+  wrap.innerHTML = `
+    <div class="quiz-card">
+      <div class="quiz-progress">
+        <span class="grade-tag">🎓 ${session.grade}ねん</span>
+        <span class="count">${session.index + 1} / ${session.problems.length}</span>
+      </div>
+      <div class="quiz-question">${expr} <span class="eq">=</span> <span style="color:var(--ink-soft)">?</span></div>
+      <div class="quiz-answer-row">
+        <input type="number" inputmode="numeric" pattern="[0-9]*" class="quiz-answer-input" id="answerInput" autocomplete="off" />
+        <button class="quiz-submit" id="submitBtn">✓ こたえる</button>
+      </div>
+      <div class="quiz-feedback" id="feedback"></div>
+      <div class="quiz-nav" id="navRow" style="display:none">
+        <button class="btn-back" id="btnQuit">🏠 やめる</button>
+        <button class="btn-next" id="btnNext">➡️ つぎの もんだい</button>
+      </div>
+    </div>
+  `;
+  session.currentAnswered = false;
+  const input = document.getElementById('answerInput');
+  const submit = document.getElementById('submitBtn');
+  input.focus();
+  const doSubmit = () => {
+    if (session.currentAnswered) return;
+    const val = input.value.trim();
+    if (val === '') { showToast('こたえを かいてね'); return; }
+    handleAnswer(Number(val));
+  };
+  submit.addEventListener('click', doSubmit);
+  input.addEventListener('keypress', e => {
+    if (e.key === 'Enter') doSubmit();
+  });
+}
+
+function tokenize(display) {
+  // 演算子に color を付けるためだけの装飾
+  return [null, display
+    .replace(/\+/g, '<span class="op">+</span>')
+    .replace(/-/g, '<span class="op">-</span>')
+    .replace(/×/g, '<span class="op">×</span>')
+    .replace(/÷/g, '<span class="op">÷</span>')
+  ];
+}
+
+async function handleAnswer(userAnswer) {
+  session.currentAnswered = true;
+  const q = session.problems[session.index];
+  const correct = userAnswer === q.answer;
+  const fb = document.getElementById('feedback');
+  const nav = document.getElementById('navRow');
+  document.getElementById('submitBtn').disabled = true;
+
+  if (correct) {
+    session.correct += 1;
+    // 上限内なら +2G
+    const earned = getDailyEarned();
+    const canEarn = earned < DAILY_QUIZ_GOLD_CAP;
+    const willEarn = canEarn ? CORRECT_REWARD : 0;
+    if (willEarn > 0) {
+      const childKey = api.getChildKey();
+      if (childKey) {
+        try {
+          await earnGold(childKey, willEarn, `${session.grade}ねんクイズ せいかい`);
+          showGoldFly(willEarn);
+          addDailyEarned(willEarn);
+          session.goldEarned += willEarn;
+        } catch (e) { console.warn(e); }
+      }
+    }
+    fb.className = 'quiz-feedback correct show';
+    fb.innerHTML = `🎉 せいかい！ ${willEarn > 0 ? `<span class="earned">+${willEarn}G</span>` : '<span class="earned" style="background:#EFECFA;color:#5D51CC;border-color:#DCD5FF;">きょうは じょうげん</span>'}`;
+  } else {
+    fb.className = 'quiz-feedback wrong show';
+    fb.innerHTML = `😢 ざんねん... こたえは <b>${q.answer}</b> だよ`;
+  }
+  nav.style.display = '';
+  document.getElementById('btnNext').addEventListener('click', () => {
+    session.index += 1;
+    if (session.index >= session.problems.length) {
+      showResult();
+    } else {
+      renderProblem();
+    }
+  });
+  document.getElementById('btnQuit').addEventListener('click', showResult);
+}
+
+function showResult() {
+  document.getElementById('quizArea').style.display = 'none';
+  const wrap = document.getElementById('resultArea');
+  wrap.style.display = '';
+  const total = session.index + (session.currentAnswered ? 1 : 0);
+  const rate = total > 0 ? Math.round((session.correct / total) * 100) : 0;
+  const encouragement = rate >= 80 ? '🌟 すごい！' : rate >= 50 ? '👍 いいね！' : '💪 もう1かい やってみよう！';
+  wrap.innerHTML = `
+    <div class="result-card">
+      <h2>${encouragement}</h2>
+      <div class="result-score">${session.correct} / ${total}</div>
+      <div>${rate}% せいかい</div>
+      ${session.goldEarned > 0 ? `<div class="result-earned">💰 +${session.goldEarned}G ゲット！</div>` : ''}
+      <div class="result-actions">
+        <button class="btn-again" id="btnAgain">🔁 もう1かい</button>
+        <button class="btn-home" id="btnHome">🏠 メニュー</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('btnAgain').addEventListener('click', () => {
+    document.getElementById('resultArea').style.display = 'none';
+    document.getElementById('gradePickerArea').style.display = '';
+    refreshCapNote();
+  });
+  document.getElementById('btnHome').addEventListener('click', () => {
+    window.location.href = '/';
+  });
+}
+</script>
+</body>
+</html>
