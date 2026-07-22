@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#EAF6FF">
+<title>🤔 まなぼう！ - ソクラテス先生</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared/styles.css">
+<style>
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    display: flex; flex-direction: column;
+    background:
+      radial-gradient(circle at 10% 10%, #E4DAF5, transparent 40%),
+      radial-gradient(circle at 90% 0%, #FFE9C7, transparent 35%),
+      var(--bg);
+  }
+  .draw-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; background: #fff;
+    border-bottom: 2px solid #EDE9FF;
+    flex: 0 0 auto;
+  }
+  .draw-header h1 {
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    margin: 0; font-size: 18px; color: var(--purple);
+    flex: 1; line-height: 1.1;
+  }
+  .back-btn {
+    background: #F4F1FF; border: 2px solid #DCD5FF; color: var(--purple);
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    border-radius: 12px; padding: 8px 12px; cursor: pointer; font-size: 14px;
+  }
+  .main-scroll {
+    flex: 1; overflow-y: auto;
+    padding: 16px 14px calc(24px + var(--sab));
+    display: flex; flex-direction: column;
+    gap: 14px;
+    max-width: 620px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+
+  /* ==== しつもん入力カード ==== */
+  .ask-card {
+    background: #fff;
+    border-radius: 20px;
+    border: 3px solid #DCD5FF;
+    padding: 16px;
+    box-shadow: 0 6px 0 rgba(124,111,242,0.14);
+  }
+  .ask-card h2 {
+    margin: 0 0 10px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 18px; color: var(--ink);
+    text-align: center;
+  }
+  .ask-card .hint-text {
+    font-size: 12px; color: var(--ink-soft);
+    text-align: center; margin: 0 0 12px; font-weight: 700;
+    line-height: 1.5;
+  }
+  .question-input {
+    width: 100%; box-sizing: border-box;
+    padding: 14px 16px;
+    border: 2px solid #DCD5FF;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif; font-weight: 700;
+    font-size: 15px;
+    color: var(--ink);
+    background: #FAF8FF;
+    resize: vertical;
+    min-height: 70px;
+    max-height: 200px;
+    outline: none;
+  }
+  .question-input:focus {
+    border-color: var(--purple);
+    background: #fff;
+  }
+  .quick-topics {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 8px; margin-top: 12px;
+  }
+  .quick-topic-btn {
+    background: #FFF8E5; border: 2px solid #FFD966; border-radius: 12px;
+    padding: 10px 8px; cursor: pointer;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 12px; color: #7A5200;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    text-align: center; line-height: 1.2;
+  }
+  .quick-topic-btn:active { transform: translateY(1px); }
+  .quick-topic-btn .icon { font-size: 20px; }
+
+  .ask-submit {
+    width: 100%; margin-top: 12px;
+    background: linear-gradient(180deg, #FFDCEA, #FFB6D0);
+    border: 3px solid #E14E7F;
+    border-radius: 14px;
+    padding: 12px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 15px; color: #C63A6A;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #C63A6A;
+    transition: transform .08s, box-shadow .08s;
+  }
+  .ask-submit:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #C63A6A;
+  }
+  .ask-submit:disabled {
+    opacity: 0.5; cursor: not-allowed;
+    transform: none; box-shadow: 0 4px 0 rgba(198,58,106,0.4);
+  }
+
+  /* ==== 対話のヒント/答え表示 ==== */
+  .thread {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .question-bubble {
+    background: linear-gradient(180deg, #E4F0FF, #C9E0FF);
+    border: 2px solid #7C6FF2;
+    border-radius: 18px 18px 18px 4px;
+    padding: 12px 16px;
+    font-family: 'Nunito', sans-serif; font-weight: 700;
+    font-size: 14px; color: var(--ink);
+    align-self: flex-start;
+    max-width: 90%;
+    line-height: 1.5;
+  }
+  .hint-bubble {
+    background: #fff;
+    border: 3px solid #FFC93C;
+    border-radius: 18px 18px 4px 18px;
+    padding: 14px 16px;
+    font-family: 'Nunito', sans-serif; font-weight: 700;
+    font-size: 15px; color: var(--ink);
+    align-self: flex-end;
+    max-width: 92%;
+    line-height: 1.6;
+    box-shadow: 0 4px 0 rgba(255,201,60,0.35);
+    position: relative;
+  }
+  .hint-bubble .badge {
+    position: absolute; top: -10px; right: 12px;
+    background: linear-gradient(180deg, #FFF3C9, #FFD966);
+    border: 2px solid #E8A200;
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 11px; color: #7A5200;
+  }
+  .hint-bubble.answer {
+    border-color: #4CD4B0;
+    box-shadow: 0 4px 0 rgba(76,212,176,0.35);
+  }
+  .hint-bubble.answer .badge {
+    background: linear-gradient(180deg, #C7F3D6, #7DE0B0);
+    border-color: #2B7A5A;
+    color: #1F5A40;
+  }
+  .waiting {
+    text-align: center; padding: 20px;
+    color: var(--ink-soft); font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 13px;
+  }
+  .waiting .dots::after {
+    content: ''; animation: dots 1.5s steps(4, end) infinite;
+  }
+  @keyframes dots {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+  }
+
+  /* ==== アクションボタン群 ==== */
+  .action-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-top: 4px;
+  }
+  .action-row.single { grid-template-columns: 1fr; }
+  .action-btn {
+    padding: 12px 8px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 13px;
+    border-radius: 14px; cursor: pointer;
+    border: 3px solid; box-shadow: 0 4px 0;
+    transition: transform .08s, box-shadow .08s;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 2px; line-height: 1.2;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .action-btn:active { transform: translateY(2px); box-shadow: 0 2px 0; }
+  .action-btn.next-hint {
+    background: linear-gradient(180deg, #FFF3C9, #FFD966); border-color: #E8A200;
+    color: #7A5200; box-shadow-color: #E8A200; box-shadow: 0 4px 0 #E8A200;
+  }
+  .action-btn.next-hint:active { box-shadow: 0 2px 0 #E8A200; }
+  .action-btn.got-it {
+    background: linear-gradient(180deg, #C7F3D6, #7DE0B0); border-color: #2B7A5A;
+    color: #1F5A40; box-shadow: 0 4px 0 #2B7A5A;
+  }
+  .action-btn.got-it:active { box-shadow: 0 2px 0 #2B7A5A; }
+  .action-btn.buy-answer {
+    background: linear-gradient(180deg, #FFDCEA, #FFB6D0); border-color: #E14E7F;
+    color: #C63A6A; box-shadow: 0 4px 0 #C63A6A;
+  }
+  .action-btn.buy-answer:active { box-shadow: 0 2px 0 #C63A6A; }
+  .action-btn.new-question {
+    background: linear-gradient(180deg, #E4DAF5, #C9B4F0); border-color: #7C6FF2;
+    color: #5D51CC; box-shadow: 0 4px 0 #7C6FF2;
+  }
+  .action-btn.new-question:active { box-shadow: 0 2px 0 #7C6FF2; }
+  .action-btn .cost {
+    font-family: 'Nunito', sans-serif; font-weight: 800;
+    font-size: 11px; padding: 1px 6px;
+    background: rgba(255,255,255,0.65); border-radius: 999px;
+  }
+  .action-btn:disabled {
+    opacity: 0.4; cursor: not-allowed;
+    transform: none; box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+  }
+
+  /* ==== せつめい入力 (振り返り) ==== */
+  .reflect-card {
+    background: #FFFAF0; border: 3px solid #E8A200;
+    border-radius: 18px; padding: 14px;
+    box-shadow: 0 4px 0 rgba(232,162,0,0.35);
+  }
+  .reflect-card h3 {
+    margin: 0 0 8px; text-align: center;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 15px; color: #7A5200;
+  }
+  .reflect-card p {
+    text-align: center; margin: 0 0 10px;
+    font-size: 12px; color: #7A5200; font-weight: 700; line-height: 1.5;
+  }
+  .reflect-input {
+    width: 100%; box-sizing: border-box;
+    padding: 12px; min-height: 60px;
+    border: 2px solid #E8A200; border-radius: 12px;
+    background: #fff;
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px;
+    color: var(--ink); outline: none; resize: vertical;
+  }
+  .reflect-submit {
+    width: 100%; margin-top: 10px;
+    background: linear-gradient(180deg, #FFE58A, #FFC93C);
+    border: 3px solid #E8A200; border-radius: 12px;
+    padding: 10px; cursor: pointer;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 14px;
+    color: #7A5200; box-shadow: 0 4px 0 #E8A200;
+  }
+  .reflect-submit:active { transform: translateY(2px); box-shadow: 0 2px 0 #E8A200; }
+  .reflect-result {
+    padding: 10px; border-radius: 12px; margin-top: 10px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800; text-align: center;
+    font-size: 13px;
+  }
+  .reflect-result.correct {
+    background: #E8FFF3; color: #1F5A40; border: 2px solid #4CD4B0;
+  }
+  .reflect-result.incorrect {
+    background: #FFF0F0; color: #C63A6A; border: 2px solid #FF9EBF;
+  }
+
+  .error-note {
+    text-align: center; padding: 12px 16px;
+    background: #FFE0E5; border: 2px solid #FF9EBF;
+    border-radius: 12px; color: #C63A6A;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 13px;
+  }
+  .hint-count-info {
+    text-align: center; font-size: 11px; color: var(--ink-soft);
+    font-weight: 700; margin: 4px 0;
+  }
+</style>
+</head>
+<body>
+<header class="draw-header">
+  <button class="back-btn" onclick="window.location.href='/'">← もどる</button>
+  <h1>🤔 まなぼう！</h1>
+</header>
+
+<main class="main-scroll" id="mainScroll">
+  <!-- 初期状態: しつもん入力 -->
+  <div class="ask-card" id="askCard">
+    <h2>🤔 きょうは なにを しる？</h2>
+    <p class="hint-text">
+      せんせいは こたえを おしえないよ。<br>
+      いっしょに かんがえよう！
+    </p>
+    <textarea id="questionInput" class="question-input" placeholder="れい: どうして そらは あおいの？" maxlength="200"></textarea>
+    <div class="quick-topics" id="quickTopics">
+      <button class="quick-topic-btn" data-q="どうして そらは あおいの？"><span class="icon">🌤️</span><span>そら の いろ</span></button>
+      <button class="quick-topic-btn" data-q="どうして 冬は さむいの？"><span class="icon">❄️</span><span>ふゆの さむさ</span></button>
+      <button class="quick-topic-btn" data-q="どうして 犬は しっぽを ふるの？"><span class="icon">🐕</span><span>いぬの しっぽ</span></button>
+      <button class="quick-topic-btn" data-q="どうして お月さまは かたちが かわるの？"><span class="icon">🌙</span><span>おつきさま</span></button>
+    </div>
+    <button class="ask-submit" id="askSubmit">💡 せんせいに きく</button>
+  </div>
+
+  <!-- 対話スレッド（動的に構築） -->
+  <div class="thread" id="thread"></div>
+
+  <!-- アクションボタン -->
+  <div id="actionArea"></div>
+</main>
+
+<script type="module">
+// フェーズ5: Gold バッジ + ログインストリーク + 保存ボーナス公開
+import { isAllowanceConfigured, getStoredChildKey, setStoredChildKey,
+  watchAllowance, listAllowanceChildren, earnGold, spendGold, updateAllowanceChild } from '/shared/firebase.js';
+import { setupGoldBadge, showToast, showGoldFly } from '/shared/utils.js';
+
+const header = document.querySelector('header');
+const api = setupGoldBadge(
+  { isAllowanceConfigured, getStoredChildKey, setStoredChildKey,
+    watchAllowance, listAllowanceChildren, earnGold, updateAllowanceChild },
+  header, null
+);
+window.avatarAppGold = api;
+
+// ============================================================
+// セッション状態
+// ============================================================
+const session = {
+  question: '',
+  hints: [],          // { text, count }
+  answered: false,    // 「わかった！」で正解扱い
+  boughtAnswer: false,
+  answerText: null,
+  reflectionShown: false,
+  reflectionResult: null // 'correct'|'incorrect'|null
+};
+
+const ANSWER_COST = 10;
+const HINT_MAX = 3;
+const CORRECT_REWARD = 5;
+
+// DOM 参照
+const askCard = document.getElementById('askCard');
+const askSubmit = document.getElementById('askSubmit');
+const questionInput = document.getElementById('questionInput');
+const quickTopics = document.getElementById('quickTopics');
+const thread = document.getElementById('thread');
+const actionArea = document.getElementById('actionArea');
+const mainScroll = document.getElementById('mainScroll');
+
+// クイックトピック
+quickTopics.querySelectorAll('.quick-topic-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    questionInput.value = b.dataset.q;
+    questionInput.focus();
+  });
+});
+
+askSubmit.addEventListener('click', () => {
+  const q = questionInput.value.trim();
+  if (q.length < 3) {
+    showToast('もうすこし ながく かいてね');
+    return;
+  }
+  session.question = q;
+  askCard.style.display = 'none';
+  renderThread();
+  fetchNextHint();
+});
+
+async function fetchNextHint() {
+  const hintCount = session.hints.length + 1;
+  showWaiting(`せんせいが かんがえてる${hintCount}...`);
+  try {
+    const r = await fetch('/api/socrates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: session.question,
+        hints: session.hints.map(h => h.text),
+        mode: 'hint'
+      })
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      throw new Error(err.error || 'せんせい、いま おやすみ みたい…');
+    }
+    const data = await r.json();
+    session.hints.push({ text: data.text, count: hintCount });
+    clearWaiting();
+    renderThread();
+  } catch (err) {
+    clearWaiting();
+    showError(err.message);
+  }
+}
+
+async function buyAnswer() {
+  const childKey = api.getChildKey();
+  if (!childKey) {
+    showToast('さきに「だれ？」を えらんでね');
+    api.openChildPicker();
+    return;
+  }
+  if (api.getGold() < ANSWER_COST) {
+    showToast(`${ANSWER_COST}G ひつよう だよ (いま ${api.getGold()}G)`);
+    return;
+  }
+  const ok = confirm(`こたえを ${ANSWER_COST}G で かう？\nでも あとで「じぶんの ことばで せつめい」できたら +${CORRECT_REWARD}G もどってくるよ！`);
+  if (!ok) return;
+
+  try {
+    await spendGold(childKey, ANSWER_COST, 'こたえを かった');
+    showGoldFly(-ANSWER_COST);
+    session.boughtAnswer = true;
+  } catch (err) {
+    showToast(err.message || 'かえなかった…');
+    return;
+  }
+  showWaiting('せんせいが せつめい しているよ...');
+  try {
+    const r = await fetch('/api/socrates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: session.question,
+        hints: session.hints.map(h => h.text),
+        mode: 'answer'
+      })
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      throw new Error(err.error || 'せんせい、いま おやすみ みたい…');
+    }
+    const data = await r.json();
+    session.answerText = data.text;
+    clearWaiting();
+    renderThread();
+  } catch (err) {
+    clearWaiting();
+    showError(err.message);
+  }
+}
+
+async function markAsCorrect() {
+  const childKey = api.getChildKey();
+  if (!childKey) {
+    showToast('さきに「だれ？」を えらんでね');
+    return;
+  }
+  try {
+    await earnGold(childKey, CORRECT_REWARD, 'ヒントで じぶんで わかった');
+    showGoldFly(CORRECT_REWARD);
+    showToast(`🎉 じぶんで わかったね！ +${CORRECT_REWARD}G`);
+    session.answered = true;
+    renderThread();
+  } catch (err) {
+    showToast(err.message || 'ボーナスが もらえなかった…');
+  }
+}
+
+async function submitReflection(explanation) {
+  showWaiting('せんせいが みているよ...');
+  try {
+    const r = await fetch('/api/socrates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: session.question,
+        answer: session.answerText,
+        explanation,
+        mode: 'reflection'
+      })
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      throw new Error(err.error || 'せんせい、いま おやすみ みたい…');
+    }
+    const data = await r.json();
+    session.reflectionResult = data.correct ? 'correct' : 'incorrect';
+    session.reflectionFeedback = data.feedback || '';
+    clearWaiting();
+    if (data.correct) {
+      const childKey = api.getChildKey();
+      if (childKey) {
+        try {
+          await earnGold(childKey, CORRECT_REWARD, 'せつめい できた リターン');
+          showGoldFly(CORRECT_REWARD);
+        } catch (e) { console.warn(e); }
+      }
+    }
+    renderThread();
+  } catch (err) {
+    clearWaiting();
+    showError(err.message);
+  }
+}
+
+function resetSession() {
+  Object.assign(session, {
+    question: '', hints: [], answered: false,
+    boughtAnswer: false, answerText: null,
+    reflectionShown: false, reflectionResult: null, reflectionFeedback: null
+  });
+  askCard.style.display = '';
+  thread.innerHTML = '';
+  actionArea.innerHTML = '';
+  questionInput.value = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================================
+// 描画
+// ============================================================
+function renderThread() {
+  thread.innerHTML = '';
+  if (!session.question) return;
+
+  // しつもん
+  const qBubble = document.createElement('div');
+  qBubble.className = 'question-bubble';
+  qBubble.textContent = '🙋 ' + session.question;
+  thread.appendChild(qBubble);
+
+  // ヒント
+  session.hints.forEach(h => {
+    const b = document.createElement('div');
+    b.className = 'hint-bubble';
+    b.innerHTML = `<div class="badge">💡 ${h.count} / ${HINT_MAX}</div>${escapeHtml(h.text)}`;
+    thread.appendChild(b);
+  });
+
+  // 答え
+  if (session.answerText) {
+    const b = document.createElement('div');
+    b.className = 'hint-bubble answer';
+    b.innerHTML = `<div class="badge">📖 こたえ</div>${escapeHtml(session.answerText)}`;
+    thread.appendChild(b);
+  }
+
+  // アクション
+  renderActions();
+  // スクロール
+  setTimeout(() => mainScroll.scrollTo({ top: mainScroll.scrollHeight, behavior: 'smooth' }), 100);
+}
+
+function renderActions() {
+  actionArea.innerHTML = '';
+  if (session.answered) {
+    // 正解 → 新しい質問へ
+    const wrap = document.createElement('div');
+    wrap.className = 'action-row single';
+    wrap.innerHTML = `
+      <button class="action-btn new-question" id="btnNewQ">🌱 べつの しつもん</button>
+    `;
+    actionArea.appendChild(wrap);
+    document.getElementById('btnNewQ').addEventListener('click', resetSession);
+    return;
+  }
+  if (session.answerText) {
+    // 答えが表示された → リフレクション or 新しい質問
+    if (session.reflectionResult === 'correct') {
+      const resBox = document.createElement('div');
+      resBox.className = 'reflect-result correct';
+      resBox.innerHTML = `🎉 ${escapeHtml(session.reflectionFeedback || 'すごい！ せつめい できた！')} +${CORRECT_REWARD}G`;
+      actionArea.appendChild(resBox);
+      const wrap = document.createElement('div');
+      wrap.className = 'action-row single';
+      wrap.innerHTML = `<button class="action-btn new-question" id="btnNewQ">🌱 べつの しつもん</button>`;
+      actionArea.appendChild(wrap);
+      document.getElementById('btnNewQ').addEventListener('click', resetSession);
+    } else if (session.reflectionResult === 'incorrect') {
+      const resBox = document.createElement('div');
+      resBox.className = 'reflect-result incorrect';
+      resBox.innerHTML = `🤔 ${escapeHtml(session.reflectionFeedback || 'もうちょっと！ もういちど 読んでみよう')}`;
+      actionArea.appendChild(resBox);
+      // リフレクション再挑戦 or 新しい質問
+      const rc = buildReflectionCard();
+      actionArea.appendChild(rc);
+      const wrap = document.createElement('div');
+      wrap.className = 'action-row single';
+      wrap.innerHTML = `<button class="action-btn new-question" id="btnNewQ">🌱 べつの しつもん</button>`;
+      actionArea.appendChild(wrap);
+      document.getElementById('btnNewQ').addEventListener('click', resetSession);
+    } else {
+      // 初回リフレクション UI
+      const rc = buildReflectionCard();
+      actionArea.appendChild(rc);
+      const wrap = document.createElement('div');
+      wrap.className = 'action-row single';
+      wrap.innerHTML = `<button class="action-btn new-question" id="btnNewQ">🌱 スキップ して べつの もんだい</button>`;
+      actionArea.appendChild(wrap);
+      document.getElementById('btnNewQ').addEventListener('click', resetSession);
+    }
+    return;
+  }
+  // ヒント中
+  const hintsLeft = HINT_MAX - session.hints.length;
+  const wrap = document.createElement('div');
+  wrap.className = 'action-row';
+  const showBuyAnswer = hintsLeft === 0 || session.hints.length >= 2;
+  wrap.innerHTML = `
+    <button class="action-btn got-it" id="btnGotIt">🎉 わかった！<span class="cost">+${CORRECT_REWARD}G</span></button>
+    ${hintsLeft > 0
+      ? `<button class="action-btn next-hint" id="btnNextHint">💡 もっと ヒント<span class="cost">あと ${hintsLeft} かい</span></button>`
+      : `<button class="action-btn buy-answer" id="btnBuyAnswer">📖 こたえを かう<span class="cost">💰 ${ANSWER_COST}G</span></button>`
+    }
+  `;
+  actionArea.appendChild(wrap);
+  // 2回目以降は「答えを買う」も同時に選べるように追加
+  if (showBuyAnswer && hintsLeft > 0) {
+    const extra = document.createElement('div');
+    extra.className = 'action-row single';
+    extra.style.marginTop = '10px';
+    extra.innerHTML = `<button class="action-btn buy-answer" id="btnBuyAnswer">📖 こたえを かう<span class="cost">💰 ${ANSWER_COST}G</span></button>`;
+    actionArea.appendChild(extra);
+  }
+  const gotIt = document.getElementById('btnGotIt');
+  if (gotIt) gotIt.addEventListener('click', markAsCorrect);
+  const nextHint = document.getElementById('btnNextHint');
+  if (nextHint) nextHint.addEventListener('click', fetchNextHint);
+  const buyAns = document.getElementById('btnBuyAnswer');
+  if (buyAns) buyAns.addEventListener('click', buyAnswer);
+}
+
+function buildReflectionCard() {
+  const card = document.createElement('div');
+  card.className = 'reflect-card';
+  card.innerHTML = `
+    <h3>✨ じぶんの ことばで せつめい できる？</h3>
+    <p>できたら +${CORRECT_REWARD}G もらえるよ！<br>おうえん してるよ 🌱</p>
+    <textarea class="reflect-input" id="reflectInput" placeholder="ここに かいてね（じぶんの ことばで）"></textarea>
+    <button class="reflect-submit" id="reflectSubmit">💌 せんせいに みてもらう</button>
+  `;
+  setTimeout(() => {
+    const btn = card.querySelector('#reflectSubmit');
+    const input = card.querySelector('#reflectInput');
+    btn.addEventListener('click', () => {
+      const text = input.value.trim();
+      if (text.length < 5) { showToast('もうすこし ながく かいてね'); return; }
+      submitReflection(text);
+    });
+  }, 0);
+  return card;
+}
+
+function showWaiting(msg) {
+  clearWaiting();
+  const w = document.createElement('div');
+  w.className = 'waiting';
+  w.id = 'waitingEl';
+  w.innerHTML = `${msg}<span class="dots"></span>`;
+  thread.appendChild(w);
+  setTimeout(() => mainScroll.scrollTo({ top: mainScroll.scrollHeight, behavior: 'smooth' }), 50);
+}
+function clearWaiting() {
+  const w = document.getElementById('waitingEl');
+  if (w) w.remove();
+}
+
+function showError(msg) {
+  const e = document.createElement('div');
+  e.className = 'error-note';
+  e.textContent = '😢 ' + msg;
+  thread.appendChild(e);
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[ch]));
+}
+</script>
+</body>
+</html>
