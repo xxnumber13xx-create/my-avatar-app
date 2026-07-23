@@ -1226,6 +1226,9 @@ async function buildRoom() {
     await buildOutdoorScene(loc);
     scene.background = new THREE.Color(OUTDOOR_SKY_COLORS[loc.key] || 0xE8F2FF);
   }
+  // 家具は「おうち」でのみ表示。屋外シーンでは非表示にする（データは保持したまま描画だけ抑制）。
+  // ※ state.items 自体は変更しないので、おうちに戻れば元通り表示される。
+  furnitureGroup.visible = !!loc.isHome;
 }
 
 /** おうちの部屋（床＋壁） */
@@ -2240,7 +2243,12 @@ async function addPresetFurniture(category, variantIndex) {
   state.selectedId = item.id;
   updateSelectionVisual();
   renderAdjust();
-  showToast(`「${FURNITURE_LIBRARY[category][variantIndex].label}」を おいたよ！`);
+  const isHome = (LOCATIONS.find(l => l.key === state.locationKey) || {}).isHome;
+  if (isHome) {
+    showToast(`「${FURNITURE_LIBRARY[category][variantIndex].label}」を おいたよ！`);
+  } else {
+    showToast(`「${FURNITURE_LIBRARY[category][variantIndex].label}」を おいたよ！🏠 おうちに かえると みえるよ`, 2400);
+  }
 }
 
 async function addCustomFurniture(cf) {
@@ -2257,7 +2265,12 @@ async function addCustomFurniture(cf) {
   state.selectedId = item.id;
   updateSelectionVisual();
   renderAdjust();
-  showToast('マイ かぐ を おいたよ！');
+  const isHome = (LOCATIONS.find(l => l.key === state.locationKey) || {}).isHome;
+  if (isHome) {
+    showToast('マイ かぐ を おいたよ！');
+  } else {
+    showToast('マイ かぐ を おいたよ！🏠 おうちに かえると みえるよ', 2400);
+  }
 }
 
 // ============================================================
