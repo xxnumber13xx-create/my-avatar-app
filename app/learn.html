@@ -299,12 +299,7 @@
       いっしょに かんがえよう！
     </p>
     <textarea id="questionInput" class="question-input" placeholder="れい: どうして そらは あおいの？" maxlength="200"></textarea>
-    <div class="quick-topics" id="quickTopics">
-      <button class="quick-topic-btn" data-q="どうして そらは あおいの？"><span class="icon">🌤️</span><span>そら の いろ</span></button>
-      <button class="quick-topic-btn" data-q="どうして 冬は さむいの？"><span class="icon">❄️</span><span>ふゆの さむさ</span></button>
-      <button class="quick-topic-btn" data-q="どうして 犬は しっぽを ふるの？"><span class="icon">🐕</span><span>いぬの しっぽ</span></button>
-      <button class="quick-topic-btn" data-q="どうして お月さまは かたちが かわるの？"><span class="icon">🌙</span><span>おつきさま</span></button>
-    </div>
+    <div class="quick-topics" id="quickTopics"></div>
     <button class="ask-submit" id="askSubmit">💡 せんせいに きく</button>
   </div>
 
@@ -319,7 +314,7 @@
 // フェーズ5: Gold バッジ + ログインストリーク + 保存ボーナス公開
 import { isAllowanceConfigured, getStoredChildKey, setStoredChildKey,
   watchAllowance, listAllowanceChildren, earnGold, spendGold, updateAllowanceChild } from '/shared/firebase.js';
-import { setupGoldBadge, showToast, showGoldFly } from '/shared/utils.js';
+import { setupGoldBadge, showToast, showGoldFly, getDailyTopics } from '/shared/utils.js';
 
 const header = document.querySelector('header');
 const api = setupGoldBadge(
@@ -355,13 +350,23 @@ const thread = document.getElementById('thread');
 const actionArea = document.getElementById('actionArea');
 const mainScroll = document.getElementById('mainScroll');
 
-// クイックトピック
-quickTopics.querySelectorAll('.quick-topic-btn').forEach(b => {
-  b.addEventListener('click', () => {
-    questionInput.value = b.dataset.q;
-    questionInput.focus();
+// クイックトピック（日替わり: 日付シードで毎日4個を決定的に入れ替え）
+function renderQuickTopics() {
+  quickTopics.innerHTML = '';
+  const topics = getDailyTopics(4);
+  topics.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'quick-topic-btn';
+    b.dataset.q = t.question;
+    b.innerHTML = `<span class="icon">${t.icon}</span><span>${t.label}</span>`;
+    b.addEventListener('click', () => {
+      questionInput.value = t.question;
+      questionInput.focus();
+    });
+    quickTopics.appendChild(b);
   });
-});
+}
+renderQuickTopics();
 
 askSubmit.addEventListener('click', () => {
   const q = questionInput.value.trim();
