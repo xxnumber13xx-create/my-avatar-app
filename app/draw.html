@@ -202,6 +202,78 @@
   /* previewCanvas はポーズガイドより上に */
   .canvas-container.pose-active #previewCanvas { z-index: 3; }
 
+  /* ============================================================
+     配置直後のスタンプ（拡大縮小・回転できる浮遊オブジェクト）
+     ============================================================ */
+  .stamp-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 6;
+    pointer-events: none; /* 実際に触れるのは中の .stamp-box のみ */
+  }
+  .stamp-box {
+    position: absolute;
+    pointer-events: auto;
+    cursor: grab;
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: 3px dashed rgba(124,111,242,0.85);
+    outline-offset: 6px;
+    border-radius: 10px;
+    background: rgba(124,111,242,0.08);
+  }
+  .stamp-box:active { cursor: grabbing; }
+  .stamp-box.dragging { background: rgba(124,111,242,0.16); }
+  .stamp-content-img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  .stamp-content-emoji {
+    display: none;
+    font-family: 'Baloo 2', sans-serif;
+    line-height: 1;
+    text-align: center;
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  /* スタンプ調整用フローティングツールバー */
+  .stamp-toolbar {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    background: #fff;
+    padding: 8px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(46,42,71,0.25);
+    z-index: 10;
+  }
+  .stamp-tb-btn {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    border: 2px solid #E4DEFF;
+    background: #F8F5FF;
+    font-size: 17px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #2E2A47;
+  }
+  .stamp-tb-btn:active { transform: translateY(1px); }
+  .stamp-tb-confirm { background: #E3FBF3; border-color: #4CD4B0; }
+  .stamp-tb-delete { background: #FFEAF0; border-color: #FF9EBB; }
+
+
   /* ポーズガイドの ピッカー */
   .pose-picker-btn {
     width: 40px; height: 40px;
@@ -979,6 +1051,22 @@
       <canvas id="displayCanvas" width="480" height="720"></canvas>
       <canvas id="previewCanvas" width="480" height="720"></canvas>
       <div class="symmetry-guide"></div>
+      <!-- 配置直後のスタンプ（拡大縮小・回転できる浮遊オブジェクト）。確定するとcanvasに焼き込まれる -->
+      <div id="stampOverlay" class="stamp-overlay" style="display:none;">
+        <div id="stampBox" class="stamp-box">
+          <img id="stampImg" class="stamp-content-img" alt="">
+          <span id="stampEmoji" class="stamp-content-emoji"></span>
+        </div>
+      </div>
+    </div>
+    <!-- スタンプ選択中のフローティングツールバー -->
+    <div id="stampToolbar" class="stamp-toolbar" style="display:none;">
+      <button id="stampSmallerBtn" class="stamp-tb-btn" title="ちいさく">🔍−</button>
+      <button id="stampBiggerBtn" class="stamp-tb-btn" title="おおきく">🔍+</button>
+      <button id="stampRotateLBtn" class="stamp-tb-btn" title="かいてん左">⟲</button>
+      <button id="stampRotateRBtn" class="stamp-tb-btn" title="かいてん右">⟳</button>
+      <button id="stampConfirmBtn" class="stamp-tb-btn stamp-tb-confirm" title="けってい">✓</button>
+      <button id="stampDeleteBtn" class="stamp-tb-btn stamp-tb-delete" title="けす">🗑️</button>
     </div>
   </div>
 
@@ -1017,6 +1105,7 @@
       <section class="panel-section" id="section-part">
         <div class="section-title">タップして えらぶ → キャンバス に タップ で おく</div>
         <div class="part-category-tabs" id="partCatTabs">
+          <button class="part-cat-btn" data-cat="face">😶 かお</button>
           <button class="part-cat-btn active" data-cat="eye">👁️ め</button>
           <button class="part-cat-btn" data-cat="mouth">👄 くち</button>
           <button class="part-cat-btn" data-cat="nose">👃 はな</button>
@@ -1142,6 +1231,17 @@ const previewCanvas = document.getElementById('previewCanvas');
 const previewCtx = previewCanvas.getContext('2d');
 const canvasContainer = document.getElementById('canvasContainer');
 const canvasArea = document.getElementById('canvasArea');
+const stampOverlay = document.getElementById('stampOverlay');
+const stampBox = document.getElementById('stampBox');
+const stampImgEl = document.getElementById('stampImg');
+const stampEmojiEl = document.getElementById('stampEmoji');
+const stampToolbar = document.getElementById('stampToolbar');
+const stampSmallerBtn = document.getElementById('stampSmallerBtn');
+const stampBiggerBtn = document.getElementById('stampBiggerBtn');
+const stampRotateLBtn = document.getElementById('stampRotateLBtn');
+const stampRotateRBtn = document.getElementById('stampRotateRBtn');
+const stampConfirmBtn = document.getElementById('stampConfirmBtn');
+const stampDeleteBtn = document.getElementById('stampDeleteBtn');
 const sizeSlider = document.getElementById('sizeSlider');
 const sizeValue = document.getElementById('sizeValue');
 const opacitySlider = document.getElementById('opacitySlider');
@@ -1190,7 +1290,10 @@ const state = {
   isPanning: false,
   panStart: null,
   shapeStart: null,
-  colorHistory: []
+  colorHistory: [],
+  // 配置直後、まだ canvas に焼き込んでいないスタンプ。null なら何も置いていない状態。
+  // { kind: 'part'|'emoji', img, emoji, x, y (center, canvas座標), w, h (baseサイズ), scale, rotation(deg) }
+  pendingStamp: null
 };
 
 // ============================================================
@@ -1284,6 +1387,8 @@ function updateUndoRedo() {
 // ============================================================
 document.querySelectorAll('[data-tool]').forEach(btn => {
   btn.addEventListener('click', () => {
+    // スタンプを浮遊調整中に他のツールへ切り替えたら、そのまま確定させる
+    if (state.pendingStamp && btn.dataset.tool !== 'stamp') confirmPendingStamp();
     document.querySelectorAll('[data-tool]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     state.tool = btn.dataset.tool;
@@ -1380,6 +1485,7 @@ function renderLayers() {
     item.appendChild(name);
     item.appendChild(vis);
     item.addEventListener('click', () => {
+      if (state.pendingStamp) confirmPendingStamp();
       state.activeLayerId = layer.id;
       renderLayers();
       updateUndoRedo();
@@ -1392,6 +1498,7 @@ function renderLayers() {
       del.addEventListener('click', e => {
         e.stopPropagation();
         if (!confirm(`${layer.name} を けす？`)) return;
+        if (state.activeLayerId === layer.id) cancelPendingStamp();
         const idx = layers.findIndex(l => l.id === layer.id);
         layers.splice(idx, 1);
         if (state.activeLayerId === layer.id) {
@@ -1416,6 +1523,7 @@ function updateLayerThumbs() {
 }
 
 addLayerBtn.addEventListener('click', () => {
+  if (state.pendingStamp) confirmPendingStamp();
   const layer = createLayer('レイヤー ' + nextLayerId, nextLayerId++);
   layers.push(layer);
   state.activeLayerId = layer.id;
@@ -1437,6 +1545,19 @@ partCatTabs.querySelectorAll('.part-cat-btn').forEach(btn => {
 
 const EMOJI_STAMPS = ['⭐', '💖', '🌸', '✨', '🌈', '🦄', '🍭', '🎀', '🌟', '💫', '☁️', '🌷'];
 
+/**
+ * パーツ/絵文字が選ばれた時の共通処理。
+ * 浮遊調整中のスタンプがあれば先に確定し、スタンプツールへ切り替えて選択中の中身を差し替える。
+ * @param {{img?: HTMLImageElement, emoji?: string}} source
+ */
+function selectStampSource({ img = null, emoji = null }) {
+  if (state.pendingStamp) confirmPendingStamp();
+  state.tool = 'stamp';
+  document.querySelectorAll('[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === 'stamp'));
+  state.activeEmoji = emoji;
+  state.activePartImg = img;
+}
+
 function renderPartGrid() {
   partGrid.innerHTML = '';
   if (state.activePartCat === 'emoji') {
@@ -1448,10 +1569,7 @@ function renderPartGrid() {
       em.textContent = emoji;
       it.appendChild(em);
       it.addEventListener('click', () => {
-        state.tool = 'stamp';
-        document.querySelectorAll('[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === 'stamp'));
-        state.activeEmoji = emoji;
-        state.activePartImg = null;
+        selectStampSource({ emoji });
         partGrid.querySelectorAll('.part-item').forEach(x => x.classList.remove('selected'));
         it.classList.add('selected');
         showToast(`${emoji} を えらんだよ！キャンバス に タップ`);
@@ -1470,18 +1588,17 @@ function renderPartGrid() {
       const svgTinted = tintSvg(p.svg, p.defaultColor);
       it.innerHTML = svgTinted;
       it.addEventListener('click', async () => {
-        state.tool = 'stamp';
-        document.querySelectorAll('[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === 'stamp'));
-        state.activeEmoji = null;
+        let img;
         try {
           // 現在の描画色に染めて配置する
           const tinted = tintSvg(p.svg, state.color);
-          state.activePartImg = await svgToImage(tinted);
+          img = await svgToImage(tinted);
         } catch (e) {
           console.error(e);
           showToast('パーツの よみこみ に しっぱい');
           return;
         }
+        selectStampSource({ img });
         partGrid.querySelectorAll('.part-item').forEach(x => x.classList.remove('selected'));
         it.classList.add('selected');
         showToast(`「${p.label}」えらんだよ！キャンバスに タップ`);
@@ -1499,16 +1616,15 @@ function renderPartGrid() {
       it.className = 'part-item';
       it.innerHTML = p.svg;
       it.addEventListener('click', async () => {
-        state.tool = 'stamp';
-        document.querySelectorAll('[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === 'stamp'));
-        state.activeEmoji = null;
+        let img;
         try {
-          state.activePartImg = await svgToImage(p.svg);
+          img = await svgToImage(p.svg);
         } catch (e) {
           console.error(e);
           showToast('ふくの よみこみ に しっぱい');
           return;
         }
+        selectStampSource({ img });
         partGrid.querySelectorAll('.part-item').forEach(x => x.classList.remove('selected'));
         it.classList.add('selected');
         showToast(`「${p.label}」えらんだよ！キャンバスに タップ`);
@@ -1524,16 +1640,15 @@ function renderPartGrid() {
     it.className = 'part-item';
     it.innerHTML = p.svg;
     it.addEventListener('click', async () => {
-      state.tool = 'stamp';
-      document.querySelectorAll('[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === 'stamp'));
-      state.activeEmoji = null;
+      let img;
       try {
-        state.activePartImg = await svgToImage(p.svg);
+        img = await svgToImage(p.svg);
       } catch (e) {
         console.error(e);
         showToast('パーツの よみこみ に しっぱい しました');
         return;
       }
+      selectStampSource({ img });
       partGrid.querySelectorAll('.part-item').forEach(x => x.classList.remove('selected'));
       it.classList.add('selected');
       showToast(`${p.label} を えらんだよ！キャンバス に タップ`);
@@ -1557,8 +1672,8 @@ opacitySlider.addEventListener('input', e => {
 // ============================================================
 // Undo/Redo/対称/消去/ズーム ボタン
 // ============================================================
-undoBtn.addEventListener('click', undo);
-redoBtn.addEventListener('click', redo);
+undoBtn.addEventListener('click', () => { cancelPendingStamp(); undo(); });
+redoBtn.addEventListener('click', () => { cancelPendingStamp(); redo(); });
 
 symBtn.addEventListener('click', () => {
   state.symmetry = !state.symmetry;
@@ -1568,6 +1683,7 @@ symBtn.addEventListener('click', () => {
 
 clearBtn.addEventListener('click', () => {
   if (!confirm('この レイヤー を ぜんぶ けす？')) return;
+  cancelPendingStamp();
   pushUndo();
   const layer = activeLayer();
   layer.ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
@@ -1973,36 +2089,162 @@ function commitShape(x1, y1) {
 }
 
 // ============================================================
-// スタンプ
+// スタンプ（配置直後は浮遊オブジェクトとして拡大縮小・回転できる。
+// 確定するまでは canvas に焼き込まれない）
 // ============================================================
-function placeStamp(x, y) {
-  const layer = activeLayer();
-  const ctx = layer.ctx;
-  const size = state.size * 6; // スライダーでスタンプの大きさを制御
-  if (state.activeEmoji) {
-    ctx.save();
-    ctx.globalAlpha = state.opacity / 100;
-    ctx.font = `${size}px "Baloo 2", sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(state.activeEmoji, x, y);
-    if (state.symmetry) ctx.fillText(state.activeEmoji, CANVAS_W - x, y);
-    ctx.restore();
-  } else if (state.activePartImg) {
-    const img = state.activePartImg;
-    const w = size, h = size * (img.height / img.width);
-    ctx.save();
-    ctx.globalAlpha = state.opacity / 100;
-    ctx.drawImage(img, x - w / 2, y - h / 2, w, h);
-    if (state.symmetry) ctx.drawImage(img, (CANVAS_W - x) - w / 2, y - h / 2, w, h);
-    ctx.restore();
-  } else {
+function beginPendingStamp(x, y) {
+  if (!state.activeEmoji && !state.activePartImg) {
     showToast('パーツを えらんでね（🧩 パーツ タブ）');
     return;
   }
+  const size = state.size * 6; // スライダーでスタンプの初期サイズを決める（従来の挙動を踏襲）
+  let w, h, kind;
+  if (state.activeEmoji) {
+    kind = 'emoji';
+    w = size; h = size; // 絵文字は正方形の当たり領域として扱う
+  } else {
+    kind = 'part';
+    const img = state.activePartImg;
+    w = size; h = size * (img.height / img.width);
+  }
+  state.pendingStamp = {
+    kind,
+    img: state.activePartImg,
+    emoji: state.activeEmoji,
+    x, y, w, h,
+    scale: 1,
+    rotation: 0
+  };
+  renderPendingStamp();
+  showStampToolbar();
+}
+
+/** pendingStamp の値を元に、オーバーレイDOMの見た目・位置を更新する */
+function renderPendingStamp() {
+  const p = state.pendingStamp;
+  if (!p) { stampOverlay.style.display = 'none'; stampToolbar.style.display = 'none'; return; }
+  stampOverlay.style.display = 'block';
+  const w = p.w * p.scale, h = p.h * p.scale;
+  stampBox.style.left = ((p.x - w / 2) / CANVAS_W * 100) + '%';
+  stampBox.style.top = ((p.y - h / 2) / CANVAS_H * 100) + '%';
+  stampBox.style.width = (w / CANVAS_W * 100) + '%';
+  stampBox.style.height = (h / CANVAS_H * 100) + '%';
+  stampBox.style.transform = `rotate(${p.rotation}deg)`;
+  stampBox.style.opacity = state.opacity / 100;
+  if (p.kind === 'emoji') {
+    stampImgEl.style.display = 'none';
+    stampEmojiEl.style.display = 'block';
+    stampEmojiEl.textContent = p.emoji;
+    stampEmojiEl.style.fontSize = (h * 0.82) + 'px';
+  } else {
+    stampEmojiEl.style.display = 'none';
+    stampImgEl.style.display = 'block';
+    stampImgEl.src = p.img.src;
+  }
+}
+
+function showStampToolbar() {
+  stampToolbar.style.display = 'flex';
+}
+
+/** ペンディング中のスタンプを実際に canvas へ焼き込んで確定する */
+function confirmPendingStamp() {
+  const p = state.pendingStamp;
+  if (!p) return;
+  pushUndo();
+  const layer = activeLayer();
+  const ctx = layer.ctx;
+  const w = p.w * p.scale, h = p.h * p.scale;
+  ctx.save();
+  ctx.globalAlpha = state.opacity / 100;
+  ctx.translate(p.x, p.y);
+  ctx.rotate(p.rotation * Math.PI / 180);
+  if (p.kind === 'emoji') {
+    ctx.font = `${h}px "Baloo 2", sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(p.emoji, 0, 0);
+  } else {
+    ctx.drawImage(p.img, -w / 2, -h / 2, w, h);
+  }
+  ctx.restore();
+  if (state.symmetry) {
+    ctx.save();
+    ctx.globalAlpha = state.opacity / 100;
+    ctx.translate(CANVAS_W - p.x, p.y);
+    ctx.rotate(-p.rotation * Math.PI / 180);
+    if (p.kind === 'emoji') {
+      ctx.font = `${h}px "Baloo 2", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(p.emoji, 0, 0);
+    } else {
+      ctx.drawImage(p.img, -w / 2, -h / 2, w, h);
+    }
+    ctx.restore();
+  }
+  state.pendingStamp = null;
+  stampOverlay.style.display = 'none';
+  stampToolbar.style.display = 'none';
   composite();
   updateLayerThumbs();
 }
+
+/** ペンディング中のスタンプを破棄する（canvasには何も残らない） */
+function cancelPendingStamp() {
+  state.pendingStamp = null;
+  stampOverlay.style.display = 'none';
+  stampToolbar.style.display = 'none';
+}
+
+// ツールバー操作
+const STAMP_SCALE_MIN = 0.3, STAMP_SCALE_MAX = 4, STAMP_SCALE_STEP = 1.15;
+stampBiggerBtn.addEventListener('click', () => {
+  if (!state.pendingStamp) return;
+  state.pendingStamp.scale = Math.min(STAMP_SCALE_MAX, state.pendingStamp.scale * STAMP_SCALE_STEP);
+  renderPendingStamp();
+});
+stampSmallerBtn.addEventListener('click', () => {
+  if (!state.pendingStamp) return;
+  state.pendingStamp.scale = Math.max(STAMP_SCALE_MIN, state.pendingStamp.scale / STAMP_SCALE_STEP);
+  renderPendingStamp();
+});
+stampRotateLBtn.addEventListener('click', () => {
+  if (!state.pendingStamp) return;
+  state.pendingStamp.rotation -= 15;
+  renderPendingStamp();
+});
+stampRotateRBtn.addEventListener('click', () => {
+  if (!state.pendingStamp) return;
+  state.pendingStamp.rotation += 15;
+  renderPendingStamp();
+});
+stampConfirmBtn.addEventListener('click', () => confirmPendingStamp());
+stampDeleteBtn.addEventListener('click', () => cancelPendingStamp());
+
+// スタンプ本体をドラッグして位置調整
+let stampDragState = null;
+stampBox.addEventListener('pointerdown', (e) => {
+  if (!state.pendingStamp) return;
+  e.stopPropagation();
+  stampBox.setPointerCapture(e.pointerId);
+  stampBox.classList.add('dragging');
+  const [x, y] = getCanvasCoord(e);
+  stampDragState = { startX: x, startY: y, origX: state.pendingStamp.x, origY: state.pendingStamp.y };
+});
+stampBox.addEventListener('pointermove', (e) => {
+  if (!stampDragState || !state.pendingStamp) return;
+  const [x, y] = getCanvasCoord(e);
+  state.pendingStamp.x = stampDragState.origX + (x - stampDragState.startX);
+  state.pendingStamp.y = stampDragState.origY + (y - stampDragState.startY);
+  renderPendingStamp();
+});
+function endStampDrag() {
+  stampDragState = null;
+  stampBox.classList.remove('dragging');
+}
+stampBox.addEventListener('pointerup', endStampDrag);
+stampBox.addEventListener('pointercancel', endStampDrag);
 
 // ============================================================
 // パン（ハンドツール）
@@ -2056,8 +2298,9 @@ function onPointerDown(e) {
     return;
   }
   if (state.tool === 'stamp') {
-    pushUndo();
-    placeStamp(x, y);
+    // 既に浮遊中のスタンプがあれば、それを確定してから次を置く（連続スタンプの自然な挙動）
+    if (state.pendingStamp) confirmPendingStamp();
+    beginPendingStamp(x, y);
     return;
   }
   if (state.tool === 'line' || state.tool === 'rect' || state.tool === 'circle') {
@@ -2121,6 +2364,7 @@ function onPointerUp(e) {
 // 保存
 // ============================================================
 saveBtn.addEventListener('click', () => {
+  if (state.pendingStamp) confirmPendingStamp();
   saveModal.classList.add('show');
 });
 closeSaveModal.addEventListener('click', () => {
