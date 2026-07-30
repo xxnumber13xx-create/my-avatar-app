@@ -103,6 +103,19 @@
   .quiz-progress .count {
     color: var(--purple);
   }
+  .quiz-type-tag {
+    display: inline-block;
+    background: linear-gradient(180deg, #FFF3C9, #FFE1A0);
+    border: 2px solid #E8A200; color: #7A5200;
+    padding: 3px 12px; border-radius: 999px;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 11px; margin: 2px 0 0;
+  }
+  .quiz-suffix {
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    font-size: 20px; color: var(--ink-soft);
+    margin-left: -4px;
+  }
   .quiz-question {
     font-family: 'Baloo 2', sans-serif; font-weight: 800;
     font-size: clamp(28px, 8vw, 44px);
@@ -240,6 +253,11 @@
     font-size: 12px; font-weight: 700; text-align: center;
     margin-top: 4px;
   }
+  .today-note {
+    text-align: center; margin: 2px 0 0;
+    font-size: 11px; font-weight: 700; color: var(--ink-soft);
+    line-height: 1.5;
+  }
 </style>
 </head>
 <body>
@@ -254,14 +272,15 @@
       <h2>🎓 なんねん の もんだいに する？</h2>
       <p class="sub">10もん セット。まちがえても だいじょうぶ！<br>せいかい 1もん あたり +2G ✨</p>
       <div class="grade-grid" id="gradeGrid">
-        <button class="grade-btn" data-grade="1"><span class="icon">1️⃣</span><span>1ねん</span><span class="label">たしざん</span></button>
-        <button class="grade-btn" data-grade="2"><span class="icon">2️⃣</span><span>2ねん</span><span class="label">ひきざん</span></button>
-        <button class="grade-btn" data-grade="3"><span class="icon">3️⃣</span><span>3ねん</span><span class="label">かけざん</span></button>
-        <button class="grade-btn" data-grade="4"><span class="icon">4️⃣</span><span>4ねん</span><span class="label">わりざん</span></button>
-        <button class="grade-btn" data-grade="5"><span class="icon">5️⃣</span><span>5ねん</span><span class="label">こんごう</span></button>
-        <button class="grade-btn" data-grade="6"><span class="icon">6️⃣</span><span>6ねん</span><span class="label">むずかしい</span></button>
+        <button class="grade-btn" data-grade="1"><span class="icon">1️⃣</span><span>1ねん</span><span class="label" data-label-for="1">たしざん</span></button>
+        <button class="grade-btn" data-grade="2"><span class="icon">2️⃣</span><span>2ねん</span><span class="label" data-label-for="2">ひきざん</span></button>
+        <button class="grade-btn" data-grade="3"><span class="icon">3️⃣</span><span>3ねん</span><span class="label" data-label-for="3">かけざん</span></button>
+        <button class="grade-btn" data-grade="4"><span class="icon">4️⃣</span><span>4ねん</span><span class="label" data-label-for="4">わりざん</span></button>
+        <button class="grade-btn" data-grade="5"><span class="icon">5️⃣</span><span>5ねん</span><span class="label" data-label-for="5">こんごう</span></button>
+        <button class="grade-btn" data-grade="6"><span class="icon">6️⃣</span><span>6ねん</span><span class="label" data-label-for="6">むずかしい</span></button>
       </div>
     </div>
+    <p class="today-note">🗓️ きょうの もんだい は 学年ごとに 3しゅるい ローテーション。あすは ちがう もんだいが でるよ！</p>
     <div class="cap-note" id="capNote"></div>
   </div>
 
@@ -285,13 +304,10 @@ window.avatarAppGold = api;
 // ============================================================
 // クイズ 生成: ローカル アルゴリズム（Gemini 呼ばない）
 // ============================================================
-// 学年別問題タイプ
-//   1年: たしざん 1-20
-//   2年: ひきざん 20 まで, 2桁+1桁 の たしざん
-//   3年: かけざん (九九)
-//   4年: わりざん (九九 の 逆)
-//   5年: こんごう (かっこ 含む)
-//   6年: 分数計算入門 or 大きな数
+// 学年ごとに複数の問題タイプを用意し、日付シードで「きょう出すタイプの並び」を
+// 決定的に決める（同じ日は同じ並び、日が変われば変わる）。utils.js の
+// getDailyTopics と同じ考え方（日付文字列ハッシュ→Fisher-Yatesシャッフル）を
+// quiz.html 内で完結させたローカル実装。
 function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -302,65 +318,132 @@ function shuffle(arr) {
   }
   return arr;
 }
-function generateProblem(grade) {
-  if (grade === 1) {
-    const a = randInt(1, 9);
-    const b = randInt(1, 9);
-    return { display: `${a} + ${b}`, answer: a + b };
+
+/** 日付文字列（YYYYMMDD）から決定的な擬似乱数を作る簡易ハッシュ（utils.js と同ロジック） */
+function seededRandom(seedStr) {
+  let h = 0;
+  for (let i = 0; i < seedStr.length; i++) {
+    h = (h * 31 + seedStr.charCodeAt(i)) >>> 0;
   }
-  if (grade === 2) {
-    // 半々でひきざん or 2桁たしざん
-    if (Math.random() < 0.6) {
-      let a = randInt(5, 20), b = randInt(1, a);
-      return { display: `${a} - ${b}`, answer: a - b };
-    } else {
-      const a = randInt(10, 30), b = randInt(1, 9);
-      return { display: `${a} + ${b}`, answer: a + b };
-    }
+  return function () {
+    h ^= h << 13; h >>>= 0;
+    h ^= h >> 17;
+    h ^= h << 5; h >>>= 0;
+    return (h % 100000) / 100000;
+  };
+}
+function todayYmd(date = new Date()) {
+  return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
+}
+
+// 学年ごとの問題タイプ定義。各タイプは { key, label, gen: () => {display, answer} } を持つ。
+const PROBLEM_TYPES = {
+  1: [
+    { key: 'add1', label: 'たしざん',
+      gen: () => { const a = randInt(1, 9), b = randInt(1, 9); return { display: `${a} + ${b}`, answer: a + b }; } },
+    { key: 'sub1', label: 'ひきざん',
+      gen: () => { const a = randInt(2, 9), b = randInt(1, a); return { display: `${a} - ${b}`, answer: a - b }; } },
+    { key: 'make10', label: '10のかたまり',
+      gen: () => { const a = randInt(1, 9); return { display: `${a} + ？ = 10`, answer: 10 - a }; } }
+  ],
+  2: [
+    { key: 'sub2', label: 'ひきざん',
+      gen: () => { const a = randInt(5, 20), b = randInt(1, a); return { display: `${a} - ${b}`, answer: a - b }; } },
+    { key: 'carry_add', label: 'くり上がり たしざん',
+      gen: () => { const a = randInt(10, 30), b = randInt(1, 9); return { display: `${a} + ${b}`, answer: a + b }; } },
+    { key: 'order', label: '大きい数の じゅんばん',
+      gen: () => {
+        const nums = new Set();
+        while (nums.size < 3) nums.add(randInt(1, 99));
+        const arr = shuffle([...nums]);
+        const max = Math.max(...arr);
+        return { display: `いちばん 大きいのは？ ${arr.join(' ・ ')}`, answer: max, freeform: true };
+      } }
+  ],
+  3: [
+    { key: 'mul_all', label: 'かけざん (九九)',
+      gen: () => { const a = randInt(2, 9), b = randInt(2, 9); return { display: `${a} × ${b}`, answer: a * b }; } },
+    { key: 'mul_3', label: '3のだん しゅうちゅう',
+      gen: () => { const b = randInt(1, 9); return { display: `3 × ${b}`, answer: 3 * b }; } },
+    { key: 'div_intro', label: 'わりざん にゅうもん',
+      gen: () => { const b = randInt(2, 5), q = randInt(2, 5); const a = b * q; return { display: `${a} ÷ ${b}`, answer: q }; } }
+  ],
+  4: [
+    { key: 'div4', label: 'わりざん',
+      gen: () => { const b = randInt(2, 9), q = randInt(2, 9); const a = b * q; return { display: `${a} ÷ ${b}`, answer: q }; } },
+    { key: 'mul_2digit', label: '2けた×1けた',
+      gen: () => { const a = randInt(11, 40), b = randInt(2, 9); return { display: `${a} × ${b}`, answer: a * b }; } },
+    { key: 'div_rem', label: 'あまりの あるわりざん',
+      gen: () => {
+        const b = randInt(2, 9), q = randInt(2, 9), r = randInt(1, b - 1);
+        const a = b * q + r;
+        return { display: `${a} ÷ ${b} の あまりは？`, answer: r };
+      } }
+  ],
+  5: [
+    { key: 'mixed5', label: 'こんごう けいさん',
+      gen: () => {
+        const t = Math.random();
+        if (t < 0.5) { const a = randInt(2, 12), b = randInt(2, 9), c = randInt(1, 9); return { display: `${a} × ${b} + ${c}`, answer: a * b + c }; }
+        const a = randInt(10, 20), b = randInt(1, Math.min(9, a - 1)), c = randInt(1, 9);
+        return { display: `${a} - ${b} + ${c}`, answer: a - b + c };
+      } },
+    { key: 'frac_add', label: 'ぶんすうの たしざん',
+      gen: () => {
+        const d = randInt(3, 8); // 分母
+        const a = randInt(1, d - 2); // 和が d 未満になるよう a は最大 d-2 まで
+        const b = randInt(1, d - 1 - a);
+        return { display: `${a}/${d} + ${b}/${d}`, answer: a + b, suffix: `/${d}` };
+      } },
+    { key: 'decimal', label: '小数の たしひき',
+      gen: () => {
+        const a = randInt(10, 99) / 10, b = randInt(10, 99) / 10;
+        const isAdd = Math.random() < 0.5;
+        const ans = Math.round((isAdd ? a + b : Math.abs(a - b)) * 10) / 10;
+        return { display: `${a.toFixed(1)} ${isAdd ? '+' : '-'} ${b.toFixed(1)}`, answer: ans, decimal: true };
+      } }
+  ],
+  6: [
+    { key: 'paren', label: 'カッコ けいさん',
+      gen: () => { const a = randInt(2, 15), b = randInt(2, 15), c = randInt(2, 9); return { display: `( ${a} + ${b} ) × ${c}`, answer: (a + b) * c }; } },
+    { key: 'big_mul', label: '大きい数の かけざん',
+      gen: () => { const a = randInt(10, 30), b = randInt(2, 12); return { display: `${a} × ${b}`, answer: a * b }; } },
+    { key: 'percent', label: 'わりあいの にゅうもん',
+      gen: () => {
+        const base = randInt(2, 20) * 10; // 20,30,...,200
+        const pct = [10, 20, 25, 50][randInt(0, 3)];
+        return { display: `${base} の ${pct}% は？`, answer: Math.round(base * pct / 100) };
+      } }
+  ]
+};
+
+/** その日の学年ごとの出題タイプ配列（日付シードで決定的にシャッフル）。1日1回計算してキャッシュ。 */
+const _dailyTypeCache = {};
+function getDailyTypes(grade) {
+  if (_dailyTypeCache[grade]) return _dailyTypeCache[grade];
+  const types = PROBLEM_TYPES[grade];
+  const ymd = todayYmd();
+  const rand = seededRandom(ymd + '_g' + grade);
+  const pool = types.slice();
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
   }
-  if (grade === 3) {
-    const a = randInt(2, 9), b = randInt(2, 9);
-    return { display: `${a} × ${b}`, answer: a * b };
-  }
-  if (grade === 4) {
-    // 割り切れる わりざん
-    const b = randInt(2, 9);
-    const q = randInt(2, 9);
-    const a = b * q;
-    return { display: `${a} ÷ ${b}`, answer: q };
-  }
-  if (grade === 5) {
-    // 混合演算 or カッコ
-    const t = Math.random();
-    if (t < 0.4) {
-      const a = randInt(2, 12), b = randInt(2, 9), c = randInt(1, 9);
-      return { display: `${a} × ${b} + ${c}`, answer: a * b + c };
-    } else if (t < 0.75) {
-      const a = randInt(3, 20), b = randInt(1, 9), c = randInt(1, 9);
-      return { display: `${a} - ${b} + ${c}`, answer: a - b + c };
-    } else {
-      const b = randInt(2, 9), q = randInt(2, 9);
-      const a = b * q;
-      const c = randInt(1, 9);
-      return { display: `${a} ÷ ${b} + ${c}`, answer: q + c };
-    }
-  }
-  // grade 6
-  const t = Math.random();
-  if (t < 0.35) {
-    // カッコあり
-    const a = randInt(2, 15), b = randInt(2, 15), c = randInt(2, 9);
-    return { display: `( ${a} + ${b} ) × ${c}`, answer: (a + b) * c };
-  } else if (t < 0.7) {
-    // 大きな数の掛け算
-    const a = randInt(10, 30), b = randInt(2, 12);
-    return { display: `${a} × ${b}`, answer: a * b };
-  } else {
-    // 大きな数の割り算
-    const b = randInt(3, 12), q = randInt(10, 20);
-    const a = b * q;
-    return { display: `${a} ÷ ${b}`, answer: q };
-  }
+  _dailyTypeCache[grade] = pool;
+  return pool;
+}
+
+/** 10問ぶんの問題セットを生成。その日のタイプ並びをできるだけ均等にくり返して割り当てる。 */
+function generateProblemSet(grade, count = 10) {
+  const types = getDailyTypes(grade);
+  const seq = [];
+  for (let i = 0; i < count; i++) seq.push(types[i % types.length]);
+  shuffle(seq);
+  return seq.map(t => ({ ...t.gen(), typeLabel: t.label }));
+}
+
+function todayTypeLabelsText(grade) {
+  return getDailyTypes(grade).map(t => t.label).join(' / ');
 }
 
 // ============================================================
@@ -395,6 +478,13 @@ function refreshCapNote() {
 }
 refreshCapNote();
 
+// 学年ボタン下のラベルを「きょうのタイプ」の先頭2つに書き換える
+document.querySelectorAll('[data-label-for]').forEach(el => {
+  const grade = Number(el.dataset.labelFor);
+  const types = getDailyTypes(grade);
+  el.textContent = types.slice(0, 2).map(t => t.label).join('・');
+});
+
 // ============================================================
 // セッション
 // ============================================================
@@ -413,7 +503,7 @@ document.querySelectorAll('.grade-btn').forEach(b => {
 
 function startQuiz(grade) {
   session.grade = grade;
-  session.problems = Array.from({ length: 10 }, () => generateProblem(grade));
+  session.problems = generateProblemSet(grade, 10);
   session.index = 0;
   session.correct = 0;
   session.goldEarned = 0;
@@ -427,16 +517,19 @@ function startQuiz(grade) {
 function renderProblem() {
   const q = session.problems[session.index];
   const wrap = document.getElementById('quizArea');
-  const [op, expr] = tokenize(q.display);
+  const expr = tokenize(q.display);
+  const isDecimal = !!q.decimal;
+  const suffix = q.suffix || '';
   wrap.innerHTML = `
     <div class="quiz-card">
       <div class="quiz-progress">
         <span class="grade-tag">🎓 ${session.grade}ねん</span>
         <span class="count">${session.index + 1} / ${session.problems.length}</span>
       </div>
+      <div class="quiz-type-tag">${q.typeLabel || ''}</div>
       <div class="quiz-question">${expr} <span class="eq">=</span> <span style="color:var(--ink-soft)">?</span></div>
       <div class="quiz-answer-row">
-        <input type="number" inputmode="numeric" pattern="[0-9]*" class="quiz-answer-input" id="answerInput" autocomplete="off" />
+        <input type="number" inputmode="${isDecimal ? 'decimal' : 'numeric'}" ${isDecimal ? 'step="0.1"' : 'pattern="[0-9]*"'} class="quiz-answer-input" id="answerInput" autocomplete="off" />${suffix ? `<span class="quiz-suffix">${suffix}</span>` : ''}
         <button class="quiz-submit" id="submitBtn">✓ こたえる</button>
       </div>
       <div class="quiz-feedback" id="feedback"></div>
@@ -464,18 +557,19 @@ function renderProblem() {
 
 function tokenize(display) {
   // 演算子に color を付けるためだけの装飾
-  return [null, display
+  return display
     .replace(/\+/g, '<span class="op">+</span>')
     .replace(/-/g, '<span class="op">-</span>')
     .replace(/×/g, '<span class="op">×</span>')
-    .replace(/÷/g, '<span class="op">÷</span>')
-  ];
+    .replace(/÷/g, '<span class="op">÷</span>');
 }
 
 async function handleAnswer(userAnswer) {
   session.currentAnswered = true;
   const q = session.problems[session.index];
-  const correct = userAnswer === q.answer;
+  const correct = q.decimal
+    ? Math.abs(userAnswer - q.answer) < 0.05
+    : userAnswer === q.answer;
   const fb = document.getElementById('feedback');
   const nav = document.getElementById('navRow');
   document.getElementById('submitBtn').disabled = true;
@@ -501,7 +595,8 @@ async function handleAnswer(userAnswer) {
     fb.innerHTML = `🎉 せいかい！ ${willEarn > 0 ? `<span class="earned">+${willEarn}G</span>` : '<span class="earned" style="background:#EFECFA;color:#5D51CC;border-color:#DCD5FF;">きょうは じょうげん</span>'}`;
   } else {
     fb.className = 'quiz-feedback wrong show';
-    fb.innerHTML = `😢 ざんねん... こたえは <b>${q.answer}</b> だよ`;
+    const answerText = q.decimal ? q.answer.toFixed(1) : `${q.answer}${q.suffix || ''}`;
+    fb.innerHTML = `😢 ざんねん... こたえは <b>${answerText}</b> だよ`;
   }
   nav.style.display = '';
   document.getElementById('btnNext').addEventListener('click', () => {
