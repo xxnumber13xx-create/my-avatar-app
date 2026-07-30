@@ -375,7 +375,11 @@ export const MAKEUP_LIBRARY = {
     { label: 'おちょぼ', hasColor: true, defaultColor: '#E14E7F', defaultOpacity: 0.85, isPair: false,
       svg: `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="50" viewBox="0 0 80 50"><path d="M40 10 Q30 6 22 10 Q16 14 12 20 Q26 30 40 32 Q54 30 68 20 Q64 14 58 10 Q50 6 40 10 Z M12 20 Q26 16 40 18 Q54 16 68 20 Q54 38 40 40 Q26 38 12 20 Z" fill="currentColor" stroke="#2E2A47" stroke-width="1.5"/></svg>` },
     { label: 'スマイル', hasColor: true, defaultColor: '#E14E7F', defaultOpacity: 0.85, isPair: false,
-      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="60" viewBox="0 0 120 60"><path d="M10 22 Q60 44 110 22 Q60 26 10 22 Z" fill="currentColor" stroke="#2E2A47" stroke-width="1.5"/><path d="M10 22 Q60 4 110 22" stroke="#2E2A47" stroke-width="1.5" fill="none"/></svg>` }
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="60" viewBox="0 0 120 60"><path d="M10 22 Q60 44 110 22 Q60 26 10 22 Z" fill="currentColor" stroke="#2E2A47" stroke-width="1.5"/><path d="M10 22 Q60 4 110 22" stroke="#2E2A47" stroke-width="1.5" fill="none"/></svg>` },
+    { label: 'グロス', hasColor: true, defaultColor: '#FF7FAA', defaultOpacity: 0.75, isPair: false,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="60" viewBox="0 0 120 60"><path d="M60 12 Q45 4 30 12 Q18 18 12 26 Q30 40 60 42 Q90 40 108 26 Q102 18 90 12 Q75 4 60 12 Z M12 26 Q30 20 60 22 Q90 20 108 26 Q90 46 60 48 Q30 46 12 26 Z" fill="currentColor" stroke="#2E2A47" stroke-width="1.5"/><ellipse cx="50" cy="24" rx="12" ry="5" fill="#FFFFFF" opacity="0.5"/></svg>` },
+    { label: 'ハート', hasColor: true, defaultColor: '#FF6B9D', defaultOpacity: 0.85, isPair: false,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="55" viewBox="0 0 100 55"><path d="M50 14 C42 4 26 4 20 14 C14 22 20 32 50 46 C80 32 86 22 80 14 C74 4 58 4 50 14 Z" fill="currentColor" stroke="#2E2A47" stroke-width="1.5"/></svg>` }
   ],
   blush: [
     { label: 'まる', hasColor: true, defaultColor: '#FF9EBB', defaultOpacity: 0.55, isPair: true, pairOffsetX: 80,
@@ -385,7 +389,11 @@ export const MAKEUP_LIBRARY = {
     { label: 'ななめ', hasColor: true, defaultColor: '#FF7FAA', defaultOpacity: 0.55, isPair: true, pairOffsetX: 80,
       svg: `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="60" viewBox="0 0 120 60"><defs><radialGradient id="g3"><stop offset="0%" stop-color="currentColor" stop-opacity="0.9"/><stop offset="100%" stop-color="currentColor" stop-opacity="0"/></radialGradient></defs><ellipse cx="60" cy="30" rx="55" ry="18" fill="url(#g3)" transform="rotate(-15 60 30)"/></svg>` },
     { label: 'キラ', hasColor: true, defaultColor: '#FFB8D0', defaultOpacity: 0.6, isPair: true, pairOffsetX: 80,
-      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><defs><radialGradient id="g4"><stop offset="0%" stop-color="currentColor" stop-opacity="0.85"/><stop offset="100%" stop-color="currentColor" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="45" fill="url(#g4)"/><g fill="#FFFFFF" opacity="0.9"><circle cx="35" cy="40" r="2"/><circle cx="60" cy="55" r="2.5"/><circle cx="50" cy="30" r="1.5"/><circle cx="70" cy="38" r="1.8"/></g></svg>` }
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><defs><radialGradient id="g4"><stop offset="0%" stop-color="currentColor" stop-opacity="0.85"/><stop offset="100%" stop-color="currentColor" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="50" r="45" fill="url(#g4)"/><g fill="#FFFFFF" opacity="0.9"><circle cx="35" cy="40" r="2"/><circle cx="60" cy="55" r="2.5"/><circle cx="50" cy="30" r="1.5"/><circle cx="70" cy="38" r="1.8"/></g></svg>` },
+    { label: 'ハート型', hasColor: true, defaultColor: '#FF6B9D', defaultOpacity: 0.6, isPair: true, pairOffsetX: 80,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="90" viewBox="0 0 90 90"><defs><radialGradient id="g5"><stop offset="0%" stop-color="currentColor" stop-opacity="0.85"/><stop offset="100%" stop-color="currentColor" stop-opacity="0"/></radialGradient></defs><path d="M45 25 C38 12 18 12 14 25 C10 36 20 48 45 62 C70 48 80 36 76 25 C72 12 52 12 45 25 Z" fill="url(#g5)"/></svg>` },
+    { label: 'そばかす', hasColor: true, defaultColor: '#F296B5', defaultOpacity: 0.7, isPair: true, pairOffsetX: 80,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="70" viewBox="0 0 100 70"><g fill="currentColor"><circle cx="20" cy="20" r="2.5"/><circle cx="35" cy="15" r="2"/><circle cx="45" cy="28" r="2.5"/><circle cx="60" cy="18" r="2"/><circle cx="75" cy="25" r="2.5"/><circle cx="28" cy="38" r="2"/><circle cx="50" cy="42" r="2"/><circle cx="68" cy="40" r="2.2"/><circle cx="15" cy="45" r="1.8"/><circle cx="82" cy="42" r="2"/></g></svg>` }
   ],
   eyeshadow: [
     { label: 'ふつう', hasColor: true, defaultColor: '#B77FE0', defaultOpacity: 0.5, isPair: true, pairOffsetX: 60,
@@ -393,7 +401,11 @@ export const MAKEUP_LIBRARY = {
     { label: 'しっかり', hasColor: true, defaultColor: '#7A4AC7', defaultOpacity: 0.7, isPair: true, pairOffsetX: 60,
       svg: `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="40" viewBox="0 0 90 40"><defs><linearGradient id="es2" x1="0%" y1="100%" x2="0%" y2="0%"><stop offset="0%" stop-color="currentColor" stop-opacity="1"/><stop offset="100%" stop-color="currentColor" stop-opacity="0.1"/></linearGradient></defs><path d="M8 30 Q45 5 82 30 Q45 22 8 30 Z" fill="url(#es2)"/></svg>` },
     { label: 'キラ', hasColor: true, defaultColor: '#FFC93C', defaultOpacity: 0.65, isPair: true, pairOffsetX: 60,
-      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="40" viewBox="0 0 90 40"><defs><radialGradient id="es3" cy="80%"><stop offset="0%" stop-color="currentColor" stop-opacity="0.9"/><stop offset="100%" stop-color="currentColor" stop-opacity="0"/></radialGradient></defs><ellipse cx="45" cy="25" rx="42" ry="18" fill="url(#es3)"/><g fill="#FFFFFF"><path d="M25 22 L27 26 L31 27 L27 28 L25 32 L23 28 L19 27 L23 26 Z"/><path d="M55 18 L57 22 L61 23 L57 24 L55 28 L53 24 L49 23 L53 22 Z"/><path d="M70 26 L71 28 L73 29 L71 30 L70 32 L69 30 L67 29 L69 28 Z"/></g></svg>` }
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="40" viewBox="0 0 90 40"><defs><radialGradient id="es3" cy="80%"><stop offset="0%" stop-color="currentColor" stop-opacity="0.9"/><stop offset="100%" stop-color="currentColor" stop-opacity="0"/></radialGradient></defs><ellipse cx="45" cy="25" rx="42" ry="18" fill="url(#es3)"/><g fill="#FFFFFF"><path d="M25 22 L27 26 L31 27 L27 28 L25 32 L23 28 L19 27 L23 26 Z"/><path d="M55 18 L57 22 L61 23 L57 24 L55 28 L53 24 L49 23 L53 22 Z"/><path d="M70 26 L71 28 L73 29 L71 30 L70 32 L69 30 L67 29 L69 28 Z"/></g></svg>` },
+    { label: 'グラデ', hasColor: true, defaultColor: '#5AB8FF', defaultOpacity: 0.6, isPair: true, pairOffsetX: 60,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="40" viewBox="0 0 90 40"><defs><linearGradient id="es4" x1="0%" y1="50%" x2="100%" y2="50%"><stop offset="0%" stop-color="currentColor" stop-opacity="0.15"/><stop offset="100%" stop-color="currentColor" stop-opacity="0.9"/></linearGradient></defs><ellipse cx="45" cy="25" rx="42" ry="17" fill="url(#es4)"/></svg>` },
+    { label: 'ツートン', hasColor: true, defaultColor: '#FF9EBB', defaultOpacity: 0.65, isPair: true, pairOffsetX: 60,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="42" viewBox="0 0 90 42"><defs><radialGradient id="es5" cy="90%"><stop offset="0%" stop-color="currentColor" stop-opacity="0.95"/><stop offset="100%" stop-color="currentColor" stop-opacity="0"/></radialGradient></defs><ellipse cx="45" cy="30" rx="40" ry="12" fill="url(#es5)"/><path d="M8 20 Q45 0 82 20 Q45 10 8 20 Z" fill="#7A4AC7" opacity="0.55"/></svg>` }
   ],
   eyeliner: [
     { label: 'ふつう', hasColor: true, defaultColor: '#2E2A47', defaultOpacity: 0.95, isPair: true, pairOffsetX: 60,
@@ -401,7 +413,11 @@ export const MAKEUP_LIBRARY = {
     { label: 'ねこ', hasColor: true, defaultColor: '#2E2A47', defaultOpacity: 0.95, isPair: true, pairOffsetX: 60,
       svg: `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="25" viewBox="0 0 90 25"><path d="M6 15 Q40 6 68 12 L85 4 L80 14 Q60 16 6 15 Z" fill="currentColor"/></svg>` },
     { label: 'たれ', hasColor: true, defaultColor: '#2E2A47', defaultOpacity: 0.95, isPair: true, pairOffsetX: 60,
-      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="25" viewBox="0 0 90 25"><path d="M6 8 Q40 20 78 18 Q40 14 6 8 Z" fill="currentColor"/></svg>` }
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="25" viewBox="0 0 90 25"><path d="M6 8 Q40 20 78 18 Q40 14 6 8 Z" fill="currentColor"/></svg>` },
+    { label: 'カラー', hasColor: true, defaultColor: '#5D51CC', defaultOpacity: 0.9, isPair: true, pairOffsetX: 60,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="85" height="22" viewBox="0 0 85 22"><path d="M6 13 Q42 4 79 13 Q42 9 6 13 Z" fill="currentColor"/></svg>` },
+    { label: 'ダブルライン', hasColor: true, defaultColor: '#2E2A47', defaultOpacity: 0.9, isPair: true, pairOffsetX: 60,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="28" viewBox="0 0 90 28"><path d="M6 14 Q40 5 74 14 Q40 10 6 14 Z" fill="currentColor"/><path d="M10 20 Q40 15 70 20" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6"/></svg>` }
   ],
   lashes: [
     { label: 'ナチュラル', hasColor: true, defaultColor: '#2E2A47', defaultOpacity: 0.9, isPair: true, pairOffsetX: 60,
@@ -409,7 +425,11 @@ export const MAKEUP_LIBRARY = {
     { label: 'ふさふさ', hasColor: true, defaultColor: '#2E2A47', defaultOpacity: 0.95, isPair: true, pairOffsetX: 60,
       svg: `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="30" viewBox="0 0 90 30"><path d="M8 24 Q45 14 82 24" stroke="currentColor" stroke-width="3" fill="none"/><path d="M12 24 L10 6 M18 22 L15 4 M24 20 L22 2 M32 18 L31 0 M40 17 L40 0 M48 17 L48 0 M56 18 L58 0 M64 20 L67 2 M70 22 L74 4 M76 24 L80 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>` },
     { label: 'カール', hasColor: true, defaultColor: '#2E2A47', defaultOpacity: 0.95, isPair: true, pairOffsetX: 60,
-      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="30" viewBox="0 0 90 30"><path d="M8 24 Q45 14 82 24" stroke="currentColor" stroke-width="3" fill="none"/><g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none"><path d="M14 24 Q10 12 6 6"/><path d="M22 22 Q18 10 16 4"/><path d="M32 20 Q30 8 28 2"/><path d="M45 18 Q45 6 44 0"/><path d="M58 20 Q60 8 62 2"/><path d="M68 22 Q72 10 74 4"/><path d="M76 24 Q80 12 84 6"/></g></svg>` }
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="30" viewBox="0 0 90 30"><path d="M8 24 Q45 14 82 24" stroke="currentColor" stroke-width="3" fill="none"/><g stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none"><path d="M14 24 Q10 12 6 6"/><path d="M22 22 Q18 10 16 4"/><path d="M32 20 Q30 8 28 2"/><path d="M45 18 Q45 6 44 0"/><path d="M58 20 Q60 8 62 2"/><path d="M68 22 Q72 10 74 4"/><path d="M76 24 Q80 12 84 6"/></g></svg>` },
+    { label: 'ドーリー', hasColor: true, defaultColor: '#2E2A47', defaultOpacity: 0.95, isPair: true, pairOffsetX: 60,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="34" viewBox="0 0 90 34"><path d="M8 26 Q45 15 82 26" stroke="currentColor" stroke-width="3.5" fill="none"/><g stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none"><path d="M16 26 L14 4"/><path d="M28 23 L26 2"/><path d="M45 21 L45 0"/><path d="M62 23 L64 2"/><path d="M74 26 L76 4"/></g></svg>` },
+    { label: 'したまつげ', hasColor: true, defaultColor: '#2E2A47', defaultOpacity: 0.85, isPair: true, pairOffsetX: 60,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="22" viewBox="0 0 80 22"><path d="M8 4 Q40 12 72 4" stroke="currentColor" stroke-width="2" fill="none"/><path d="M18 6 L16 16 M32 9 L31 19 M48 9 L49 19 M62 6 L64 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>` }
   ],
   brow_makeup: [
     { label: 'アーチ', hasColor: true, defaultColor: '#6B4E2E', defaultOpacity: 0.95, isPair: true, pairOffsetX: 60,
@@ -417,7 +437,11 @@ export const MAKEUP_LIBRARY = {
     { label: 'ふとめ', hasColor: true, defaultColor: '#6B4E2E', defaultOpacity: 0.95, isPair: true, pairOffsetX: 60,
       svg: `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="20" viewBox="0 0 80 20"><path d="M6 14 Q40 4 74 14 Q40 12 6 14 Z" fill="currentColor"/></svg>` },
     { label: 'ほそめ', hasColor: true, defaultColor: '#6B4E2E', defaultOpacity: 0.95, isPair: true, pairOffsetX: 60,
-      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="15" viewBox="0 0 80 15"><path d="M6 10 Q40 2 74 10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>` }
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="15" viewBox="0 0 80 15"><path d="M6 10 Q40 2 74 10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>` },
+    { label: 'まっすぐ', hasColor: true, defaultColor: '#6B4E2E', defaultOpacity: 0.95, isPair: true, pairOffsetX: 60,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="16" viewBox="0 0 80 16"><path d="M6 10 Q40 6 74 10" stroke="currentColor" stroke-width="4.5" fill="none" stroke-linecap="round"/></svg>` },
+    { label: 'キリッと', hasColor: true, defaultColor: '#3E2A18', defaultOpacity: 0.95, isPair: true, pairOffsetX: 60,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="20" viewBox="0 0 80 20"><path d="M6 16 L40 4 L74 12 Q40 8 6 16 Z" fill="currentColor"/></svg>` }
   ],
   highlight: [
     { label: 'ほおぼね', hasColor: true, defaultColor: '#FFFAF0', defaultOpacity: 0.7, isPair: true, pairOffsetX: 80,
@@ -425,7 +449,11 @@ export const MAKEUP_LIBRARY = {
     { label: 'はな', hasColor: true, defaultColor: '#FFFAF0', defaultOpacity: 0.75, isPair: false,
       svg: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="80" viewBox="0 0 30 80"><defs><linearGradient id="hl2" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="currentColor" stop-opacity="0"/><stop offset="50%" stop-color="currentColor" stop-opacity="0.9"/><stop offset="100%" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs><rect x="10" y="0" width="10" height="80" fill="url(#hl2)" rx="5"/></svg>` },
     { label: 'キラ', hasColor: true, defaultColor: '#FFFDE4', defaultOpacity: 0.85, isPair: false,
-      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><g fill="currentColor"><path d="M30 8 L33 26 L50 30 L33 34 L30 52 L27 34 L10 30 L27 26 Z"/><circle cx="15" cy="15" r="3"/><circle cx="48" cy="18" r="2.5"/><circle cx="45" cy="45" r="2"/><circle cx="12" cy="42" r="2.5"/></g></svg>` }
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><g fill="currentColor"><path d="M30 8 L33 26 L50 30 L33 34 L30 52 L27 34 L10 30 L27 26 Z"/><circle cx="15" cy="15" r="3"/><circle cx="48" cy="18" r="2.5"/><circle cx="45" cy="45" r="2"/><circle cx="12" cy="42" r="2.5"/></g></svg>` },
+    { label: 'おでこ', hasColor: true, defaultColor: '#FFFDE4', defaultOpacity: 0.7, isPair: false,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="30" viewBox="0 0 80 30"><defs><radialGradient id="hl3" cy="80%"><stop offset="0%" stop-color="currentColor" stop-opacity="0.9"/><stop offset="100%" stop-color="currentColor" stop-opacity="0"/></radialGradient></defs><ellipse cx="40" cy="15" rx="36" ry="13" fill="url(#hl3)"/></svg>` },
+    { label: 'まゆげした', hasColor: true, defaultColor: '#FFFAF0', defaultOpacity: 0.65, isPair: true, pairOffsetX: 60,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="20" viewBox="0 0 80 20"><defs><linearGradient id="hl4" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="currentColor" stop-opacity="0.85"/><stop offset="100%" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs><ellipse cx="40" cy="8" rx="36" ry="8" fill="url(#hl4)"/></svg>` }
   ],
   paint: [
     { label: 'ほし', hasColor: true, defaultColor: '#FFC93C', defaultOpacity: 1, isPair: false,
@@ -435,7 +463,11 @@ export const MAKEUP_LIBRARY = {
     { label: 'はな', hasColor: true, defaultColor: '#FF9EBB', defaultOpacity: 1, isPair: false,
       svg: `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><g fill="currentColor" stroke="#2E2A47" stroke-width="1.5"><ellipse cx="30" cy="14" rx="8" ry="12"/><ellipse cx="30" cy="46" rx="8" ry="12"/><ellipse cx="14" cy="30" rx="12" ry="8"/><ellipse cx="46" cy="30" rx="12" ry="8"/></g><circle cx="30" cy="30" r="6" fill="#FFC93C" stroke="#2E2A47" stroke-width="1.5"/></svg>` },
     { label: 'キラ', hasColor: true, defaultColor: '#FFC93C', defaultOpacity: 1, isPair: false,
-      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><path d="M30 6 L32 26 L52 30 L32 34 L30 54 L28 34 L8 30 L28 26 Z" fill="currentColor" stroke="#2E2A47" stroke-width="1.5"/></svg>` }
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><path d="M30 6 L32 26 L52 30 L32 34 L30 54 L28 34 L8 30 L28 26 Z" fill="currentColor" stroke="#2E2A47" stroke-width="1.5"/></svg>` },
+    { label: 'にじ', hasColor: false, defaultOpacity: 1, isPair: false,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="70" height="45" viewBox="0 0 70 45"><path d="M5 42 A30 30 0 0 1 65 42" fill="none" stroke="#FF6B9D" stroke-width="4"/><path d="M11 42 A24 24 0 0 1 59 42" fill="none" stroke="#FFC93C" stroke-width="4"/><path d="M17 42 A18 18 0 0 1 53 42" fill="none" stroke="#5AB8FF" stroke-width="4"/><path d="M23 42 A12 12 0 0 1 47 42" fill="none" stroke="#4CD4B0" stroke-width="4"/></svg>` },
+    { label: 'ちょう', hasColor: true, defaultColor: '#B77FE0', defaultOpacity: 1, isPair: false,
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="50" viewBox="0 0 60 50"><g stroke="#2E2A47" stroke-width="1.5"><path d="M30 25 C24 8 8 8 6 20 C4 30 18 32 30 25 Z" fill="currentColor"/><path d="M30 25 C36 8 52 8 54 20 C56 30 42 32 30 25 Z" fill="currentColor"/></g><line x1="30" y1="15" x2="30" y2="38" stroke="#2E2A47" stroke-width="2"/></svg>` }
   ]
 };
 
@@ -762,7 +794,7 @@ export const FURNITURE_LIBRARY = {
           <rect x="40" y="86" width="6" height="22" fill="#FFC93C"/>
         </g>
       </svg>` },
-      { label: 'たな', footprintW: 1, footprintD: 1, imgWidth: 80, imgHeight: 90, anchorX: 40, anchorY: 82,
+    { label: 'たな', footprintW: 1, footprintD: 1, imgWidth: 80, imgHeight: 90, anchorX: 40, anchorY: 82,
       svg: `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="90" viewBox="0 0 80 90">
         <defs>
           <linearGradient id="bs2front" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#C49865"/><stop offset="100%" stop-color="#9A7248"/></linearGradient>
@@ -1236,41 +1268,73 @@ export const CLOTHING_LIBRARY = {
   dress: [
     { label: 'ワンピース', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="180" viewBox="0 0 140 180"><path d="M 40 20 L 60 15 L 80 15 L 100 20 L 105 60 L 120 160 L 20 160 L 35 60 Z" fill="#FF9EBB" stroke="#2E2A47" stroke-width="2"/><path d="M 60 15 L 60 25 L 80 25 L 80 15" fill="#FF6B9D" stroke="#2E2A47" stroke-width="1.5"/><circle cx="70" cy="55" r="4" fill="#E14E7F"/><path d="M 35 100 L 105 100" stroke="#E14E7F" stroke-width="2"/></svg>` },
     { label: 'ワンピース (青)', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="180" viewBox="0 0 140 180"><path d="M 40 20 L 60 15 L 80 15 L 100 20 L 105 60 L 130 160 L 10 160 L 35 60 Z" fill="#5AB8FF" stroke="#2E2A47" stroke-width="2"/><path d="M 60 15 L 60 25 L 80 25 L 80 15" fill="#4A8CD8" stroke="#2E2A47" stroke-width="1.5"/><g fill="#FFFFFF"><circle cx="55" cy="80" r="3"/><circle cx="85" cy="90" r="3"/><circle cx="70" cy="120" r="3"/><circle cx="45" cy="130" r="3"/><circle cx="95" cy="130" r="3"/></g></svg>` },
-    { label: 'フリル', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="180" viewBox="0 0 140 180"><path d="M 40 20 L 60 15 L 80 15 L 100 20 L 105 60 L 115 140 L 25 140 L 35 60 Z" fill="#F296B5" stroke="#2E2A47" stroke-width="2"/><path d="M 60 15 L 60 25 L 80 25 L 80 15" fill="#E14E7F" stroke="#2E2A47" stroke-width="1.5"/><path d="M 25 140 Q 40 155 55 145 Q 70 155 85 145 Q 100 155 115 140" fill="#FFC5D8" stroke="#2E2A47" stroke-width="1.5"/><path d="M 25 155 Q 40 168 55 158 Q 70 168 85 158 Q 100 168 115 155" fill="#FFFFFF" stroke="#2E2A47" stroke-width="1.5"/></svg>` }
+    { label: 'フリル', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="180" viewBox="0 0 140 180"><path d="M 40 20 L 60 15 L 80 15 L 100 20 L 105 60 L 115 140 L 25 140 L 35 60 Z" fill="#F296B5" stroke="#2E2A47" stroke-width="2"/><path d="M 60 15 L 60 25 L 80 25 L 80 15" fill="#E14E7F" stroke="#2E2A47" stroke-width="1.5"/><path d="M 25 140 Q 40 155 55 145 Q 70 155 85 145 Q 100 155 115 140" fill="#FFC5D8" stroke="#2E2A47" stroke-width="1.5"/><path d="M 25 155 Q 40 168 55 158 Q 70 168 85 158 Q 100 168 115 155" fill="#FFFFFF" stroke="#2E2A47" stroke-width="1.5"/></svg>` },
+    { label: 'ジャンパースカート', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="170" viewBox="0 0 140 170"><path d="M 45 15 L 60 25 L 80 25 L 95 15 L 100 55 L 115 150 L 25 150 L 40 55 Z" fill="#7C6FF2" stroke="#2E2A47" stroke-width="2"/><path d="M 45 15 L 50 45 L 40 45 Z" fill="#5D51CC" stroke="#2E2A47" stroke-width="1.5"/><path d="M 95 15 L 90 45 L 100 45 Z" fill="#5D51CC" stroke="#2E2A47" stroke-width="1.5"/><rect x="55" y="60" width="30" height="8" fill="#FFC93C" stroke="#2E2A47" stroke-width="1"/></svg>` },
+    { label: 'プリンセス', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="190" viewBox="0 0 150 190"><path d="M 45 20 L 62 12 L 88 12 L 105 20 L 112 55 L 140 175 L 10 175 L 38 55 Z" fill="#FFD9E8" stroke="#2E2A47" stroke-width="2"/><path d="M 62 12 L 62 24 L 88 24 L 88 12" fill="#FF9EBB" stroke="#2E2A47" stroke-width="1.5"/><path d="M 38 100 Q 75 90 112 100 L 140 175 L 10 175 Z" fill="#FFFFFF" stroke="#2E2A47" stroke-width="1.5" opacity="0.7"/><circle cx="75" cy="60" r="5" fill="#FFC93C" stroke="#2E2A47" stroke-width="1.5"/><g fill="#F296B5"><circle cx="30" cy="130" r="4"/><circle cx="55" cy="150" r="4"/><circle cx="95" cy="150" r="4"/><circle cx="120" cy="130" r="4"/></g></svg>` },
+    { label: 'サロペット', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="170" viewBox="0 0 140 170"><path d="M 35 60 L 30 150 L 65 150 L 68 100 L 72 100 L 75 150 L 110 150 L 105 60 Z" fill="#4CD4B0" stroke="#2E2A47" stroke-width="2"/><path d="M 45 60 L 40 15 L 52 15 L 55 60 Z" fill="#4CD4B0" stroke="#2E2A47" stroke-width="2"/><path d="M 95 60 L 100 15 L 88 15 L 85 60 Z" fill="#4CD4B0" stroke="#2E2A47" stroke-width="2"/><rect x="55" y="60" width="30" height="30" fill="#3AB498" stroke="#2E2A47" stroke-width="1.5" rx="3"/><circle cx="45" cy="70" r="3" fill="#FFC93C"/><circle cx="95" cy="70" r="3" fill="#FFC93C"/></svg>` },
+    { label: 'チュチュ', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="170" viewBox="0 0 150 170"><path d="M 50 15 L 60 10 L 90 10 L 100 15 L 105 55 L 75 65 L 45 55 Z" fill="#B77FE0" stroke="#2E2A47" stroke-width="2"/><path d="M 30 60 Q 75 40 120 60 Q 130 90 110 110 Q 75 95 40 110 Q 20 90 30 60 Z" fill="#D9B8F5" stroke="#2E2A47" stroke-width="2"/><path d="M 35 65 Q 75 48 115 65 Q 122 85 108 100 Q 75 88 42 100 Q 28 85 35 65 Z" fill="#FFFFFF" stroke="#2E2A47" stroke-width="1" opacity="0.6"/><circle cx="75" cy="40" r="4" fill="#FFC93C" stroke="#2E2A47" stroke-width="1"/></svg>` },
+    { label: 'なつまつり', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="180" viewBox="0 0 140 180"><path d="M 42 25 L 70 15 L 98 25 L 100 55 L 115 165 L 25 165 L 40 55 Z" fill="#5AB8FF" stroke="#2E2A47" stroke-width="2"/><path d="M 42 25 L 70 15 L 98 25 L 96 45 L 70 35 L 44 45 Z" fill="#E14E7F" stroke="#2E2A47" stroke-width="1.5"/><g fill="#FFC93C" stroke="#2E2A47" stroke-width="0.8"><circle cx="55" cy="90" r="5"/><circle cx="85" cy="110" r="5"/><circle cx="60" cy="135" r="5"/><circle cx="95" cy="80" r="5"/></g><rect x="40" y="55" width="60" height="6" fill="#FFC93C" stroke="#2E2A47" stroke-width="1"/></svg>` }
   ],
   skirt: [
     { label: 'スカート', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="120" viewBox="0 0 140 120"><path d="M 40 10 L 100 10 L 120 100 L 20 100 Z" fill="#B77FE0" stroke="#2E2A47" stroke-width="2"/><rect x="40" y="10" width="60" height="8" fill="#7C6FF2" stroke="#2E2A47" stroke-width="1"/><g stroke="#7C6FF2" stroke-width="1.5"><line x1="50" y1="20" x2="45" y2="98"/><line x1="70" y1="20" x2="70" y2="98"/><line x1="90" y1="20" x2="95" y2="98"/></g></svg>` },
     { label: 'スカート (赤)', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="120" viewBox="0 0 140 120"><path d="M 40 10 L 100 10 L 120 100 L 20 100 Z" fill="#FF6B9D" stroke="#2E2A47" stroke-width="2"/><rect x="40" y="10" width="60" height="8" fill="#E14E7F" stroke="#2E2A47" stroke-width="1"/><g fill="#FFC93C"><circle cx="45" cy="55" r="3"/><circle cx="75" cy="65" r="3"/><circle cx="95" cy="80" r="3"/><circle cx="55" cy="85" r="3"/></g></svg>` },
-    { label: 'プリーツ', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="120" viewBox="0 0 140 120"><path d="M 40 10 L 100 10 L 120 100 L 20 100 Z" fill="#2E4A8B" stroke="#2E2A47" stroke-width="2"/><rect x="40" y="10" width="60" height="6" fill="#1E3A7B" stroke="#2E2A47" stroke-width="1"/><g stroke="#4A66B0" stroke-width="1"><line x1="48" y1="18" x2="42" y2="98"/><line x1="56" y1="18" x2="52" y2="98"/><line x1="64" y1="18" x2="62" y2="98"/><line x1="72" y1="18" x2="72" y2="98"/><line x1="80" y1="18" x2="82" y2="98"/><line x1="88" y1="18" x2="92" y2="98"/><line x1="96" y1="18" x2="102" y2="98"/></g></svg>` }
+    { label: 'プリーツ', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="120" viewBox="0 0 140 120"><path d="M 40 10 L 100 10 L 120 100 L 20 100 Z" fill="#2E4A8B" stroke="#2E2A47" stroke-width="2"/><rect x="40" y="10" width="60" height="6" fill="#1E3A7B" stroke="#2E2A47" stroke-width="1"/><g stroke="#4A66B0" stroke-width="1"><line x1="48" y1="18" x2="42" y2="98"/><line x1="56" y1="18" x2="52" y2="98"/><line x1="64" y1="18" x2="62" y2="98"/><line x1="72" y1="18" x2="72" y2="98"/><line x1="80" y1="18" x2="82" y2="98"/><line x1="88" y1="18" x2="92" y2="98"/><line x1="96" y1="18" x2="102" y2="98"/></g></svg>` },
+    { label: 'チェック', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="120" viewBox="0 0 140 120"><path d="M 40 10 L 100 10 L 120 100 L 20 100 Z" fill="#E8967A" stroke="#2E2A47" stroke-width="2"/><g stroke="#8B4A2E" stroke-width="1.5" opacity="0.7"><line x1="45" y1="18" x2="42" y2="98"/><line x1="60" y1="15" x2="58" y2="99"/><line x1="80" y1="15" x2="82" y2="99"/><line x1="95" y1="18" x2="98" y2="98"/><line x1="25" y1="45" x2="115" y2="42"/><line x1="22" y1="70" x2="118" y2="66"/></g></svg>` },
+    { label: 'ふわふわ', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="110" viewBox="0 0 140 110"><path d="M 35 8 L 105 8 L 130 95 L 10 95 Z" fill="#FFC5D8" stroke="#2E2A47" stroke-width="2"/><path d="M 10 95 Q 30 108 50 95 Q 70 108 90 95 Q 110 108 130 95" fill="none" stroke="#2E2A47" stroke-width="2"/><g fill="#FFFFFF" opacity="0.7"><circle cx="45" cy="35" r="4"/><circle cx="75" cy="50" r="4"/><circle cx="95" cy="30" r="4"/><circle cx="60" cy="70" r="4"/></g></svg>` },
+    { label: 'デニム', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="110" viewBox="0 0 140 110"><path d="M 40 10 L 100 10 L 115 100 L 25 100 Z" fill="#5B7FC7" stroke="#2E2A47" stroke-width="2"/><rect x="40" y="10" width="60" height="10" fill="#4A6BB0" stroke="#2E2A47" stroke-width="1"/><g stroke="#3E5590" stroke-width="1" stroke-dasharray="2 2"><line x1="50" y1="22" x2="46" y2="98"/><line x1="70" y1="22" x2="70" y2="98"/><line x1="90" y1="22" x2="94" y2="98"/></g><circle cx="70" cy="16" r="2.5" fill="#FFC93C"/></svg>` }
+  ],
+  bottoms: [
+    { label: 'たんぱん', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="130" height="90" viewBox="0 0 130 90"><path d="M 30 8 L 100 8 L 105 55 L 75 55 L 70 80 L 60 80 L 58 55 L 25 55 Z" fill="#FFC93C" stroke="#2E2A47" stroke-width="2"/><rect x="30" y="8" width="70" height="10" fill="#E8A800" stroke="#2E2A47" stroke-width="1"/><circle cx="65" cy="14" r="2" fill="#FFF"/></svg>` },
+    { label: 'ズボン', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="130" height="150" viewBox="0 0 130 150"><path d="M 30 8 L 100 8 L 108 140 L 78 140 L 68 60 L 62 60 L 52 140 L 22 140 Z" fill="#4A5A8B" stroke="#2E2A47" stroke-width="2"/><rect x="30" y="8" width="70" height="10" fill="#3A4A70" stroke="#2E2A47" stroke-width="1"/><line x1="65" y1="20" x2="65" y2="55" stroke="#3A4A70" stroke-width="1.5"/></svg>` },
+    { label: 'サロペット (半)', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="130" height="110" viewBox="0 0 130 110"><path d="M 30 40 L 25 100 L 55 100 L 60 65 L 70 65 L 75 100 L 105 100 L 100 40 Z" fill="#FF9EBB" stroke="#2E2A47" stroke-width="2"/><path d="M 40 40 L 36 10 L 46 10 L 48 40 Z" fill="#FF9EBB" stroke="#2E2A47" stroke-width="2"/><path d="M 90 40 L 94 10 L 84 10 L 82 40 Z" fill="#FF9EBB" stroke="#2E2A47" stroke-width="2"/><rect x="50" y="40" width="30" height="22" fill="#F296B5" stroke="#2E2A47" stroke-width="1.5" rx="3"/></svg>` },
+    { label: 'レギンス', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="110" height="150" viewBox="0 0 110 150"><path d="M 25 8 L 85 8 L 90 140 L 65 140 L 58 60 L 52 60 L 45 140 L 20 140 Z" fill="#B77FE0" stroke="#2E2A47" stroke-width="2"/><g fill="#FFFFFF" opacity="0.6"><circle cx="35" cy="30" r="2.5"/><circle cx="75" cy="45" r="2.5"/><circle cx="40" cy="90" r="2.5"/><circle cx="70" cy="110" r="2.5"/></g></svg>` },
+    { label: 'ショートパンツ (しま)', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="130" height="90" viewBox="0 0 130 90"><path d="M 30 8 L 100 8 L 105 55 L 75 55 L 70 80 L 60 80 L 58 55 L 25 55 Z" fill="#5AB8FF" stroke="#2E2A47" stroke-width="2"/><g fill="#FFFFFF"><rect x="25" y="20" width="80" height="6"/><rect x="25" y="34" width="80" height="6"/></g></svg>` }
+  ],
+  wafuku: [
+    { label: 'ゆかた', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="180" viewBox="0 0 140 180"><path d="M 45 15 L 60 10 L 80 10 L 95 15 L 100 60 L 118 170 L 22 170 L 40 60 Z" fill="#5AB8FF" stroke="#2E2A47" stroke-width="2"/><path d="M 45 15 L 65 40 L 60 10 Z" fill="#4A9ED8" stroke="#2E2A47" stroke-width="1.5"/><path d="M 95 15 L 75 40 L 80 10 Z" fill="#4A9ED8" stroke="#2E2A47" stroke-width="1.5"/><rect x="55" y="70" width="30" height="45" fill="#FFC93C" stroke="#2E2A47" stroke-width="1.5"/><g fill="#FFFFFF" opacity="0.85"><circle cx="55" cy="90" r="4"/><circle cx="85" cy="115" r="4"/><circle cx="65" cy="140" r="4"/><circle cx="95" cy="150" r="4"/></g></svg>` },
+    { label: 'じんべい', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="150" viewBox="0 0 140 150"><path d="M 40 15 L 58 10 L 82 10 L 100 15 L 105 90 L 35 90 Z" fill="#4CD4B0" stroke="#2E2A47" stroke-width="2"/><path d="M 40 15 L 62 45 L 58 10 Z" fill="#3AB498" stroke="#2E2A47" stroke-width="1.5"/><path d="M 100 15 L 78 45 L 82 10 Z" fill="#3AB498" stroke="#2E2A47" stroke-width="1.5"/><rect x="58" y="55" width="24" height="30" fill="#FFC93C" stroke="#2E2A47" stroke-width="1.5"/><path d="M 45 90 L 40 145 L 65 145 L 68 100 L 72 100 L 75 145 L 100 145 L 95 90 Z" fill="#3AB498" stroke="#2E2A47" stroke-width="2"/></svg>` },
+    { label: 'きもの', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="150" height="190" viewBox="0 0 150 190"><path d="M 45 15 L 62 8 L 88 8 L 105 15 L 112 65 L 130 180 L 20 180 L 38 65 Z" fill="#FF6B9D" stroke="#2E2A47" stroke-width="2"/><path d="M 45 15 L 68 50 L 62 8 Z" fill="#E14E7F" stroke="#2E2A47" stroke-width="1.5"/><path d="M 105 15 L 82 50 L 88 8 Z" fill="#E14E7F" stroke="#2E2A47" stroke-width="1.5"/><rect x="58" y="75" width="34" height="55" fill="#B77FE0" stroke="#2E2A47" stroke-width="1.5"/><g fill="#FFC93C"><circle cx="50" cy="100" r="4"/><circle cx="100" cy="120" r="4"/><circle cx="65" cy="150" r="4"/><circle cx="95" cy="165" r="4"/><circle cx="40" cy="150" r="4"/></g></svg>` },
+    { label: 'はっぴ', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140"><path d="M 38 15 L 58 10 L 82 10 L 102 15 L 108 80 L 32 80 Z" fill="#E14E7F" stroke="#2E2A47" stroke-width="2"/><path d="M 38 15 L 60 40 L 58 10 Z" fill="#C73E5F" stroke="#2E2A47" stroke-width="1.5"/><path d="M 102 15 L 80 40 L 82 10 Z" fill="#C73E5F" stroke="#2E2A47" stroke-width="1.5"/><rect x="62" y="20" width="16" height="55" fill="#FFFDF0" stroke="#2E2A47" stroke-width="1.5"/><text x="70" y="55" text-anchor="middle" font-family="'Baloo 2',sans-serif" font-weight="800" font-size="18" fill="#E14E7F">祭</text></svg>` }
   ],
   top: [
     { label: 'Tシャツ', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="130" viewBox="0 0 140 130"><path d="M 40 20 L 55 10 L 65 20 L 75 20 L 85 10 L 100 20 L 120 40 L 110 60 L 100 55 L 100 120 L 40 120 L 40 55 L 30 60 L 20 40 Z" fill="#FFFFFF" stroke="#2E2A47" stroke-width="2"/><path d="M 55 10 L 65 20 L 75 20 L 85 10" stroke="#2E2A47" stroke-width="1.5" fill="none"/></svg>` },
     { label: 'Tシャツ (縞)', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="130" viewBox="0 0 140 130"><path d="M 40 20 L 55 10 L 65 20 L 75 20 L 85 10 L 100 20 L 120 40 L 110 60 L 100 55 L 100 120 L 40 120 L 40 55 L 30 60 L 20 40 Z" fill="#FFFFFF" stroke="#2E2A47" stroke-width="2"/><g fill="#5AB8FF"><rect x="40" y="70" width="60" height="8"/><rect x="40" y="88" width="60" height="8"/><rect x="40" y="106" width="60" height="8"/></g><path d="M 55 10 L 65 20 L 75 20 L 85 10" stroke="#2E2A47" stroke-width="1.5" fill="none"/></svg>` },
-    { label: 'パーカー', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="150" viewBox="0 0 140 150"><path d="M 30 40 L 45 15 L 60 5 L 80 5 L 95 15 L 110 40 L 120 55 L 108 70 L 108 140 L 32 140 L 32 70 L 20 55 Z" fill="#4CD4B0" stroke="#2E2A47" stroke-width="2"/><path d="M 45 15 Q 70 30 95 15 L 90 40 L 50 40 Z" fill="#3AB498" stroke="#2E2A47" stroke-width="1.5"/><path d="M 60 5 L 60 30 M 80 5 L 80 30" stroke="#FFF" stroke-width="2"/><rect x="55" y="80" width="30" height="18" fill="#3AB498" stroke="#2E2A47" stroke-width="1.5" rx="3"/></svg>` }
+    { label: 'パーカー', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="150" viewBox="0 0 140 150"><path d="M 30 40 L 45 15 L 60 5 L 80 5 L 95 15 L 110 40 L 120 55 L 108 70 L 108 140 L 32 140 L 32 70 L 20 55 Z" fill="#4CD4B0" stroke="#2E2A47" stroke-width="2"/><path d="M 45 15 Q 70 30 95 15 L 90 40 L 50 40 Z" fill="#3AB498" stroke="#2E2A47" stroke-width="1.5"/><path d="M 60 5 L 60 30 M 80 5 L 80 30" stroke="#FFF" stroke-width="2"/><rect x="55" y="80" width="30" height="18" fill="#3AB498" stroke="#2E2A47" stroke-width="1.5" rx="3"/></svg>` },
+    { label: 'セーラー', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="130" viewBox="0 0 140 130"><path d="M 40 20 L 55 10 L 65 20 L 75 20 L 85 10 L 100 20 L 120 40 L 110 60 L 100 55 L 100 120 L 40 120 L 40 55 L 30 60 L 20 40 Z" fill="#FFFFFF" stroke="#2E2A47" stroke-width="2"/><path d="M 55 10 L 70 35 L 85 10" fill="#2E4A8B" stroke="#2E2A47" stroke-width="1.5"/><path d="M 40 20 L 70 40 L 100 20" stroke="#2E4A8B" stroke-width="4" fill="none"/><rect x="63" y="45" width="14" height="8" fill="#E14E7F" stroke="#2E2A47" stroke-width="1"/></svg>` },
+    { label: 'ボーダー', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="130" viewBox="0 0 140 130"><path d="M 40 20 L 55 10 L 65 20 L 75 20 L 85 10 L 100 20 L 120 40 L 110 60 L 100 55 L 100 120 L 40 120 L 40 55 L 30 60 L 20 40 Z" fill="#FFEFC2" stroke="#2E2A47" stroke-width="2"/><g fill="#E14E7F"><rect x="30" y="40" width="80" height="10"/><rect x="35" y="60" width="70" height="10"/><rect x="40" y="80" width="60" height="10"/><rect x="40" y="100" width="60" height="10"/></g></svg>` },
+    { label: 'ニット', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140"><path d="M 35 35 L 48 12 L 65 5 L 75 5 L 92 12 L 105 35 L 118 55 L 105 68 L 100 60 L 100 130 L 40 130 L 40 60 L 35 68 L 22 55 Z" fill="#F296B5" stroke="#2E2A47" stroke-width="2"/><g stroke="#E14E7F" stroke-width="1.5" opacity="0.7"><path d="M 48 70 Q 55 75 48 80 Q 55 85 48 90"/><path d="M 65 70 Q 72 75 65 80 Q 72 85 65 90"/><path d="M 82 70 Q 89 75 82 80 Q 89 85 82 90"/></g></svg>` }
   ],
   shoes: [
     { label: 'スニーカー', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="60" viewBox="0 0 120 60"><path d="M 15 40 L 20 20 L 45 15 L 70 25 L 100 30 L 105 45 L 100 50 L 15 50 Z" fill="#FF6B9D" stroke="#2E2A47" stroke-width="2"/><path d="M 15 45 L 105 45 L 105 50 L 15 50 Z" fill="#FFFFFF" stroke="#2E2A47" stroke-width="1.5"/><g stroke="#FFFFFF" stroke-width="2" fill="none"><path d="M 30 22 L 38 30"/><path d="M 40 20 L 48 28"/><path d="M 50 18 L 58 26"/></g><circle cx="60" cy="30" r="2" fill="#FFF"/></svg>` },
     { label: 'スニーカー (白)', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="60" viewBox="0 0 120 60"><path d="M 15 40 L 20 20 L 45 15 L 70 25 L 100 30 L 105 45 L 100 50 L 15 50 Z" fill="#FFFFFF" stroke="#2E2A47" stroke-width="2"/><path d="M 15 45 L 105 45 L 105 50 L 15 50 Z" fill="#2E2A47" stroke="#2E2A47" stroke-width="1.5"/><g stroke="#2E2A47" stroke-width="2" fill="none"><path d="M 30 22 L 38 30"/><path d="M 40 20 L 48 28"/><path d="M 50 18 L 58 26"/></g></svg>` },
-    { label: 'ブーツ', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="120" viewBox="0 0 100 120"><path d="M 25 5 L 65 5 L 65 80 L 85 80 L 90 100 L 85 110 L 15 110 L 15 90 L 25 80 Z" fill="#8B6B3F" stroke="#2E2A47" stroke-width="2"/><path d="M 15 100 L 90 100 L 90 110 L 15 110 Z" fill="#2E2A47"/><g stroke="#B78C5A" stroke-width="1"><line x1="30" y1="25" x2="60" y2="25"/><line x1="30" y1="45" x2="60" y2="45"/><line x1="30" y1="65" x2="60" y2="65"/></g></svg>` }
+    { label: 'ブーツ', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="120" viewBox="0 0 100 120"><path d="M 25 5 L 65 5 L 65 80 L 85 80 L 90 100 L 85 110 L 15 110 L 15 90 L 25 80 Z" fill="#8B6B3F" stroke="#2E2A47" stroke-width="2"/><path d="M 15 100 L 90 100 L 90 110 L 15 110 Z" fill="#2E2A47"/><g stroke="#B78C5A" stroke-width="1"><line x1="30" y1="25" x2="60" y2="25"/><line x1="30" y1="45" x2="60" y2="45"/><line x1="30" y1="65" x2="60" y2="65"/></g></svg>` },
+    { label: 'サンダル', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="110" height="50" viewBox="0 0 110 50"><path d="M 15 35 L 20 20 L 90 20 L 95 35 L 90 42 L 20 42 Z" fill="#FFC93C" stroke="#2E2A47" stroke-width="2"/><path d="M 35 20 L 30 5 M 55 20 L 55 5 M 75 20 L 80 5" stroke="#E8A800" stroke-width="4" fill="none" stroke-linecap="round"/></svg>` },
+    { label: 'エナメル', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="60" viewBox="0 0 120 60"><path d="M 15 40 L 20 20 L 45 15 L 70 25 L 100 30 L 105 45 L 100 50 L 15 50 Z" fill="#7C6FF2" stroke="#2E2A47" stroke-width="2"/><ellipse cx="45" cy="28" rx="18" ry="6" fill="#FFFFFF" opacity="0.4"/><circle cx="55" cy="20" r="3" fill="#FFC93C" stroke="#2E2A47" stroke-width="1"/></svg>` },
+    { label: 'げた', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="50" viewBox="0 0 100 50"><rect x="10" y="18" width="80" height="14" fill="#8B6B3F" stroke="#2E2A47" stroke-width="2" rx="3"/><rect x="15" y="32" width="8" height="10" fill="#6E5236" stroke="#2E2A47" stroke-width="1.5"/><rect x="77" y="32" width="8" height="10" fill="#6E5236" stroke="#2E2A47" stroke-width="1.5"/><path d="M 50 18 L 30 5 M 50 18 L 70 5" stroke="#E14E7F" stroke-width="3" fill="none" stroke-linecap="round"/></svg>` }
   ],
   hat: [
     { label: 'ぼうし', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="80" viewBox="0 0 140 80"><ellipse cx="70" cy="65" rx="60" ry="10" fill="#7C6FF2" stroke="#2E2A47" stroke-width="2"/><path d="M 35 65 Q 35 20 70 15 Q 105 20 105 65 Z" fill="#9D91FF" stroke="#2E2A47" stroke-width="2"/><rect x="35" y="55" width="70" height="8" fill="#5D51CC"/><circle cx="70" cy="55" r="6" fill="#FFC93C" stroke="#2E2A47" stroke-width="1.5"/></svg>` },
     { label: 'キャップ', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="70" viewBox="0 0 140 70"><path d="M 20 45 Q 70 5 120 45 L 120 55 L 20 55 Z" fill="#E14E7F" stroke="#2E2A47" stroke-width="2"/><path d="M 20 55 L 20 65 L 130 65 L 120 55 Z" fill="#FF6B9D" stroke="#2E2A47" stroke-width="2"/><circle cx="70" cy="30" r="8" fill="#FFF" stroke="#2E2A47" stroke-width="1.5"/><text x="70" y="35" text-anchor="middle" font-family="'Baloo 2',sans-serif" font-weight="800" font-size="12" fill="#E14E7F">M</text></svg>` },
-    { label: 'ふゆ', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="120" viewBox="0 0 140 120"><path d="M 30 60 Q 70 15 110 60 L 115 90 Q 70 100 25 90 Z" fill="#FF6B9D" stroke="#2E2A47" stroke-width="2"/><rect x="25" y="85" width="90" height="15" fill="#FFFFFF" stroke="#2E2A47" stroke-width="1.5"/><g fill="#2E2A47"><rect x="35" y="88" width="4" height="9"/><rect x="55" y="88" width="4" height="9"/><rect x="75" y="88" width="4" height="9"/><rect x="95" y="88" width="4" height="9"/></g><circle cx="115" cy="20" r="15" fill="#FFFFFF" stroke="#2E2A47" stroke-width="1.5"/></svg>` }
+    { label: 'ふゆ', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="120" viewBox="0 0 140 120"><path d="M 30 60 Q 70 15 110 60 L 115 90 Q 70 100 25 90 Z" fill="#FF6B9D" stroke="#2E2A47" stroke-width="2"/><rect x="25" y="85" width="90" height="15" fill="#FFFFFF" stroke="#2E2A47" stroke-width="1.5"/><g fill="#2E2A47"><rect x="35" y="88" width="4" height="9"/><rect x="55" y="88" width="4" height="9"/><rect x="75" y="88" width="4" height="9"/><rect x="95" y="88" width="4" height="9"/></g><circle cx="115" cy="20" r="15" fill="#FFFFFF" stroke="#2E2A47" stroke-width="1.5"/></svg>` },
+    { label: 'リボン', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="60" viewBox="0 0 100 60"><path d="M 50 30 L 15 10 L 10 45 Z" fill="#FF6B9D" stroke="#2E2A47" stroke-width="2"/><path d="M 50 30 L 85 10 L 90 45 Z" fill="#FF6B9D" stroke="#2E2A47" stroke-width="2"/><circle cx="50" cy="30" r="8" fill="#E14E7F" stroke="#2E2A47" stroke-width="1.5"/></svg>` },
+    { label: 'ベレー', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80" viewBox="0 0 120 80"><path d="M 20 55 Q 15 15 60 15 Q 105 15 100 55 Q 60 70 20 55 Z" fill="#8B5A3C" stroke="#2E2A47" stroke-width="2"/><circle cx="60" cy="14" r="4" fill="#6E4530" stroke="#2E2A47" stroke-width="1.2"/></svg>` }
   ],
   bag: [
     { label: 'リュック', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="140" viewBox="0 0 100 140"><path d="M 20 20 Q 20 10 30 10 L 70 10 Q 80 10 80 20 L 80 130 L 20 130 Z" fill="#5AB8FF" stroke="#2E2A47" stroke-width="2"/><rect x="30" y="35" width="40" height="55" fill="#4A9ED8" stroke="#2E2A47" stroke-width="1.5" rx="4"/><rect x="35" y="45" width="30" height="15" fill="#FFFFFF" stroke="#2E2A47" stroke-width="1"/><path d="M 20 20 L 5 25 L 5 90 L 20 100" stroke="#2E2A47" stroke-width="2" fill="none"/><path d="M 80 20 L 95 25 L 95 90 L 80 100" stroke="#2E2A47" stroke-width="2" fill="none"/></svg>` },
-    { label: 'かばん', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="80" viewBox="0 0 100 80"><rect x="15" y="30" width="70" height="45" fill="#FF9EBB" stroke="#2E2A47" stroke-width="2" rx="5"/><path d="M 30 30 Q 30 10 50 10 Q 70 10 70 30" stroke="#2E2A47" stroke-width="2" fill="none"/><circle cx="50" cy="50" r="6" fill="#FFC93C" stroke="#2E2A47" stroke-width="1.5"/></svg>` }
+    { label: 'かばん', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="80" viewBox="0 0 100 80"><rect x="15" y="30" width="70" height="45" fill="#FF9EBB" stroke="#2E2A47" stroke-width="2" rx="5"/><path d="M 30 30 Q 30 10 50 10 Q 70 10 70 30" stroke="#2E2A47" stroke-width="2" fill="none"/><circle cx="50" cy="50" r="6" fill="#FFC93C" stroke="#2E2A47" stroke-width="1.5"/></svg>` },
+    { label: 'ポシェット', svg: `<svg xmlns="http://www.w3.org/2000/svg" width="90" height="70" viewBox="0 0 90 70"><rect x="15" y="25" width="60" height="35" fill="#4CD4B0" stroke="#2E2A47" stroke-width="2" rx="6"/><path d="M 20 25 L 10 5 M 70 25 L 80 5" stroke="#2E2A47" stroke-width="2" fill="none"/><circle cx="45" cy="42" r="4" fill="#FFC93C" stroke="#2E2A47" stroke-width="1.2"/></svg>` }
   ]
 };
 
 export const CLOTHING_CATEGORIES = [
-  { key: 'dress', icon: '👗', label: 'ワンピース' },
-  { key: 'skirt', icon: '🩱', label: 'スカート' },
-  { key: 'top',   icon: '👕', label: 'トップス' },
-  { key: 'shoes', icon: '👟', label: 'くつ' },
-  { key: 'hat',   icon: '🎩', label: 'ぼうし' },
-  { key: 'bag',   icon: '🎒', label: 'かばん' }
+  { key: 'dress',   icon: '👗', label: 'ワンピース' },
+  { key: 'skirt',   icon: '🩱', label: 'スカート' },
+  { key: 'bottoms', icon: '🩳', label: 'たんぱん' },
+  { key: 'wafuku',  icon: '🎐', label: 'わふく' },
+  { key: 'top',     icon: '👕', label: 'トップス' },
+  { key: 'shoes',   icon: '👟', label: 'くつ' },
+  { key: 'hat',     icon: '🎩', label: 'ぼうし' },
+  { key: 'bag',     icon: '🎒', label: 'かばん' }
 ];
 
 
@@ -1314,6 +1378,78 @@ export const CARE_ACTIONS = [
   { key: 'sleep', icon: '😴', label: 'ねる',   effect: { genki: 40 },    exp: 3, cooldownSec: 0,  msg: 'ぐっすり… 💤' },
   { key: 'pet',   icon: '🤗', label: 'なでる', effect: { heart: 20 },    exp: 2, cooldownSec: 30, msg: 'えへへ ♪' }
 ];
+
+/**
+ * カフェ場所（room.html の location: 'cafe'）で使うメニュー定義。
+ * price は「ごっこのお金」単位（毎日リセットされる仮想通貨、Gold とは別管理）。
+ * effect は CARE_ACTIONS と同じ形式で stats に適用する（主に onaka 回復）。
+ */
+export const CAFE_MENU = [
+  { key: 'pancake',   icon: '🥞', label: 'パンケーキ',   price: 25, effect: { onaka: 35, heart: 5  }, exp: 4, msg: 'ふわふわで おいしい〜！ 🥞' },
+  { key: 'parfait',   icon: '🍨', label: 'パフェ',       price: 30, effect: { onaka: 25, heart: 10 }, exp: 4, msg: 'あまくて しあわせ〜 🍨' },
+  { key: 'sandwich',  icon: '🥪', label: 'サンドイッチ', price: 20, effect: { onaka: 40 },            exp: 3, msg: 'モリモリ たべたよ！ 🥪' },
+  { key: 'juice',     icon: '🧃', label: 'ジュース',     price: 10, effect: { onaka: 10, genki: 10 }, exp: 2, msg: 'ごくごく… おいしい！ 🧃' },
+  { key: 'cake',      icon: '🍰', label: 'ショートケーキ', price: 28, effect: { onaka: 20, heart: 15 }, exp: 4, msg: 'あまくて とろける〜 🍰' },
+  { key: 'donut',     icon: '🍩', label: 'ドーナツ',     price: 15, effect: { onaka: 20, heart: 5  }, exp: 3, msg: 'もちもち たのしい！ 🍩' },
+  { key: 'coffee',    icon: '☕', label: 'ホットミルク', price: 12, effect: { onaka: 10, genki: 15 }, exp: 2, msg: 'あったかい… ほっとするね ☕' },
+  { key: 'omurice',   icon: '🍳', label: 'オムライス',   price: 32, effect: { onaka: 50, heart: 5  }, exp: 5, msg: 'たまごが とろとろ〜 🍳' }
+];
+
+/** カフェメニューを stats に適用（CARE_ACTIONS の applyCareAction と同じロジックを再利用） */
+export function applyCafeMenu(stats, menuKey) {
+  const item = CAFE_MENU.find(m => m.key === menuKey);
+  if (!item) return { stats, expGained: 0, leveledUp: false, oldLevel: stats.level, newLevel: stats.level, item: null };
+  const s = { ...stats };
+  for (const [k, v] of Object.entries(item.effect)) {
+    s[k] = Math.max(0, Math.min(100, (s[k] || 0) + v));
+  }
+  const oldLevel = calcLevel(s.exp || 0).level;
+  s.exp = (s.exp || 0) + item.exp;
+  s.level = calcLevel(s.exp).level;
+  return {
+    stats: s,
+    expGained: item.exp,
+    leveledUp: s.level > oldLevel,
+    oldLevel,
+    newLevel: s.level,
+    item
+  };
+}
+
+/**
+ * 公園場所（room.html の location: 'park'）で使う遊具定義。
+ * cooldownSec 経過ごとに1回遊べる（お金は不要、CARE_ACTIONS の pet と同じ考え方）。
+ * effect は主に genki・heart を回復する。
+ */
+export const PARK_PLAYGROUND = [
+  { key: 'swing',    icon: '🎠', label: 'ブランコ',   effect: { genki: 25, heart: 10 }, exp: 3, cooldownSec: 20, msg: 'たかく こげたよ〜！ 🎠' },
+  { key: 'slide',     icon: '🛝', label: 'すべりだい', effect: { genki: 20, heart: 15 }, exp: 3, cooldownSec: 20, msg: 'しゅ〜っと たのしい！ 🛝' },
+  { key: 'sandbox',   icon: '⛱️', label: 'すなば',     effect: { genki: 10, heart: 20 }, exp: 3, cooldownSec: 20, msg: 'おやまが できたよ ⛱️' },
+  { key: 'barbell',   icon: '🤸', label: 'てつぼう',   effect: { genki: 30, heart: 5  }, exp: 4, cooldownSec: 20, msg: 'くるっと まわれた！ 🤸' },
+  { key: 'seesaw',    icon: '🎡', label: 'シーソー',   effect: { genki: 15, heart: 15 }, exp: 3, cooldownSec: 20, msg: 'ぎったん ばっこん ♪ 🎡' },
+  { key: 'jungle_gym', icon: '🧗', label: 'ジャングルジム', effect: { genki: 25, heart: 10 }, exp: 4, cooldownSec: 20, msg: 'てっぺんまで のぼれた！ 🧗' }
+];
+
+/** 公園の遊具を stats に適用（CARE_ACTIONS の applyCareAction と同じロジックを再利用） */
+export function applyParkPlay(stats, playKey) {
+  const item = PARK_PLAYGROUND.find(p => p.key === playKey);
+  if (!item) return { stats, expGained: 0, leveledUp: false, oldLevel: stats.level, newLevel: stats.level, item: null };
+  const s = { ...stats };
+  for (const [k, v] of Object.entries(item.effect)) {
+    s[k] = Math.max(0, Math.min(100, (s[k] || 0) + v));
+  }
+  const oldLevel = calcLevel(s.exp || 0).level;
+  s.exp = (s.exp || 0) + item.exp;
+  s.level = calcLevel(s.exp).level;
+  return {
+    stats: s,
+    expGained: item.exp,
+    leveledUp: s.level > oldLevel,
+    oldLevel,
+    newLevel: s.level,
+    item
+  };
+}
 
 /** 生の stats を正規化。未設定フィールドはデフォルトで埋め、範囲外はクランプ。
  *  level は必ず exp から算出（保存されている level は無視、表示用の派生値扱い）。 */
@@ -1615,7 +1751,7 @@ export function setupGoldBadge(deps, headerEl, insertBefore = null) {
   }
 
   /**
-  * 「保存で +1G」ボーナス。1日に最大 3 回まで。
+   * 「保存で +1G」ボーナス。1日に最大 3 回まで。
    * @param {string} what - 何を保存したか（履歴に残る）
    * @returns {Promise<number>} 支払われた G。既に上限なら 0
    */
