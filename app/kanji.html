@@ -72,6 +72,19 @@
   .grade-btn .icon { font-size: 22px; }
   .grade-btn .label { font-size: 11px; opacity: 0.8; font-weight: 700; }
 
+  .today-btn {
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;
+    background: linear-gradient(180deg, #FFF3C9, #FFD966);
+    border: 3px solid #E8A200; border-radius: 14px;
+    padding: 14px 10px; margin-bottom: 12px; cursor: pointer;
+    font-family: 'Baloo 2', sans-serif; font-weight: 800;
+    color: #7A5200; font-size: 15px;
+    box-shadow: 0 4px 0 #E8A200;
+    transition: transform .08s, box-shadow .08s;
+  }
+  .today-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #E8A200; }
+  .today-btn span#todayBtnSub { font-size: 11px; opacity: 0.75; font-weight: 700; }
+
   /* ==== 問題カード ==== */
   .kanji-card {
     background: #fff; border-radius: 24px;
@@ -258,6 +271,7 @@
     <div class="grade-card">
       <h2>🎓 なんねん の かんじ？</h2>
       <p class="sub">かんじを みて よみかたを えらぼう！<br>10もんセット・せいかい 1もん あたり +2G ✨</p>
+      <button class="today-btn" id="todayBtn">🗓️ きょうの10じ <span id="todayBtnSub"></span></button>
       <div class="grade-grid" id="gradeGrid">
         <button class="grade-btn" data-grade="1"><span class="icon">1️⃣</span><span>1ねん</span><span class="label">やさしい</span></button>
         <button class="grade-btn" data-grade="2"><span class="icon">2️⃣</span><span>2ねん</span><span class="label">かぞく・きせつ</span></button>
@@ -325,7 +339,52 @@ const KANJI_DATA = {
     { k: '口', r: 'くち', hint: '👄' },
     { k: '手', r: 'て',   hint: '✋' },
     { k: '足', r: 'あし', hint: '🦶' },
-    { k: '車', r: 'くるま', hint: '🚗' }
+    { k: '車', r: 'くるま', hint: '🚗' },
+    { k: '雨', r: 'あめ', hint: '☔' },
+    { k: '円', r: 'えん', hint: '⭕💴' },
+    { k: '王', r: 'おう', hint: '👑' },
+    { k: '音', r: 'おと', hint: '🎵' },
+    { k: '貝', r: 'かい', hint: '🐚' },
+    { k: '学', r: 'がく', hint: '🏫' },
+    { k: '気', r: 'き', hint: '💨' },
+    { k: '休', r: 'やす', hint: '😴' },
+    { k: '玉', r: 'たま', hint: '⚽' },
+    { k: '金', r: 'きん', hint: '🥇' },
+    { k: '空', r: 'そら', hint: '🌌' },
+    { k: '見', r: 'み', hint: '👀' },
+    { k: '校', r: 'こう', hint: '🏫' },
+    { k: '子', r: 'こ', hint: '🧒' },
+    { k: '糸', r: 'いと', hint: '🧵' },
+    { k: '字', r: 'じ', hint: '🔤' },
+    { k: '出', r: 'で', hint: '🚪' },
+    { k: '女', r: 'おんな', hint: '👧' },
+    { k: '森', r: 'もり', hint: '🌳🌳🌳' },
+    { k: '正', r: 'ただ', hint: '⭕' },
+    { k: '生', r: 'う', hint: '🐣' },
+    { k: '青', r: 'あお', hint: '🔵' },
+    { k: '夕', r: 'ゆう', hint: '🌇' },
+    { k: '赤', r: 'あか', hint: '🔴' },
+    { k: '千', r: 'せん', hint: '1000' },
+    { k: '先', r: 'さき', hint: '👉' },
+    { k: '早', r: 'はや', hint: '⏰' },
+    { k: '草', r: 'くさ', hint: '🌿' },
+    { k: '村', r: 'むら', hint: '🏡' },
+    { k: '男', r: 'おとこ', hint: '👦' },
+    { k: '竹', r: 'たけ', hint: '🎋' },
+    { k: '虫', r: 'むし', hint: '🐛' },
+    { k: '町', r: 'まち', hint: '🏘️' },
+    { k: '天', r: 'てん', hint: '🌈 てんき' },
+    { k: '田', r: 'た', hint: '🌾' },
+    { k: '入', r: 'い', hint: '🚪' },
+    { k: '年', r: 'ねん', hint: '📅' },
+    { k: '白', r: 'しろ', hint: '⚪' },
+    { k: '百', r: 'ひゃく', hint: '100' },
+    { k: '文', r: 'ぶん', hint: '📝' },
+    { k: '本', r: 'ほん', hint: '📕' },
+    { k: '名', r: 'な', hint: '📛' },
+    { k: '立', r: 'た', hint: '🧍' },
+    { k: '力', r: 'ちから', hint: '💪' },
+    { k: '林', r: 'はやし', hint: '🌲' },
   ],
   2: [
     { k: '父', r: 'ちち',     hint: '👨 パパ' },
@@ -362,7 +421,70 @@ const KANJI_DATA = {
     { k: '馬', r: 'うま',     hint: '🐴' },
     { k: '牛', r: 'うし',     hint: '🐄' },
     { k: '肉', r: 'にく',     hint: '🍖' },
-    { k: '光', r: 'ひかり',   hint: '💡' }
+    { k: '光', r: 'ひかり',   hint: '💡' },
+    { k: '引', r: 'ひ', hint: '↔️' },
+    { k: '雲', r: 'くも', hint: '☁️' },
+    { k: '遠', r: 'とお', hint: '🔭' },
+    { k: '何', r: 'なに', hint: '❓' },
+    { k: '歌', r: 'うた', hint: '🎤' },
+    { k: '画', r: 'が', hint: '🎨' },
+    { k: '会', r: 'あ', hint: '🤝' },
+    { k: '絵', r: 'え', hint: '🖼️' },
+    { k: '外', r: 'そと', hint: '🌳' },
+    { k: '角', r: 'かど', hint: '📐' },
+    { k: '間', r: 'あいだ', hint: '↔️' },
+    { k: '丸', r: 'まる', hint: '⭕' },
+    { k: '岩', r: 'いわ', hint: '🪨' },
+    { k: '顔', r: 'かお', hint: '😊' },
+    { k: '記', r: 'き', hint: '📝' },
+    { k: '弓', r: 'ゆみ', hint: '🏹' },
+    { k: '京', r: 'きょう', hint: '🏯 きょうと' },
+    { k: '強', r: 'つよ', hint: '💪' },
+    { k: '教', r: 'おし', hint: '📖' },
+    { k: '近', r: 'ちか', hint: '📍' },
+    { k: '形', r: 'かたち', hint: '🔺' },
+    { k: '言', r: 'い', hint: '💬' },
+    { k: '古', r: 'ふる', hint: '🏚️' },
+    { k: '午', r: 'ご', hint: '🕛 ひる' },
+    { k: '後', r: 'あと', hint: '⏩' },
+    { k: '語', r: 'ご', hint: '💬' },
+    { k: '工', r: 'こう', hint: '🔧' },
+    { k: '公', r: 'こう', hint: '🏞️ こうえん' },
+    { k: '広', r: 'ひろ', hint: '↔️' },
+    { k: '交', r: 'まじ', hint: '🚦' },
+    { k: '考', r: 'かんが', hint: '🤔' },
+    { k: '行', r: 'い', hint: '🚶' },
+    { k: '高', r: 'たか', hint: '📏' },
+    { k: '黄', r: 'き', hint: '🟡' },
+    { k: '合', r: 'あ', hint: '🤝' },
+    { k: '国', r: 'くに', hint: '🌍' },
+    { k: '黒', r: 'くろ', hint: '⚫' },
+    { k: '今', r: 'いま', hint: '⏰' },
+    { k: '作', r: 'つく', hint: '🛠️' },
+    { k: '算', r: 'さん', hint: '🔢' },
+    { k: '止', r: 'と', hint: '🛑' },
+    { k: '市', r: 'し', hint: '🏙️' },
+    { k: '思', r: 'おも', hint: '💭' },
+    { k: '紙', r: 'かみ', hint: '📄' },
+    { k: '自', r: 'じ', hint: '🙋' },
+    { k: '時', r: 'とき', hint: '⏰' },
+    { k: '室', r: 'しつ', hint: '🚪' },
+    { k: '社', r: 'しゃ', hint: '⛩️' },
+    { k: '弱', r: 'よわ', hint: '🥺' },
+    { k: '首', r: 'くび', hint: '🦒' },
+    { k: '週', r: 'しゅう', hint: '📅' },
+    { k: '少', r: 'すこ', hint: '🤏' },
+    { k: '場', r: 'ば', hint: '📍' },
+    { k: '色', r: 'いろ', hint: '🌈' },
+    { k: '心', r: 'こころ', hint: '💗' },
+    { k: '新', r: 'あたら', hint: '✨' },
+    { k: '親', r: 'おや', hint: '👨‍👩‍👧' },
+    { k: '図', r: 'ず', hint: '🗺️' },
+    { k: '数', r: 'かず', hint: '🔢' },
+    { k: '声', r: 'こえ', hint: '📢' },
+    { k: '晴', r: 'は', hint: '☀️' },
+    { k: '切', r: 'き', hint: '✂️' },
+    { k: '前', r: 'まえ', hint: '⬅️' },
   ],
   3: [
     { k: '海', r: 'うみ',       hint: '🌊' },
@@ -394,7 +516,78 @@ const KANJI_DATA = {
     { k: '駅', r: 'えき',       hint: '🚉' },
     { k: '荷', r: 'に',         hint: '📦' },
     { k: '味', r: 'あじ',       hint: '👅' },
-    { k: '幸', r: 'しあわ',     hint: '😊' }
+    { k: '幸', r: 'しあわ',     hint: '😊' },
+    { k: '悪', r: 'わる', hint: '😠' },
+    { k: '安', r: 'やす', hint: '💰' },
+    { k: '意', r: 'い', hint: '💭' },
+    { k: '育', r: 'そだ', hint: '🌱' },
+    { k: '員', r: 'いん', hint: '👤' },
+    { k: '飲', r: 'の', hint: '🥤' },
+    { k: '運', r: 'うん', hint: '🍀' },
+    { k: '屋', r: 'や', hint: '🏠' },
+    { k: '化', r: 'か', hint: '🔄' },
+    { k: '開', r: 'ひら', hint: '🚪' },
+    { k: '感', r: 'かん', hint: '💗' },
+    { k: '漢', r: 'かん', hint: '🈷️' },
+    { k: '館', r: 'かん', hint: '🏛️' },
+    { k: '期', r: 'き', hint: '📅' },
+    { k: '客', r: 'きゃく', hint: '🙋' },
+    { k: '急', r: 'きゅう', hint: '⚡' },
+    { k: '級', r: 'きゅう', hint: '🏫 クラス' },
+    { k: '球', r: 'きゅう', hint: '⚾' },
+    { k: '去', r: 'さ', hint: '👋' },
+    { k: '業', r: 'ぎょう', hint: '📚 じゅぎょう' },
+    { k: '曲', r: 'きょく', hint: '🎵' },
+    { k: '局', r: 'きょく', hint: '🏢 ゆうびんきょく' },
+    { k: '区', r: 'く', hint: '🗺️' },
+    { k: '君', r: 'きみ', hint: '🙋' },
+    { k: '決', r: 'き', hint: '✅' },
+    { k: '研', r: 'けん', hint: '🔬' },
+    { k: '県', r: 'けん', hint: '🗾' },
+    { k: '祭', r: 'まつり', hint: '🎏' },
+    { k: '皿', r: 'さら', hint: '🍽️' },
+    { k: '仕', r: 'し', hint: '💼' },
+    { k: '死', r: 'し', hint: '💀' },
+    { k: '使', r: 'つか', hint: '🛠️' },
+    { k: '始', r: 'はじ', hint: '🏁' },
+    { k: '指', r: 'ゆび', hint: '👆' },
+    { k: '歯', r: 'は', hint: '🦷' },
+    { k: '次', r: 'つぎ', hint: '➡️' },
+    { k: '事', r: 'こと', hint: '📌' },
+    { k: '持', r: 'も', hint: '🤲' },
+    { k: '式', r: 'しき', hint: '🎓' },
+    { k: '実', r: 'み', hint: '🍎' },
+    { k: '写', r: 'うつ', hint: '📷' },
+    { k: '者', r: 'もの', hint: '👤' },
+    { k: '主', r: 'しゅ', hint: '👑' },
+    { k: '守', r: 'まも', hint: '🛡️' },
+    { k: '取', r: 'と', hint: '🤏' },
+    { k: '受', r: 'う', hint: '📨' },
+    { k: '拾', r: 'ひろ', hint: '🖐️' },
+    { k: '終', r: 'お', hint: '🏁' },
+    { k: '習', r: 'なら', hint: '📖' },
+    { k: '集', r: 'あつ', hint: '👥' },
+    { k: '住', r: 'す', hint: '🏠' },
+    { k: '所', r: 'ところ', hint: '📍' },
+    { k: '暑', r: 'あつ', hint: '🥵' },
+    { k: '助', r: 'たす', hint: '🆘' },
+    { k: '消', r: 'け', hint: '🧹' },
+    { k: '商', r: 'しょう', hint: '🏪' },
+    { k: '乗', r: 'の', hint: '🚃' },
+    { k: '植', r: 'う', hint: '🌱' },
+    { k: '身', r: 'み', hint: '🧍' },
+    { k: '神', r: 'かみ', hint: '⛩️' },
+    { k: '真', r: 'ま', hint: '✅' },
+    { k: '世', r: 'よ', hint: '🌍' },
+    { k: '全', r: 'ぜん', hint: '💯' },
+    { k: '相', r: 'そう', hint: '🤝' },
+    { k: '送', r: 'おく', hint: '📦' },
+    { k: '速', r: 'はや', hint: '💨' },
+    { k: '打', r: 'う', hint: '🔨' },
+    { k: '対', r: 'たい', hint: '⚔️' },
+    { k: '待', r: 'ま', hint: '⏳' },
+    { k: '代', r: 'だい', hint: '🔄' },
+    { k: '題', r: 'だい', hint: '📝' },
   ],
   99: [
     // 4-6年 混合。むずかしい系。
@@ -417,7 +610,87 @@ const KANJI_DATA = {
     { k: '静', r: 'しず',       hint: '🤫' },
     { k: '暴', r: 'あば',       hint: '⚡' },
     { k: '祈', r: 'いの',       hint: '🙏' },
-    { k: '創', r: 'つく',       hint: '🎨' }
+    { k: '創', r: 'つく',       hint: '🎨' },
+    { k: '固', r: 'かた', hint: '🧊' },
+    { k: '好', r: 'す', hint: '💗' },
+    { k: '告', r: 'つ', hint: '📢' },
+    { k: '差', r: 'さ', hint: '➖' },
+    { k: '菜', r: 'さい', hint: '🥬' },
+    { k: '材', r: 'ざい', hint: '🪵' },
+    { k: '殺', r: 'ころ', hint: '⚠️' },
+    { k: '察', r: 'さつ', hint: '👮 けいさつ' },
+    { k: '参', r: 'さん', hint: '🙋' },
+    { k: '産', r: 'さん', hint: '🐣' },
+    { k: '散', r: 'さん', hint: '🚶 さんぽ' },
+    { k: '史', r: 'し', hint: '📜 れきし' },
+    { k: '試', r: 'こころ', hint: '✏️ テスト' },
+    { k: '児', r: 'じ', hint: '🧒' },
+    { k: '治', r: 'なお', hint: '🏥' },
+    { k: '失', r: 'うしな', hint: '😢' },
+    { k: '借', r: 'か', hint: '🤝' },
+    { k: '種', r: 'たね', hint: '🌱' },
+    { k: '周', r: 'まわ', hint: '🔄' },
+    { k: '祝', r: 'いわ', hint: '🎉' },
+    { k: '順', r: 'じゅん', hint: '🔢' },
+    { k: '初', r: 'はじ', hint: '🆕' },
+    { k: '松', r: 'まつ', hint: '🌲' },
+    { k: '笑', r: 'わら', hint: '😄' },
+    { k: '唱', r: 'とな', hint: '🎤' },
+    { k: '焼', r: 'や', hint: '🔥' },
+    { k: '象', r: 'ぞう', hint: '🐘' },
+    { k: '照', r: 'て', hint: '☀️' },
+    { k: '賞', r: 'しょう', hint: '🏆' },
+    { k: '信', r: 'しん', hint: '🤝' },
+    { k: '成', r: 'な', hint: '✅' },
+    { k: '清', r: 'きよ', hint: '💧' },
+    { k: '省', r: 'はぶ', hint: '✂️' },
+    { k: '積', r: 'つ', hint: '📦' },
+    { k: '折', r: 'お', hint: '📄 おりがみ' },
+    { k: '節', r: 'せつ', hint: '🎍' },
+    { k: '説', r: 'せつ', hint: '📖' },
+    { k: '戦', r: 'たたか', hint: '⚔️' },
+    { k: '選', r: 'えら', hint: '👆' },
+    { k: '争', r: 'あらそ', hint: '⚔️' },
+    { k: '倉', r: 'くら', hint: '🏚️' },
+    { k: '巣', r: 'す', hint: '🪺' },
+    { k: '束', r: 'たば', hint: '💐' },
+    { k: '側', r: 'がわ', hint: '↔️' },
+    { k: '続', r: 'つづ', hint: '➡️' },
+    { k: '卒', r: 'そつ', hint: '🎓' },
+    { k: '孫', r: 'まご', hint: '👶' },
+    { k: '帯', r: 'おび', hint: '🎗️' },
+    { k: '隊', r: 'たい', hint: '👥' },
+    { k: '達', r: 'たち', hint: '👥' },
+    { k: '単', r: 'たん', hint: '1️⃣' },
+    { k: '築', r: 'きず', hint: '🏗️' },
+    { k: '兆', r: 'ちょう', hint: '🔮 きざし' },
+    { k: '低', r: 'ひく', hint: '📉' },
+    { k: '底', r: 'そこ', hint: '⬇️' },
+    { k: '的', r: 'てき', hint: '🎯' },
+    { k: '伝', r: 'つた', hint: '📨' },
+    { k: '徒', r: 'と', hint: '🚶' },
+    { k: '灯', r: 'とう', hint: '💡' },
+    { k: '堂', r: 'どう', hint: '🏛️' },
+    { k: '得', r: 'え', hint: '➕' },
+    { k: '毒', r: 'どく', hint: '☠️' },
+    { k: '熱', r: 'ねつ', hint: '🌡️' },
+    { k: '念', r: 'ねん', hint: '💭' },
+    { k: '敗', r: 'やぶ', hint: '😢' },
+    { k: '梅', r: 'うめ', hint: '🌸' },
+    { k: '博', r: 'はく', hint: '📚' },
+    { k: '飯', r: 'めし', hint: '🍚' },
+    { k: '費', r: 'ひ', hint: '💰' },
+    { k: '必', r: 'かなら', hint: '✅' },
+    { k: '票', r: 'ひょう', hint: '🗳️' },
+    { k: '標', r: 'ひょう', hint: '🚩' },
+    { k: '府', r: 'ふ', hint: '🏛️' },
+    { k: '副', r: 'ふく', hint: '2️⃣' },
+    { k: '粉', r: 'こな', hint: '🌾' },
+    { k: '兵', r: 'へい', hint: '⚔️' },
+    { k: '変', r: 'か', hint: '🔄' },
+    { k: '便', r: 'びん', hint: '📮' },
+    { k: '包', r: 'つつ', hint: '🎁' },
+    { k: '法', r: 'ほう', hint: '⚖️' },
   ]
 };
 
@@ -478,10 +751,10 @@ function shuffle(arr) {
 function generateSession(grade) {
   const pool = KANJI_DATA[grade];
   const picked = shuffle([...pool]).slice(0, 10);
-  const readingsPool = pool.map(x => x.r);
+  // 読みをユニーク化してから候補にする（同じ読みの漢字が複数あっても選択肢が重複しないように）
+  const uniqueReadings = [...new Set(pool.map(x => x.r))];
   return picked.map(item => {
-    // ダミー3つ (自分の読み以外からランダムに)
-    const candidates = readingsPool.filter(r => r !== item.r);
+    const candidates = uniqueReadings.filter(r => r !== item.r);
     const distractors = shuffle(candidates).slice(0, 3);
     const choices = shuffle([item.r, ...distractors]);
     return { ...item, choices };
@@ -505,8 +778,73 @@ function startSession(grade) {
   renderProblem();
 }
 
+/** 日付文字列（YYYYMMDD）から決定的な擬似乱数を作る簡易ハッシュ（utils.js と同ロジック） */
+function seededRandom(seedStr) {
+  let h = 0;
+  for (let i = 0; i < seedStr.length; i++) {
+    h = (h * 31 + seedStr.charCodeAt(i)) >>> 0;
+  }
+  return function () {
+    h ^= h << 13; h >>>= 0;
+    h ^= h >> 17;
+    h ^= h << 5; h >>>= 0;
+    return (h % 100000) / 100000;
+  };
+}
+function todayYmd(date = new Date()) {
+  return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
+}
+
+/** 全学年ミックスから日付シードで10字を決定的に抽出（同じ日は同じ10字、日が変われば入れ替わる） */
+function getTodayKanji(count = 10) {
+  const allItems = [];
+  Object.keys(KANJI_DATA).forEach(g => {
+    KANJI_DATA[g].forEach(item => allItems.push({ ...item, grade: Number(g) }));
+  });
+  const ymd = todayYmd();
+  const rand = seededRandom(ymd + '_kanji_daily');
+  const pool = allItems.slice();
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, Math.min(count, pool.length));
+}
+
+/** 今日の10字を使ってセッションを生成（学年ミックスなので誤答候補も全学年プールから作る） */
+function generateTodaySession() {
+  const todayItems = getTodayKanji(10);
+  const allReadings = [...new Set(Object.values(KANJI_DATA).flat().map(x => x.r))];
+  return todayItems.map(item => {
+    const candidates = allReadings.filter(r => r !== item.r);
+    const distractors = shuffle(candidates).slice(0, 3);
+    const choices = shuffle([item.r, ...distractors]);
+    return { ...item, choices };
+  });
+}
+
+function startTodaySession() {
+  session.grade = 'today';
+  session.problems = generateTodaySession();
+  session.index = 0;
+  session.correct = 0;
+  session.goldEarned = 0;
+  session.currentAnswered = false;
+  document.getElementById('gradePickerArea').style.display = 'none';
+  document.getElementById('resultArea').style.display = 'none';
+  document.getElementById('quizArea').style.display = '';
+  renderProblem();
+}
+
+document.getElementById('todayBtn').addEventListener('click', startTodaySession);
+// ボタンのサブラベルに「きょうの日付」を表示
+(function initTodayBtnLabel() {
+  const d = new Date();
+  document.getElementById('todayBtnSub').textContent = `${d.getMonth() + 1}/${d.getDate()} の セット`;
+})();
+
 function gradeLabel(g) {
-  return g === 99 ? 'むずかしい' : `${g}ねん`;
+  return g === 'today' ? '🗓️ きょう' : (g === 99 ? 'むずかしい' : `${g}ねん`);
 }
 
 function renderProblem() {
