@@ -738,6 +738,174 @@
     line-height: 1.6;
   }
 
+  /* ==== カフェ 注文メニュー ==== */
+  .cafe-menu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 8px 2px 4px;
+  }
+  .cafe-menu-btn {
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 800;
+    color: #B87A1E;
+    background: linear-gradient(180deg, #FFFDF5, #FFF6E0);
+    border: 2px solid #FFD966;
+    border-radius: 14px;
+    padding: 10px 6px;
+    cursor: pointer;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 3px;
+    box-shadow: 0 3px 0 #E8A200;
+    transition: transform .1s, box-shadow .1s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cafe-menu-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #E8A200;
+  }
+  .cafe-menu-icon { font-size: 26px; }
+  .cafe-menu-label { font-size: 12px; }
+  .cafe-menu-price { font-size: 11px; color: #E8A200; }
+  .park-play-btn { border-color: #8FD9A8; box-shadow: 0 3px 0 #4CAF7D; }
+  .park-play-btn:active { box-shadow: 0 1px 0 #4CAF7D; }
+  .park-free { color: #2E9E62; font-weight: 800; }
+  .park-cd { color: #B87A1E; }
+  .cafe-menu-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 3px 0 #E5DCC0;
+  }
+  .cafe-menu-btn.pop {
+    animation: carePop .5s ease;
+  }
+  .cafe-empty-note {
+    text-align: center;
+    color: #B87A1E;
+    font-weight: 700;
+    font-size: 12px;
+    background: #FFF8E5;
+    border: 2px solid #FFD966;
+    border-radius: 12px;
+    padding: 12px;
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+  .cafe-my-empty {
+    text-align: center;
+    color: var(--ink-soft);
+    font-weight: 700;
+    font-size: 11px;
+    background: #FAF7FF;
+    border: 2px dashed #D9B8F5;
+    border-radius: 12px;
+    padding: 14px 10px;
+    margin: 8px 2px 4px;
+    line-height: 1.6;
+  }
+  .cafe-my-loading {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 11px;
+    padding: 10px;
+  }
+  .my-menu-btn {
+    position: relative;
+  }
+  .my-menu-del {
+    position: absolute;
+    top: -6px; right: -6px;
+    width: 22px; height: 22px;
+    background: #FF6B9D;
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    cursor: pointer;
+    z-index: 2;
+  }
+  .cafe-create-btn {
+    width: 100%;
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 800;
+    color: #7A5200;
+    background: linear-gradient(180deg, #FFF3C9, #FFE1A0);
+    border: 2px dashed #E8A200;
+    border-radius: 14px;
+    padding: 12px 8px;
+    margin-top: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: transform .08s;
+  }
+  .cafe-create-btn:active { transform: translateY(2px); }
+  .cafe-create-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .cafe-create-form {
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 4px 2px 10px;
+  }
+  .cafe-form-label {
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 8px;
+  }
+  .cafe-name-input {
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    border: 2px solid #FFD966;
+    border-radius: 12px;
+    outline: none;
+  }
+  .cafe-name-input:focus { border-color: #E8A200; }
+  .cafe-icon-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+  .cafe-icon-btn {
+    font-size: 22px;
+    background: #FFFDF5;
+    border: 2px solid #FFE9B8;
+    border-radius: 10px;
+    padding: 6px 0;
+    cursor: pointer;
+  }
+  .cafe-icon-btn.selected {
+    border-color: #E8A200;
+    background: #FFF3C9;
+    box-shadow: 0 0 0 2px #FFD966 inset;
+  }
+  .cafe-price-slider {
+    width: 100%;
+    accent-color: #E8A200;
+  }
+  .cafe-effect-preview {
+    font-size: 12px;
+    color: #B87A1E;
+    font-weight: 700;
+    background: #FFF8E5;
+    border-radius: 10px;
+    padding: 8px 10px;
+    text-align: center;
+  }
+  .cafe-form-btns {
+    display: flex; gap: 8px;
+    margin-top: 12px;
+  }
+  .cafe-form-btns .btn-ghost, .cafe-form-btns .btn-primary {
+    flex: 1;
+  }
+
   /* ==== 育成システム: レベルアップ トースト ==== */
   .level-up-toast {
     position: fixed;
@@ -773,6 +941,8 @@
   @media (max-width: 900px) {
     .care-btn { font-size: 12px; padding: 8px 4px; }
     .care-btn .care-icon { font-size: 20px; }
+    .cafe-menu-btn { font-size: 11px; padding: 8px 4px; }
+    .cafe-menu-icon { font-size: 22px; }
     .stat-row-top { font-size: 11px; }
     .care-header .avatar-thumb { width: 72px; height: 72px; }
   }
@@ -986,7 +1156,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-import { isConfigured, saveAvatar, updateAvatar, watchAvatars,
+import { isConfigured, saveAvatar, updateAvatar, watchAvatars, deleteAvatar,
   isAllowanceConfigured, getStoredChildKey, setStoredChildKey,
   watchAllowance, listAllowanceChildren,
   earnGold, spendGold, updateAllowanceChild } from '/shared/firebase.js';
@@ -996,6 +1166,8 @@ import {
   ROOM_WALL_COLORS, ROOM_FLOOR_COLORS,
   SCENE_LIBRARY,
   DEFAULT_STATS, STAT_META, CARE_ACTIONS,
+  CAFE_MENU, applyCafeMenu,
+  PARK_PLAYGROUND, applyParkPlay,
   normalizeStats, applyStatsDecay, applyCareAction, calcLevel,
   getStatBand, getMood, readLastCareAtMs,
   setupGoldBadge, showGoldFly
@@ -1112,6 +1284,10 @@ const state = {
   avatar: null,
   // Firestore から読んだ配置可能アバター一覧（type: avatar/madeup/look）
   availableAvatars: [],
+  // Firestore から読んだ マイメニュー一覧（type: cafe_menu）
+  myCafeMenu: [],
+  myCafeMenuLoaded: false,
+  cafeCreateMode: false, // マイメニュー作成フォームを表示中か
   // 「あるく モード」（次の 床タップ が walk 先）
   walkMode: false,
   // 右パネルのモード ('settings' | 'care')。アバター無いときは常に settings。
@@ -2172,12 +2348,14 @@ async function setLocation(key) {
   if (key === state.locationKey) { closeLocationPickerModal(); return; }
   pushUndo();
   state.locationKey = key;
+  state.cafeCreateMode = false; // 場所を変えたら作成フォームは閉じる
   closeLocationPickerModal();
   const loc = LOCATIONS.find(l => l.key === key);
   // 屋外シーンの選択肢では 壁/床 色スウォッチは無効になる（見た目で示す）
   updateSwatchesEnabled();
   await buildRoom();
   showToast(`${loc.label} に きたよ！`);
+  if (state.adjustTab === 'care') renderAdjust();
 }
 pickLocationBtn.addEventListener('click', openLocationPicker);
 closeLocationBtn.addEventListener('click', closeLocationPickerModal);
@@ -2734,6 +2912,17 @@ function renderAdjustCare() {
       </div>`;
   }).join('');
 
+  // カフェにいる時は注文 UI に差し替え（お世話ボタンの代わり）
+  if (state.locationKey === 'cafe') {
+    renderCafeMenu(a, statsHtml);
+    return;
+  }
+  // 公園にいる時は遊具 UI に差し替え
+  if (state.locationKey === 'park') {
+    renderParkPlayground(a, statsHtml, now);
+    return;
+  }
+
   const careBtnsHtml = CARE_ACTIONS.map(act => {
     const until = state.careCooldownUntil[act.key] || 0;
     const cdLeft = Math.max(0, until - now);
@@ -2865,6 +3054,465 @@ async function doCareAction(actionKey) {
   // 再描画
   renderAdjust();
   updateCareTabAvailable(); // needs-care バッジも更新
+}
+
+// ============================================================
+// カフェ（cafe ロケーション専用の注文システム）
+// ============================================================
+const CAFE_DAILY_COIN = 100; // 毎日リセットされる「ごっこのお金」の上限
+
+function cafeYmd(date = new Date()) {
+  return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
+}
+/** 今日使った「ごっこのお金」の合計を取得（localStorage、日付キー） */
+function getCafeSpentToday() {
+  try { return Number(localStorage.getItem('avatarApp_cafeSpent_' + cafeYmd()) || 0); } catch (e) { return 0; }
+}
+function addCafeSpentToday(n) {
+  try {
+    const cur = getCafeSpentToday();
+    localStorage.setItem('avatarApp_cafeSpent_' + cafeYmd(), String(cur + n));
+    return cur + n;
+  } catch (e) { return 0; }
+}
+function getCafeCoinLeft() {
+  return Math.max(0, CAFE_DAILY_COIN - getCafeSpentToday());
+}
+
+/** カフェの注文 UI を描画（renderAdjustCare から呼ばれる） */
+const CAFE_MENU_ICONS = ['🥞','🍨','🥪','🧃','🍰','🍩','☕','🍳','🍔','🍟','🍜','🍕','🍙','🍡','🍦','🥐','🍮','🥛','🍇','🍓'];
+const MY_CAFE_MENU_LIMIT = 20;
+const MY_CAFE_MENU_MIN_PRICE = 5;
+const MY_CAFE_MENU_MAX_PRICE = 50;
+
+/** マイメニュー名など、ユーザー入力を innerHTML に安全に埋め込むためのエスケープ */
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/** 値段からおなか回復量を連動計算（比例式、既存メニュー最大回復量60でクランプ） */
+function priceToOnakaEffect(price) {
+  return Math.min(60, Math.round(price * 1.2));
+}
+
+function renderCafeMenu(a, statsHtml) {
+  if (state.cafeCreateMode) {
+    renderCafeCreateForm(a, statsHtml);
+    return;
+  }
+
+  const coinLeft = getCafeCoinLeft();
+  const menuBtnsHtml = CAFE_MENU.map(item => {
+    const disabled = item.price > coinLeft;
+    return `
+      <button class="cafe-menu-btn" data-cafe="${item.key}" ${disabled ? 'disabled' : ''}>
+        <span class="cafe-menu-icon">${escapeHtml(item.icon)}</span>
+        <span class="cafe-menu-label">${escapeHtml(item.label)}</span>
+        <span class="cafe-menu-price">🪙 ${item.price}</span>
+      </button>`;
+  }).join('');
+
+  const myMenu = state.myCafeMenu || [];
+  const myMenuBtnsHtml = myMenu.map(item => {
+    const disabled = item.price > coinLeft;
+    return `
+      <button class="cafe-menu-btn my-menu-btn" data-mycafe="${item.id}" ${disabled ? 'disabled' : ''}>
+        <span class="my-menu-del" data-delmycafe="${item.id}" title="けす">✕</span>
+        <span class="cafe-menu-icon">${escapeHtml(item.icon)}</span>
+        <span class="cafe-menu-label">${escapeHtml(item.label)}</span>
+        <span class="cafe-menu-price">🪙 ${item.price}</span>
+      </button>`;
+  }).join('');
+
+  const myMenuSectionHtml = !state.myCafeMenuLoaded
+    ? `<div class="cafe-my-loading">よみこみちゅう…</div>`
+    : (myMenu.length > 0
+      ? `<div class="cafe-menu-grid">${myMenuBtnsHtml}</div>`
+      : `<div class="cafe-my-empty">まだ マイメニューが ないよ。したの ボタンから つくってみよう！</div>`);
+
+  adjustBody.innerHTML = `
+    <div class="care-header">
+      <div class="avatar-thumb"><img src="${a.imageData}" alt=""/></div>
+      <div class="avatar-name">☕ カフェで ちゅうもん</div>
+      <div class="mood">🪙 きょうの のこり: <b>${coinLeft}</b> / ${CAFE_DAILY_COIN}</div>
+    </div>
+    <div class="stat-list">
+      ${statsHtml}
+    </div>
+    <div class="section-title" style="margin-top:2px;">メニュー 🍽️</div>
+    <div class="cafe-menu-grid">
+      ${menuBtnsHtml}
+    </div>
+    <div class="section-title" style="margin-top:10px;">✨ マイメニュー (${myMenu.length}/${MY_CAFE_MENU_LIMIT})</div>
+    ${myMenuSectionHtml}
+    <button class="cafe-create-btn" id="cafeCreateOpenBtn" ${myMenu.length >= MY_CAFE_MENU_LIMIT ? 'disabled' : ''}>
+      ${myMenu.length >= MY_CAFE_MENU_LIMIT ? '🈵 マイメニューが いっぱいだよ' : '📝 オリジナルメニューを つくる'}
+    </button>
+    ${coinLeft <= 0 ? `<div class="cafe-empty-note">🌙 きょうの おこづかいは つかいきったよ。あした また きてね！</div>` : ''}
+  `;
+
+  adjustBody.querySelectorAll('.cafe-menu-btn[data-cafe]').forEach(b => {
+    b.addEventListener('click', () => {
+      if (b.disabled) return;
+      const key = b.dataset.cafe;
+      b.classList.remove('pop');
+      void b.offsetWidth;
+      b.classList.add('pop');
+      doCafeOrder(key);
+    });
+  });
+  adjustBody.querySelectorAll('.my-menu-btn[data-mycafe]').forEach(b => {
+    b.addEventListener('click', (e) => {
+      if (b.disabled) return;
+      if (e.target.dataset.delmycafe) return; // 削除ボタン領域は別ハンドラ
+      const id = b.dataset.mycafe;
+      b.classList.remove('pop');
+      void b.offsetWidth;
+      b.classList.add('pop');
+      doMyCafeOrder(id);
+    });
+  });
+  adjustBody.querySelectorAll('[data-delmycafe]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteMyCafeMenu(el.dataset.delmycafe);
+    });
+  });
+  const openBtn = document.getElementById('cafeCreateOpenBtn');
+  if (openBtn && !openBtn.disabled) {
+    openBtn.addEventListener('click', () => {
+      state.cafeCreateMode = true;
+      renderAdjust();
+    });
+  }
+}
+
+/** オリジナルメニュー作成フォームを描画 */
+function renderCafeCreateForm(a, statsHtml) {
+  const iconBtnsHtml = CAFE_MENU_ICONS.map((ic, i) =>
+    `<button class="cafe-icon-btn" data-icon="${ic}" data-idx="${i}">${ic}</button>`
+  ).join('');
+
+  adjustBody.innerHTML = `
+    <div class="care-header">
+      <div class="avatar-thumb"><img src="${a.imageData}" alt=""/></div>
+      <div class="avatar-name">📝 オリジナルメニュー</div>
+    </div>
+    <div class="cafe-create-form">
+      <label class="cafe-form-label">なまえ</label>
+      <input type="text" id="cafeNameInput" class="cafe-name-input" maxlength="12" placeholder="れい: にじいろパフェ" />
+
+      <label class="cafe-form-label">アイコン</label>
+      <div class="cafe-icon-grid" id="cafeIconGrid">${iconBtnsHtml}</div>
+
+      <label class="cafe-form-label">ねだん <span id="cafePriceVal">20</span> 🪙</label>
+      <input type="range" id="cafePriceInput" min="${MY_CAFE_MENU_MIN_PRICE}" max="${MY_CAFE_MENU_MAX_PRICE}" value="20" step="1" class="cafe-price-slider" />
+      <div class="cafe-effect-preview" id="cafeEffectPreview">🍽️ おなか回復: +${priceToOnakaEffect(20)}</div>
+
+      <div class="cafe-form-btns">
+        <button class="btn-ghost" id="cafeCreateCancelBtn">← もどる</button>
+        <button class="btn-primary" id="cafeCreateSaveBtn">✓ つくる</button>
+      </div>
+    </div>
+  `;
+
+  let selectedIcon = CAFE_MENU_ICONS[0];
+  const iconGrid = document.getElementById('cafeIconGrid');
+  iconGrid.querySelectorAll('.cafe-icon-btn').forEach(b => {
+    if (b.dataset.icon === selectedIcon) b.classList.add('selected');
+    b.addEventListener('click', () => {
+      iconGrid.querySelectorAll('.cafe-icon-btn').forEach(x => x.classList.remove('selected'));
+      b.classList.add('selected');
+      selectedIcon = b.dataset.icon;
+    });
+  });
+
+  const priceInput = document.getElementById('cafePriceInput');
+  const priceVal = document.getElementById('cafePriceVal');
+  const effectPreview = document.getElementById('cafeEffectPreview');
+  priceInput.addEventListener('input', () => {
+    const p = Number(priceInput.value);
+    priceVal.textContent = p;
+    effectPreview.textContent = `🍽️ おなか回復: +${priceToOnakaEffect(p)}`;
+  });
+
+  document.getElementById('cafeCreateCancelBtn').addEventListener('click', () => {
+    state.cafeCreateMode = false;
+    renderAdjust();
+  });
+
+  document.getElementById('cafeCreateSaveBtn').addEventListener('click', async () => {
+    const nameInput = document.getElementById('cafeNameInput');
+    const name = nameInput.value.trim();
+    if (!name) { showToast('なまえを かいてね'); nameInput.focus(); return; }
+    if (name.length > 12) { showToast('なまえは 12もじ までだよ'); return; }
+    const price = Number(priceInput.value);
+    await saveMyCafeMenu({ label: name, icon: selectedIcon, price });
+  });
+}
+
+/** マイメニューを Firestore に保存 */
+async function saveMyCafeMenu({ label, icon, price }) {
+  if ((state.myCafeMenu || []).length >= MY_CAFE_MENU_LIMIT) {
+    showToast('マイメニューが いっぱいだよ');
+    return;
+  }
+  const effect = { onaka: priceToOnakaEffect(price) };
+  try {
+    if (isConfigured) {
+      await saveAvatar({
+        imageData: '',
+        type: 'cafe_menu',
+        extra: { label, icon, price, effect, exp: 3, msg: `${label} を たべたよ！ ${icon}` }
+      });
+      showToast(`「${label}」を メニューに ついかしたよ！ ${icon}`);
+    } else {
+      showToast('ほぞんには Firebase の せっていが ひつようだよ');
+    }
+  } catch (err) {
+    console.warn('マイメニューの保存に失敗', err);
+    showToast('ほぞんに しっぱい したよ…');
+    return;
+  }
+  state.cafeCreateMode = false;
+  renderAdjust();
+}
+
+/** マイメニューを削除 */
+async function deleteMyCafeMenu(id) {
+  try {
+    await deleteAvatar(id);
+    showToast('メニューを けしたよ');
+  } catch (err) {
+    console.warn('マイメニューの削除に失敗', err);
+    showToast('さくじょに しっぱい したよ…');
+  }
+}
+
+/** マイメニューを注文（既存メニューの doCafeOrder と同じ流れ、対象データだけ myCafeMenu から取得） */
+async function doMyCafeOrder(id) {
+  const a = state.avatar;
+  if (!a) return;
+  const item = (state.myCafeMenu || []).find(m => m.id === id);
+  if (!item) return;
+
+  const coinLeft = getCafeCoinLeft();
+  if (item.price > coinLeft) {
+    showToast('きょうの おこづかいが たりないよ…');
+    return;
+  }
+
+  addCafeSpentToday(item.price);
+
+  const now = Date.now();
+  const s = { ...a.stats };
+  for (const [k, v] of Object.entries(item.effect || {})) {
+    s[k] = Math.max(0, Math.min(100, (s[k] || 0) + v));
+  }
+  const oldLevel = calcLevel(s.exp || 0).level;
+  s.exp = (s.exp || 0) + (item.exp || 3);
+  s.level = calcLevel(s.exp).level;
+  const leveledUp = s.level > oldLevel;
+
+  a.stats = s;
+  a.lastCareAtMs = now;
+
+  showToast(item.msg || `${item.label} を たべたよ！ ${item.icon}`);
+  showMoodBubble(item.icon, item.label, 2200);
+
+  if (leveledUp) {
+    const oldStage = oldLevel <= 2 ? 'baby' : oldLevel <= 5 ? 'child' : oldLevel <= 9 ? 'kid' : 'teen';
+    const newStage = s.level <= 2 ? 'baby' : s.level <= 5 ? 'child' : s.level <= 9 ? 'kid' : 'teen';
+    const stageChanged = oldStage !== newStage;
+    if (stageChanged) {
+      lvupLevel.innerHTML = `おおきくなった！<br>${growthStageLabel(s.level)}`;
+    } else {
+      lvupLevel.textContent = `Lv ${s.level} に なったよ！`;
+    }
+    levelUpToast.classList.add('show');
+    setTimeout(() => levelUpToast.classList.remove('show'), stageChanged ? 3200 : 2200);
+    updateAvatarTransform();
+    setTimeout(() => {
+      const mood = getMood(a.stats);
+      showMoodBubble(mood.icon, mood.msg, 2400);
+    }, stageChanged ? 3400 : 2400);
+  }
+
+  if (isConfigured) {
+    try {
+      await updateAvatar(a.id, { stats: { ...a.stats }, lastCareAt: now });
+    } catch (err) {
+      console.warn('カフェの保存に失敗', err);
+      showToast('ほぞんに しっぱい したよ…');
+    }
+  }
+
+  await checkFullCareBonus();
+  renderAdjust();
+  updateCareTabAvailable();
+}
+
+/** カフェメニューを注文 → お会計（ごっこのお金消費） → stats 反映 → 保存 → 再描画 */
+async function doCafeOrder(menuKey) {
+  const a = state.avatar;
+  if (!a) return;
+  const item = CAFE_MENU.find(m => m.key === menuKey);
+  if (!item) return;
+
+  const coinLeft = getCafeCoinLeft();
+  if (item.price > coinLeft) {
+    showToast('きょうの おこづかいが たりないよ…');
+    return;
+  }
+
+  // お会計
+  addCafeSpentToday(item.price);
+
+  // stats 反映
+  const now = Date.now();
+  const result = applyCafeMenu(a.stats, menuKey);
+  a.stats = result.stats;
+  a.lastCareAtMs = now;
+
+  showToast(item.msg + (result.expGained > 0 ? ` +${result.expGained}exp` : ''));
+  showMoodBubble(item.icon, item.msg.replace(/[🥞🍨🥪🧃🍰🍩☕🍳！〜…]/g, '').trim() || item.label, 2200);
+
+  if (result.leveledUp) {
+    const oldStage = result.oldLevel <= 2 ? 'baby' : result.oldLevel <= 5 ? 'child' : result.oldLevel <= 9 ? 'kid' : 'teen';
+    const newStage = result.newLevel <= 2 ? 'baby' : result.newLevel <= 5 ? 'child' : result.newLevel <= 9 ? 'kid' : 'teen';
+    const stageChanged = oldStage !== newStage;
+    if (stageChanged) {
+      lvupLevel.innerHTML = `おおきくなった！<br>${growthStageLabel(result.newLevel)}`;
+    } else {
+      lvupLevel.textContent = `Lv ${result.newLevel} に なったよ！`;
+    }
+    levelUpToast.classList.add('show');
+    setTimeout(() => levelUpToast.classList.remove('show'), stageChanged ? 3200 : 2200);
+    updateAvatarTransform();
+    setTimeout(() => {
+      const mood = getMood(a.stats);
+      showMoodBubble(mood.icon, mood.msg, 2400);
+    }, stageChanged ? 3400 : 2400);
+  }
+
+  if (isConfigured) {
+    try {
+      await updateAvatar(a.id, { stats: { ...a.stats }, lastCareAt: now });
+    } catch (err) {
+      console.warn('カフェの保存に失敗', err);
+      showToast('ほぞんに しっぱい したよ…');
+    }
+  }
+
+  await checkFullCareBonus();
+  renderAdjust();
+  updateCareTabAvailable();
+}
+
+// ============================================================
+// 公園（park ロケーション専用の遊具システム）
+// ============================================================
+
+/** 公園の遊具 UI を描画（renderAdjustCare から呼ばれる） */
+function renderParkPlayground(a, statsHtml, now) {
+  const playBtnsHtml = PARK_PLAYGROUND.map(item => {
+    const until = state.careCooldownUntil['park_' + item.key] || 0;
+    const cdLeft = Math.max(0, until - now);
+    const disabled = cdLeft > 0;
+    return `
+      <button class="cafe-menu-btn park-play-btn" data-park="${item.key}" ${disabled ? 'disabled' : ''}>
+        <span class="cafe-menu-icon">${item.icon}</span>
+        <span class="cafe-menu-label">${item.label}</span>
+        ${disabled
+          ? `<span class="cafe-menu-price park-cd">⏳ ${Math.ceil(cdLeft / 1000)}s</span>`
+          : `<span class="cafe-menu-price park-free">むりょう</span>`}
+      </button>`;
+  }).join('');
+
+  adjustBody.innerHTML = `
+    <div class="care-header">
+      <div class="avatar-thumb"><img src="${a.imageData}" alt=""/></div>
+      <div class="avatar-name">🌳 こうえんで あそぶ</div>
+      <div class="mood">${a.stats ? '' : ''}げんきと なかよし度が あがるよ！</div>
+    </div>
+    <div class="stat-list">
+      ${statsHtml}
+    </div>
+    <div class="section-title" style="margin-top:2px;">あそびどうぐ 🎠</div>
+    <div class="cafe-menu-grid">
+      ${playBtnsHtml}
+    </div>
+  `;
+
+  adjustBody.querySelectorAll('.park-play-btn[data-park]').forEach(b => {
+    b.addEventListener('click', () => {
+      if (b.disabled) return;
+      const key = b.dataset.park;
+      b.classList.remove('pop');
+      void b.offsetWidth;
+      b.classList.add('pop');
+      doParkPlay(key);
+    });
+  });
+
+  const anyOnCooldown = PARK_PLAYGROUND.some(item => (state.careCooldownUntil['park_' + item.key] || 0) > now);
+  if (anyOnCooldown) scheduleCooldownRefresh();
+}
+
+/** 公園の遊具で遊ぶ → クールダウン開始 → stats 反映 → 保存 → 再描画 */
+async function doParkPlay(playKey) {
+  const a = state.avatar;
+  if (!a) return;
+  const item = PARK_PLAYGROUND.find(p => p.key === playKey);
+  if (!item) return;
+
+  const now = Date.now();
+  const cdKey = 'park_' + playKey;
+  if ((state.careCooldownUntil[cdKey] || 0) > now) return;
+  state.careCooldownUntil[cdKey] = now + item.cooldownSec * 1000;
+
+  const result = applyParkPlay(a.stats, playKey);
+  a.stats = result.stats;
+  a.lastCareAtMs = now;
+
+  showToast(item.msg + (result.expGained > 0 ? ` +${result.expGained}exp` : ''));
+  showMoodBubble(item.icon, item.label, 2200);
+
+  if (result.leveledUp) {
+    const oldStage = result.oldLevel <= 2 ? 'baby' : result.oldLevel <= 5 ? 'child' : result.oldLevel <= 9 ? 'kid' : 'teen';
+    const newStage = result.newLevel <= 2 ? 'baby' : result.newLevel <= 5 ? 'child' : result.newLevel <= 9 ? 'kid' : 'teen';
+    const stageChanged = oldStage !== newStage;
+    if (stageChanged) {
+      lvupLevel.innerHTML = `おおきくなった！<br>${growthStageLabel(result.newLevel)}`;
+    } else {
+      lvupLevel.textContent = `Lv ${result.newLevel} に なったよ！`;
+    }
+    levelUpToast.classList.add('show');
+    setTimeout(() => levelUpToast.classList.remove('show'), stageChanged ? 3200 : 2200);
+    updateAvatarTransform();
+    setTimeout(() => {
+      const mood = getMood(a.stats);
+      showMoodBubble(mood.icon, mood.msg, 2400);
+    }, stageChanged ? 3400 : 2400);
+  }
+
+  if (isConfigured) {
+    try {
+      await updateAvatar(a.id, { stats: { ...a.stats }, lastCareAt: now });
+    } catch (err) {
+      console.warn('公園の保存に失敗', err);
+      showToast('ほぞんに しっぱい したよ…');
+    }
+  }
+
+  await checkFullCareBonus();
+  renderAdjust();
+  updateCareTabAvailable();
 }
 
 /** クールダウン中はカウントダウンを 1 秒ごとに再描画 */
@@ -3331,7 +3979,12 @@ if (isConfigured) {
     state.availableAvatars = all.filter(x =>
       x.type === 'avatar' || x.type === 'madeup' || x.type === 'look'
     );
+    // マイメニュー（カフェのオリジナルメニュー）
+    state.myCafeMenu = all.filter(x => x.type === 'cafe_menu');
+    state.myCafeMenuLoaded = true;
     buildCustomGrid();
+    // カフェの注文パネルを開いてる最中に反映
+    if (state.locationKey === 'cafe' && state.adjustTab === 'care') renderAdjust();
     // ピッカーを開いてる最中に反映
     if (avatarPickerModal.classList.contains('show')) buildAvatarPickerGrid();
 
